@@ -6,7 +6,7 @@
 /*   By: omathot <omathot@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:29:45 by omathot           #+#    #+#             */
-/*   Updated: 2023/06/10 14:25:16 by omathot          ###   ########.fr       */
+/*   Updated: 2023/06/10 15:16:41 by omathot          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 
 int	main(void); 
 char	**read_user_input(void);
+void	echo_handle(char *str, bool has_n);
 /*
 void add_history (const char *string)
 Place string at the end of the history list. The associated data field (if any) is set to NULL.
@@ -27,11 +28,13 @@ char *
 rl_on_new_line,
 rl_nreplace_lie, rl_redisplay,
 
+getcwd
+
 
 printf, malloc, free, write, access, open, read,
 close, fork, wait, waitpid, wait3, wait4, signal,
 sigaction, sigemptyset, sigaddset, kill, exit,
-getcwd, chdir, stat, lstat, fstat, unlink, execve,
+, chdir, stat, lstat, fstat, unlink, execve,
 dup, dup2, pipe, opendir, readdir, closedir,
 strerror, perror, isatty, ttyname, ttyslot, ioctl,
 getenv, tcsetattr, tcgetattr, tgetent, tgetflag,
@@ -61,6 +64,7 @@ char	**read_user_input(void)
 {
 	int		i;
 	char	*str;
+	char	str2[4096];
 	
 	i = 0;
 	str = readline("minishell_OS_1.0$ ");
@@ -76,5 +80,24 @@ char	**read_user_input(void)
 		printf("%s\n", str);
 		exit(EXIT_SUCCESS);
 	}
+	if (ft_memcmp(str, "pwd", ft_strlen(str)) == 0)
+	{
+		getcwd(str2, 4096);
+		printf("%s\n", str2);
+	}
+	if (ft_memcmp(str, "echo", 4) == 0)
+	{
+		if (ft_memcmp(&str[4], " -n ", 3) == 0)
+			echo_handle(&str[8], true);
+		else
+			echo_handle(&str[5], false);
+	}
 	return (NULL);
+}
+
+void	echo_handle(char *str, bool has_n)
+{
+	write(1, str, ft_strlen(str));
+	if (!has_n)
+		write(1, "\n", 1);	
 }
