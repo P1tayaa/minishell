@@ -6,7 +6,7 @@
 /*   By: omathot <omathot@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:29:45 by omathot           #+#    #+#             */
-/*   Updated: 2023/06/10 15:16:41 by omathot          ###   ########.fr       */
+/*   Updated: 2023/06/10 15:19:08 by omathot          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,7 +87,7 @@ char	**read_user_input(void)
 	}
 	if (ft_memcmp(str, "echo", 4) == 0)
 	{
-		if (ft_memcmp(&str[4], " -n ", 3) == 0)
+		if (ft_memcmp(&str[4], " -n ", 4) == 0)
 			echo_handle(&str[8], true);
 		else
 			echo_handle(&str[5], false);
