@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: omathot <omathot@student.42.fr>            +#+  +:+       +#+        */
+/*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:29:45 by omathot           #+#    #+#             */
-/*   Updated: 2023/06/10 15:19:08 by omathot          ###   ########.fr       */
+/*   Updated: 2023/06/11 12:31:41 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,16 +62,14 @@ int	main(void)
 
 char	**read_user_input(void)
 {
-	int		i;
 	char	*str;
 	char	str2[4096];
 	
-	i = 0;
 	str = readline("minishell_OS_1.0$ ");
 	add_history(str);
 	if (ft_memcmp(str, "clear", ft_strlen(str)) == 0)
 	{
-    	write(STDOUT_FILENO, "\033[H\033[2J", 7);
+    	write(1, "\033[H\033[2J", 7);
 		clear_history();
 		
 	}
@@ -91,6 +89,11 @@ char	**read_user_input(void)
 			echo_handle(&str[8], true);
 		else
 			echo_handle(&str[5], false);
+	}
+	if (ft_memcmp(str, "cd ", 3) == 0)
+	{
+		if (chdir(&str[3]) != 0)
+			perror("chdir() error");
 	}
 	return (NULL);
 }
