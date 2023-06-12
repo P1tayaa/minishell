@@ -6,7 +6,7 @@
 #    By: omathot <omathot@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/03/09 01:41:47 by oscarmathot       #+#    #+#              #
-#    Updated: 2023/06/10 14:13:17 by omathot          ###   ########.fr        #
+#    Updated: 2023/06/12 11:54:52 by omathot          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,7 +14,7 @@
 #VARIABLES
 
 NAME 	:= minishell
-SRC 	:= main.c
+SRC 	:= main.c quotes.c
 OBJ 	:= $(SRC:.c=.o)
 LIBFT_A	:= lib/libft/libft.a
 CMP		:= gcc

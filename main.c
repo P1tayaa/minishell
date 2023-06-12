@@ -6,7 +6,7 @@
 /*   By: omathot <omathot@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:29:45 by omathot           #+#    #+#             */
-/*   Updated: 2023/06/12 10:50:23 by omathot          ###   ########.fr       */
+/*   Updated: 2023/06/12 11:55:24 by omathot          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,7 +76,6 @@ char	**read_user_input(void)
 	{
     	write(1, "\033[H\033[2J", 7);
 		clear_history();
-		
 	}
 	else if (ft_memcmp(str, "exit", 4) == 0)
 	{
