@@ -6,7 +6,7 @@
 /*   By: omathot <omathot@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:29:45 by omathot           #+#    #+#             */
-/*   Updated: 2023/06/12 10:39:44 by omathot          ###   ########.fr       */
+/*   Updated: 2023/06/12 10:44:40 by omathot          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,6 +101,8 @@ char	**read_user_input(void)
 		if (chdir(&str[3]) != 0)
 			perror("chdir() error");
 	}
+	else
+		printf("minishell: %s: command not found\n", str);
 	return (NULL);
 }
 
