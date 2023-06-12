@@ -6,7 +6,7 @@
 /*   By: omathot <omathot@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:29:45 by omathot           #+#    #+#             */
-/*   Updated: 2023/06/12 10:44:40 by omathot          ###   ########.fr       */
+/*   Updated: 2023/06/12 10:50:23 by omathot          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,30 +72,30 @@ char	**read_user_input(void)
 	
 	str = readline("minishell_OS_1.0$ ");
 	add_history(str);
-	if (ft_memcmp(str, "clear", ft_strlen(str)) == 0)
+	if (ft_memcmp(str, "clear", 5) == 0)
 	{
     	write(1, "\033[H\033[2J", 7);
 		clear_history();
 		
 	}
-	if (ft_memcmp(str, "exit", 4) == 0)
+	else if (ft_memcmp(str, "exit", 4) == 0)
 	{
 		printf("%s\n", str);
 		exit(EXIT_SUCCESS);
 	}
-	if (ft_memcmp(str, "pwd", ft_strlen(str)) == 0)
+	else if (ft_memcmp(str, "pwd", 3) == 0)
 	{
 		getcwd(str2, 4096);
 		printf("%s\n", str2);
 	}
-	if (ft_memcmp(str, "echo", 4) == 0)
+	else if (ft_memcmp(str, "echo", 4) == 0)
 	{
 		if (ft_memcmp(&str[4], " -n ", 4) == 0)
 			echo_handle(&str[8], true);
 		else
 			echo_handle(&str[5], false);
 	}
-	if (ft_memcmp(str, "cd ", 3) == 0)
+	else if (ft_memcmp(str, "cd ", 3) == 0)
 	{
 		rtrim(&str[3]);
 		if (chdir(&str[3]) != 0)
