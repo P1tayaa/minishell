@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: omathot <omathot@student.42.fr>            +#+  +:+       +#+        */
+/*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:29:45 by omathot           #+#    #+#             */
-/*   Updated: 2023/06/12 13:16:14 by omathot          ###   ########.fr       */
+/*   Updated: 2023/06/12 14:39:58 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,6 +65,8 @@ int	main(void)
 	return (0);
 }
 
+void	check_quotes(char *str);
+
 char	**read_user_input(void)
 {
 	char	*str;
@@ -101,7 +103,10 @@ char	**read_user_input(void)
 			perror("chdir() error");
 	}
 	else
-		printf("minishell: %s: command not found\n", str);
+	{
+		check_quotes(str);
+		// printf("minishell: %s: command not found\n", str);
+	}
 	return (NULL);
 }
 
