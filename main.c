@@ -6,7 +6,7 @@
 /*   By: omathot <omathot@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:29:45 by omathot           #+#    #+#             */
-/*   Updated: 2023/06/12 11:55:24 by omathot          ###   ########.fr       */
+/*   Updated: 2023/06/12 13:16:14 by omathot          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@ int	main(void);
 char	**read_user_input(void);
 void	echo_handle(char *str, bool has_n);
 void	rtrim(char *str);
-int		ft_isspace(int c);
+bool	ft_isspace(unsigned char c);
 
 
 /*
@@ -34,7 +34,7 @@ rl_nreplace_lie, rl_redisplay,
 
 getcwd
 chdir
-
+getenv
 
 printf, malloc, free, write, access, open, read,
 close, fork, wait, waitpid, wait3, wait4, signal,
@@ -42,7 +42,7 @@ sigaction, sigemptyset, sigaddset, kill, exit,
 , stat, lstat, fstat, unlink, execve,
 dup, dup2, pipe, opendir, readdir, closedir,
 strerror, perror, isatty, ttyname, ttyslot, ioctl,
-getenv, tcsetattr, tcgetattr, tgetent, tgetflag,
+, tcsetattr, tcgetattr, tgetent, tgetflag,
 tgetnum, tgetstr, tgoto, tputs
 */
 
@@ -70,7 +70,7 @@ char	**read_user_input(void)
 	char	*str;
 	char	str2[4096];
 	
-	str = readline("minishell_OS_1.0$ ");
+	str = readline("minishell_OS_1.0$ 😀 ");
 	add_history(str);
 	if (ft_memcmp(str, "clear", 5) == 0)
 	{
@@ -119,15 +119,14 @@ void	rtrim(char *str)
 	len = ft_strlen(str);
 	if (str == NULL)
 		return;
-	while (len > 0 && ft_isspace((unsigned char) str[len - 1]))
+	while (len > 0 && ft_isspace(str[len - 1]))
         str[--len] = '\0';
 }
 
-int		ft_isspace(int c)
+bool	ft_isspace(unsigned char c)
 {
-	c = (unsigned char)c;
 	if (c == '\t' || c == '\n' || c == '\v' || c == '\f' || c == '\r'
 		|| c == ' ')
-		return (1);
-	return (0);
+		return (true);
+	return (false);
 }
