@@ -6,7 +6,7 @@
 /*   By: omathot <omathot@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/12 11:53:41 by omathot           #+#    #+#             */
-/*   Updated: 2023/06/12 13:42:46 by omathot          ###   ########.fr       */
+/*   Updated: 2023/06/12 14:07:00 by omathot          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,7 @@ int	*get_doll_position(char *str)
 			num_doll++;
 		i++;
 	}
-	doll_pos = malloc(sizeof(int) * num_doll);
+	doll_pos = malloc(sizeof(int) * num_doll)
 	if (!doll_pos)
 		exit(EXIT_FAILURE);
 	i = 0;
