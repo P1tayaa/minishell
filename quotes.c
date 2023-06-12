@@ -6,7 +6,7 @@
 /*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/12 11:53:41 by omathot           #+#    #+#             */
-/*   Updated: 2023/06/12 16:25:13 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/06/12 18:00:22 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,9 +54,15 @@ char	*handle_expand_doll(char *str)
 	char *final_str;
 
 	doll_pos = get_doll_position(str);
+	if (doll_pos[0] == -1)
+		{
+			free(doll_pos);
+			return (ft_strdup(str));
+		}
 	spit_text = spit_text_args(str, doll_pos);
 	final_str = ft_strjoin_double_str(spit_text);
 	split_test_freeur(spit_text);
+	free(doll_pos);
 	return (final_str);
 }
 
@@ -144,6 +150,20 @@ int	find_next_space(char *str)
 	return (i);
 }
 
+int	find_next_quote(char *str)
+{
+	int	i;
+
+	i = 0;
+	while (!(str[i] == '\"'))
+	{
+		if (str[i] == '\0')
+			return (-1);
+		i++;
+	}
+	return (i);
+}
+
 char	**spit_text_args(char *str, int	*doll_pos)
 {
 	int		i;
@@ -168,21 +188,30 @@ char	**spit_text_args(char *str, int	*doll_pos)
 			else
 			{
 				if (doll_pos[num_doll] != -1)
-					string_split[i] = ft_strdup_intil_index_n(&str
-						[doll_pos[num_doll - 1] + find_next_space(&str[doll_pos[num_doll - 1]])],
-						doll_pos[num_doll]
-						- (doll_pos[num_doll - 1] + find_next_space(&str[doll_pos[num_doll - 1]])));
+					
+						string_split[i] = ft_strdup_intil_index_n(&str
+							[doll_pos[num_doll - 1] + find_next_space(&str[doll_pos[num_doll - 1]])],
+							doll_pos[num_doll]
+							- (doll_pos[num_doll - 1] + find_next_space(&str[doll_pos[num_doll - 1]])) - 1);
 				else
-					string_split[i] = ft_strdup_intil_index_n(&str
-						[doll_pos[num_doll - 1] + find_next_space(&str[doll_pos[num_doll - 1]])],
-						ft_strlen(&str
-						[doll_pos[num_doll - 1] + find_next_space(&str[doll_pos[num_doll - 1]])]));
+					if (find_next_space(&str[doll_pos[num_doll - 1]]) == -1)
+						string_split[i] = ft_strdup("\"");
+					else
+						string_split[i] = ft_strdup_intil_index_n(&str
+							[doll_pos[num_doll - 1] + find_next_space(&str[doll_pos[num_doll - 1]])],
+							ft_strlen(&str
+							[doll_pos[num_doll - 1] + find_next_space(&str[doll_pos[num_doll - 1]])]));
 			}
 		}
 		else
 		{
-			temp_str = ft_strdup_intil_index_n(&str[doll_pos[num_doll] + 1], find_next_space(&str[doll_pos[num_doll]] + 1) - 1);
+			if (find_next_space(&str[doll_pos[num_doll]] + 1) == -1)
+				temp_str = ft_strdup_intil_index_n(&str[doll_pos[num_doll] + 1], find_next_quote(&str[doll_pos[num_doll] + 1]) - 1);
+			else
+				temp_str = ft_strdup_intil_index_n(&str[doll_pos[num_doll] + 1], find_next_space(&str[doll_pos[num_doll]] + 1) - 1);
+
 			string_split[i] = getenv(temp_str);
+			// need to manage if faled
 			free(temp_str);
 			num_doll++;
 		}
@@ -192,11 +221,6 @@ char	**spit_text_args(char *str, int	*doll_pos)
 	return (string_split);
 }
 
-// les arico $ARG song $ARG2
-
-// les arico 1 2 3 4 song 
-
-// works fine
 int	*get_doll_position(char *str)
 {
 	int	i;
