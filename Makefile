@@ -6,7 +6,7 @@
 #    By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/03/09 01:41:47 by oscarmathot       #+#    #+#              #
-#    Updated: 2023/06/12 16:21:54 by sboulain         ###   ########.fr        #
+#    Updated: 2023/06/13 14:10:05 by sboulain         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,7 +14,7 @@
 #VARIABLES
 
 NAME 	:= minishell
-SRC 	:= main.c quotes.c
+SRC 	:= main.c quotes.c executer.c parser.c
 OBJ 	:= $(SRC:.c=.o)
 LIBFT_A	:= lib/libft/libft.a
 CMP		:= gcc
