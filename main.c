@@ -3,20 +3,18 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: omathot <omathot@student.42.fr>            +#+  +:+       +#+        */
+/*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:29:45 by omathot           #+#    #+#             */
-/*   Updated: 2023/06/12 13:16:14 by omathot          ###   ########.fr       */
+/*   Updated: 2023/06/13 14:26:15 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
 int	main(void); 
-char	**read_user_input(void);
-void	echo_handle(char *str, bool has_n);
-void	rtrim(char *str);
-bool	ft_isspace(unsigned char c);
+char	*read_user_input(void);
+
 
 
 /*
@@ -48,85 +46,48 @@ tgetnum, tgetstr, tgoto, tputs
 
 /*
 */
+
+char *executer(char *str, bool no_pipe);
+t_data_table	*parsse_things(char *str);
+
 int	main(void)
 {
+	char *str;
+	t_data_table *table_pars;
+	int	i;
+
 	while (1)
 	{
 		// intial prompt print
-		read_user_input();
 		// read user input
+		str = read_user_input();
 		// parse user input
-		// break up components of user input (specifically take care with quotes)
-		// verify if correct user input (if not error or ask for more)
-		// expand PATH, or whatever (cd, pwd)
-		// execute
+		table_pars = parsse_things(str);
+		i = 0;
+		// c'est pas idea mais c'est un depart
+		while (table_pars->list_of_commands[i] != NULL)
+		{
+			// break up components of user input (specifically take care with quotes)
+			// verify if correct user input (if not error or ask for more)
+			// expand PATH
+
+			//il faudrai dup fd[0] pour recuper ce qui est imprimer et le resorting en arg
+			// execute
+			executer(table_pars->list_of_commands[i], table_pars->number_pip == 0);
+			i++;
+		}
+		
 		// optiona: wait for return value.
 	}
 	return (0);
 }
 
-char	**read_user_input(void)
+char	*read_user_input(void)
 {
 	char	*str;
-	char	str2[4096];
 	
 	str = readline("minishell_OS_1.0$ 😀 ");
 	add_history(str);
-	if (ft_memcmp(str, "clear", 5) == 0)
-	{
-    	write(1, "\033[H\033[2J", 7);
-		clear_history();
-	}
-	else if (ft_memcmp(str, "exit", 4) == 0)
-	{
-		printf("%s\n", str);
-		exit(EXIT_SUCCESS);
-	}
-	else if (ft_memcmp(str, "pwd", 3) == 0)
-	{
-		getcwd(str2, 4096);
-		printf("%s\n", str2);
-	}
-	else if (ft_memcmp(str, "echo", 4) == 0)
-	{
-		if (ft_memcmp(&str[4], " -n ", 4) == 0)
-			echo_handle(&str[8], true);
-		else
-			echo_handle(&str[5], false);
-	}
-	else if (ft_memcmp(str, "cd ", 3) == 0)
-	{
-		rtrim(&str[3]);
-		if (chdir(&str[3]) != 0)
-			perror("chdir() error");
-	}
-	else
-		printf("minishell: %s: command not found\n", str);
-	return (NULL);
-}
-
-void	echo_handle(char *str, bool has_n)
-{
-	write(1, str, ft_strlen(str));
-	if (!has_n)
-		write(1, "\n", 1);	
-}
-
-void	rtrim(char *str)
-{
-	int	len;
-
-	len = ft_strlen(str);
-	if (str == NULL)
-		return;
-	while (len > 0 && ft_isspace(str[len - 1]))
-        str[--len] = '\0';
-}
-
-bool	ft_isspace(unsigned char c)
-{
-	if (c == '\t' || c == '\n' || c == '\v' || c == '\f' || c == '\r'
-		|| c == ' ')
-		return (true);
-	return (false);
+	
+	return (str);
 }
