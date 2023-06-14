@@ -67,15 +67,16 @@ int	main(void)
 		// c'est pas idea mais c'est un depart
 		while (table_pars->list_of_commands[i] != NULL)
 		{
+			// break up components of user input (specifically take care with quotes)
+			// verify if correct user input (if not error or ask for more)
+			// expand PATH
+
 			//il faudrai dup fd[0] pour recuper ce qui est imprimer et le resorting en arg
 			// execute
 			executer(table_pars->list_of_commands[i], table_pars->number_pip == 0);
 			i++;
 		}
 		
-		// break up components of user input (specifically take care with quotes)
-		// verify if correct user input (if not error or ask for more)
-		// expand PATH, or whatever (cd, pwd)
 		// optiona: wait for return value.
 	}
 	return (0);

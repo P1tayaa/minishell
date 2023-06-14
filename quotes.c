@@ -23,9 +23,9 @@ char	*handle_expand_doll(char *str);
 // here *str is &str[3] from main.
 void	check_quotes(char *str)
 {
-	int	i;
+	// int	i;
 
-	i = 0;
+	// i = 0;
 	// while (str[i])
 	// {
 		// 39 is ascii value for single quotes BUT, \ is in front of it
@@ -163,6 +163,7 @@ int	find_next_quote(char *str)
 	}
 	return (i);
 }
+
 
 char	**spit_text_args(char *str, int	*doll_pos)
 {
