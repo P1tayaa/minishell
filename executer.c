@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   executer.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
+/*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/13 13:56:36 by sboulain          #+#    #+#             */
-/*   Updated: 2023/06/13 14:23:22 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/06/14 14:14:59 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,11 +19,14 @@ void	check_quotes(char *str);
 
 char *executer(char *str, bool no_pipe)
 {
-	char *return_val;
-	char	str2[4096];
-	int		i;
+	extern char	**environ;
+	char		*return_val;
+	char		str2[4096];
+	int			i;
+	int			k;
 
 	i = 0;
+	k = 0;
 	while (ft_isspace(str[i]))
 		i++;
 	str = &str[i];
@@ -58,6 +61,11 @@ char *executer(char *str, bool no_pipe)
 		rtrim(&str[3]);
 		if (chdir(&str[3]) != 0)
 			perror("chdir() error");
+	}
+	else if (ft_memcmp(str, "env", 3) == 0)
+	{
+		while (environ[k])
+			printf("%s\n", environ[k++]);
 	}
 	else
 	{
