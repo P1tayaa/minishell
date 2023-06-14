@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: omathot <omathot@student.42.fr>            +#+  +:+       +#+        */
+/*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:30:26 by omathot           #+#    #+#             */
-/*   Updated: 2023/06/10 15:11:51 by omathot          ###   ########.fr       */
+/*   Updated: 2023/06/13 13:42:33 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,5 +21,13 @@
 # include <readline/history.h>
 # include <stdbool.h>
 # include "./lib/libft/libft.h"
+
+
+typedef struct s_data_table
+{
+    int     number_pip;
+    char    **list_of_commands;
+    
+}       t_data_table;
 
 #endif
