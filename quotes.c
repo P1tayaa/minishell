@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/12 11:53:41 by omathot           #+#    #+#             */
-/*   Updated: 2023/06/14 13:21:28 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/06/14 13:40:07 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -236,11 +236,7 @@ int	*get_doll_position(char *str)
 			num_doll++;
 		i++;
 	}
-<<<<<<< HEAD
-	doll_pos = malloc(sizeof(int) * num_doll)
-=======
 	doll_pos = malloc(sizeof(int) * (num_doll + 1));
->>>>>>> main
 	if (!doll_pos)
 		exit(EXIT_FAILURE);
 	i = 0;
