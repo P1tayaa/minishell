@@ -6,7 +6,7 @@
 /*   By: omathot <omathot@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:29:45 by omathot           #+#    #+#             */
-/*   Updated: 2023/06/17 15:10:29 by omathot          ###   ########.fr       */
+/*   Updated: 2023/06/17 15:12:07 by omathot          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,6 @@ int	main(void)
 	t_data_table *table_pars;
 	int	i;
 
-	
 	manage_signals();
 	while (1)
 	{
