@@ -6,7 +6,7 @@
 /*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/12 11:53:41 by omathot           #+#    #+#             */
-/*   Updated: 2023/06/12 18:00:22 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/06/17 17:18:06 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,8 @@ void	check_quotes(char *str)
 		if (str[0] == '\'' && str[ft_strlen(str) - 1] == '\'')
 			printf("%s\n", str);
 		// 34 is ascii value for double quotes,
-		if (str[0] == '\"' && str[ft_strlen(str) - 1] == '\"')
+		// if (str[0] == '\"' && str[ft_strlen(str) - 1] == '\"')
+		else
 		{
 			char *str_temp;
 			str_temp = handle_expand_doll(str);
@@ -180,7 +181,7 @@ char	**spit_text_args(char *str, int	*doll_pos)
 	string_split = malloc(sizeof(char *) * (total_parts + 2));
 	i = 0;
 	num_doll = 0;
-	while (i <= (total_parts))
+	while (i < (total_parts))
 	{
 		if (i % 2 == 0)
 		{
@@ -189,14 +190,19 @@ char	**spit_text_args(char *str, int	*doll_pos)
 			else
 			{
 				if (doll_pos[num_doll] != -1)
-					
+					if (find_next_space(&str[doll_pos[num_doll - 1]] + 1) == -1 || find_next_space(&str[doll_pos[num_doll - 1]] + 1) > doll_pos[num_doll] - (doll_pos[num_doll - 1] + 1))
+						string_split[i] = ft_strdup("\0");
+					else
 						string_split[i] = ft_strdup_intil_index_n(&str
 							[doll_pos[num_doll - 1] + find_next_space(&str[doll_pos[num_doll - 1]])],
 							doll_pos[num_doll]
 							- (doll_pos[num_doll - 1] + find_next_space(&str[doll_pos[num_doll - 1]])) - 1);
 				else
 					if (find_next_space(&str[doll_pos[num_doll - 1]]) == -1)
-						string_split[i] = ft_strdup("\"");
+						if (find_next_quote(&str[doll_pos[num_doll - 1]]) == -1)
+							string_split[i] = ft_strdup("\0");
+						else
+							string_split[i] = ft_strdup("\"");
 					else
 						string_split[i] = ft_strdup_intil_index_n(&str
 							[doll_pos[num_doll - 1] + find_next_space(&str[doll_pos[num_doll - 1]])],
@@ -206,11 +212,29 @@ char	**spit_text_args(char *str, int	*doll_pos)
 		}
 		else
 		{
-			if (find_next_space(&str[doll_pos[num_doll]] + 1) == -1)
-				temp_str = ft_strdup_intil_index_n(&str[doll_pos[num_doll] + 1], find_next_quote(&str[doll_pos[num_doll] + 1]) - 1);
+			if (find_next_space(&str[doll_pos[num_doll]]) == -1)
+			{
+				if (doll_pos[num_doll + 1] != -1)
+					temp_str = ft_strdup_intil_index_n(&str[doll_pos[num_doll] + 1], doll_pos[num_doll + 1] - (doll_pos[num_doll] + 2));
+				else
+				{
+					if (find_next_quote(&str[doll_pos[num_doll] + 1]) - 1 != -2)
+						temp_str = ft_strdup_intil_index_n(&str[doll_pos[num_doll] + 1], find_next_quote(&str[doll_pos[num_doll] + 1]) - 1);
+					else
+					{
+						printf("%d\n", doll_pos[num_doll] + 1);
+						temp_str = ft_strdup(&str[doll_pos[num_doll] + 1]);
+					}
+				}
+			}
+			else if (doll_pos[num_doll + 1] != -1 && find_next_space(&str[doll_pos[num_doll]] + 1) > doll_pos[num_doll + 1] - (doll_pos[num_doll] + 1))
+			{
+				printf("\n %d, %d\n", doll_pos[num_doll + 1],  doll_pos[num_doll]);
+				temp_str = ft_strdup_intil_index_n(&str[doll_pos[num_doll] + 1], doll_pos[num_doll + 1] - (doll_pos[num_doll] + 2));
+			}
 			else
 				temp_str = ft_strdup_intil_index_n(&str[doll_pos[num_doll] + 1], find_next_space(&str[doll_pos[num_doll]] + 1) - 1);
-
+			printf("\n%s\n", temp_str);
 			string_split[i] = getenv(temp_str);
 			// need to manage if faled
 			free(temp_str);
