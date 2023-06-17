@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parser.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
+/*   By: omathot <omathot@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/13 13:30:47 by sboulain          #+#    #+#             */
-/*   Updated: 2023/06/13 14:10:27 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/06/17 13:20:09 by omathot          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,19 +16,19 @@ int	count_pipes(char *str);
 
 t_data_table	*parsse_things(char *str)
 {
-	int				i;
+	// int				i;
 	t_data_table	*table;
 
 	table = malloc(sizeof(t_data_table *));
 	table->number_pip = count_pipes(str);
 	table->list_of_commands = ft_split(str, '|');
 
-	i = 0;
-	while (table->list_of_commands[i] != NULL)
-	{
-		printf("%s\n", table->list_of_commands[i]);
-		i++;
-	}
+	// i = 0;
+	// while (table->list_of_commands[i] != NULL)
+	// {
+	// 	printf("%s\n", table->list_of_commands[i]);
+	// 	i++;
+	// }
 	return (table);
 }
 

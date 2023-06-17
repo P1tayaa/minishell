@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   executer.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
+/*   By: omathot <omathot@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/13 13:56:36 by sboulain          #+#    #+#             */
-/*   Updated: 2023/06/14 14:14:59 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/06/17 15:03:09 by omathot          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ char *executer(char *str, bool no_pipe)
 	{
 		if (no_pipe)
 		{
-			printf("%s\n", str);
+			printf("exit\n");
 			exit(EXIT_SUCCESS);
 		}
 	}
@@ -67,8 +67,11 @@ char *executer(char *str, bool no_pipe)
 		while (environ[k])
 			printf("%s\n", environ[k++]);
 	}
+	else if (ft_memcmp(str, "^D", 2) == 0)
+    	exit (EXIT_SUCCESS);
 	else
 	{
+		write(1, "proble la\n", 10);
 		check_quotes(str);
 		// printf("minishell: %s: command not found\n", str);
 	}

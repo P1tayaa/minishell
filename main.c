@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
+/*   By: omathot <omathot@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:29:45 by omathot           #+#    #+#             */
-/*   Updated: 2023/06/13 14:26:15 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/06/17 15:10:29 by omathot          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,17 +34,21 @@ getcwd
 chdir
 getenv
 
+dup, dup2, pipe    PIPES
+duplicate stdout environment, have shell write on there, return next stdout environment. 
+
 printf, malloc, free, write, access, open, read,
 close, fork, wait, waitpid, wait3, wait4, signal,
 sigaction, sigemptyset, sigaddset, kill, exit,
 , stat, lstat, fstat, unlink, execve,
-dup, dup2, pipe, opendir, readdir, closedir,
+, opendir, readdir, closedir,
 strerror, perror, isatty, ttyname, ttyslot, ioctl,
 , tcsetattr, tcgetattr, tgetent, tgetflag,
 tgetnum, tgetstr, tgoto, tputs
 */
 
 /*
+feof(3), ferror(3), fgetln(3), fgetws(3), getline(3)
 */
 
 char *executer(char *str, bool no_pipe);
@@ -56,6 +60,8 @@ int	main(void)
 	t_data_table *table_pars;
 	int	i;
 
+	
+	manage_signals();
 	while (1)
 	{
 		// intial prompt print
@@ -76,7 +82,6 @@ int	main(void)
 			executer(table_pars->list_of_commands[i], table_pars->number_pip == 0);
 			i++;
 		}
-		
 		// optiona: wait for return value.
 	}
 	return (0);
@@ -88,6 +93,10 @@ char	*read_user_input(void)
 	
 	str = readline("minishell_OS_1.0$ 😀 ");
 	add_history(str);
-	
+	if (EOF)
+	{
+		write(1, "exit\n", 5);
+		exit(EXIT_SUCCESS);
+	}
 	return (str);
 }

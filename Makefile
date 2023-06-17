@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+         #
+#    By: omathot <omathot@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/03/09 01:41:47 by oscarmathot       #+#    #+#              #
-#    Updated: 2023/06/13 14:10:05 by sboulain         ###   ########.fr        #
+#    Updated: 2023/06/17 13:28:26 by omathot          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,7 +14,7 @@
 #VARIABLES
 
 NAME 	:= minishell
-SRC 	:= main.c quotes.c executer.c parser.c
+SRC 	:= main.c quotes.c executer.c parser.c signals.c
 OBJ 	:= $(SRC:.c=.o)
 LIBFT_A	:= lib/libft/libft.a
 CMP		:= gcc
@@ -45,11 +45,10 @@ RESET	:= \033[0m
 
 all	: $(NAME)
 		@echo "$(GREEN)Project built successfully !$(RESET)"
-		@echo "$(BLUE)Usage: so_long <path to map>$(RESET)"
 
 $(NAME) : $(OBJ) $(LIBFT_A) minishell.h
 		@echo "$(CYAN)Creating the executable...$(RESET)"
-		@$(CC) $(FLAGS) -lreadline $(OBJ) $(LIBFT_A) -o $(NAME)
+		@$(CC) $(FLAGS) $(OBJ) $(LIBFT_A) -lreadline -o $(NAME)
 
 %.o : %.c minishell.h
 		@echo "$(CYAN)Compiling...$(RESET) $<"
