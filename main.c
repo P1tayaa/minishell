@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: omathot <omathot@student.42.fr>            +#+  +:+       +#+        */
+/*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:29:45 by omathot           #+#    #+#             */
-/*   Updated: 2023/06/17 15:12:07 by omathot          ###   ########.fr       */
+/*   Updated: 2023/07/02 14:04:24 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,10 +92,10 @@ char	*read_user_input(void)
 	
 	str = readline("minishell_OS_1.0$ 😀 ");
 	add_history(str);
-	if (EOF)
-	{
-		write(1, "exit\n", 5);
-		exit(EXIT_SUCCESS);
-	}
+	// if (EOF)
+	// {
+	// 	write(1, "exit\n", 5);
+	// 	exit(EXIT_SUCCESS);
+	// }
 	return (str);
 }
