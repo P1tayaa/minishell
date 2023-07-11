@@ -6,7 +6,7 @@
 /*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:29:45 by omathot           #+#    #+#             */
-/*   Updated: 2023/06/13 14:26:15 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/07/11 15:41:25 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,17 +65,17 @@ int	main(void)
 		table_pars = parsse_things(str);
 		i = 0;
 		// c'est pas idea mais c'est un depart
-		while (table_pars->list_of_commands[i] != NULL)
-		{
-			// break up components of user input (specifically take care with quotes)
-			// verify if correct user input (if not error or ask for more)
-			// expand PATH
+		// while (table_pars->list_of_commands[i] != NULL)
+		// {
+		// 	// break up components of user input (specifically take care with quotes)
+		// 	// verify if correct user input (if not error or ask for more)
+		// 	// expand PATH
 
-			//il faudrai dup fd[0] pour recuper ce qui est imprimer et le resorting en arg
-			// execute
-			executer(table_pars->list_of_commands[i], table_pars->number_pip == 0);
-			i++;
-		}
+		// 	//il faudrai dup fd[0] pour recuper ce qui est imprimer et le resorting en arg
+		// 	// execute
+		// 	executer(table_pars->list_of_commands[i], table_pars->number_pip == 0);
+		// 	i++;
+		// }
 		
 		// optiona: wait for return value.
 	}
