@@ -6,7 +6,7 @@
 /*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/13 13:30:47 by sboulain          #+#    #+#             */
-/*   Updated: 2023/07/12 15:18:12 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/07/13 14:22:40 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,15 +43,15 @@ t_data_table	*parsse_things(char *str)
 	t_lexer **lexer;
 
 	token_num = count_token(str);
-	lexer = (t_lexer **)malloc(sizeof(t_lexer *) * token_num + 2);
+	lexer = (t_lexer **)malloc(sizeof(t_lexer *) * (token_num + 2));
 	if (!lexer)
 		exit(1);
 	i = 0;
 	curser = 0;
 	while (i <= token_num)
 	{
-		
-		lexer[i] = malloc(sizeof(t_lexer));
+		// printf("mallocing tokennum %d\n", i);
+		lexer[i] = (t_lexer *)malloc(sizeof(t_lexer));
 		lexer[i]->possition = i;
 		curser = copy_input_to_parcer_and_keep_track_of_curser(str, lexer[i], curser);
 		// if (i == 0)
@@ -60,14 +60,18 @@ t_data_table	*parsse_things(char *str)
 			
 		i++;
 	}
+	lexer[i] = NULL;
+	// printf("lexer[i] == %p\ni == %d, token_num == %d\n", lexer[i], i, token_num);
 	i = 0;
-	while (i <= token_num)
+	while (lexer[i] != NULL)
 	{
-		printf("possition %d, content: \"%s\", tokenID: \"%s\"\n", lexer[i]->possition, lexer[i]->content, lexer[i]->tokenid);
+		// printf("possition %d, content: \"%s\", tokenID: \"%s\"\n", lexer[i]->possition, lexer[i]->content, lexer[i]->tokenid);
 		i++;
 	}
 	puts("freeur");
 	free_parser(lexer);
+	puts("end freeur");
+	
 	return (NULL);
 
 	// * old stuff
@@ -97,7 +101,7 @@ int	copy_input_to_parcer_and_keep_track_of_curser(char *input, t_lexer *current_
 
 	list_of_tokenid = get_list_of_tokenid();
 	i = 0;
-	current_lex->content = malloc(sizeof(char) * count_char_until_next_token(&input[curser]));
+	current_lex->content = malloc(sizeof(char) * (count_char_until_next_token(&input[curser]) + 1));
 	// printf("content size is %d and curser is %d\n", count_char_until_next_token(&input[curser]), curser);
 	if (!current_lex->content)
 		exit(1);
@@ -132,6 +136,7 @@ int	copy_input_to_parcer_and_keep_track_of_curser(char *input, t_lexer *current_
 	}
 	free_list_of_tokenid(list_of_tokenid);
 	current_lex->tokenid[0] = '\0';
+	current_lex->content[i] = '\0';
 	return(i + curser);
 }
 
@@ -144,7 +149,7 @@ void	free_parser(t_lexer **lexer)
 	i = 0;
 	while (lexer[i] != NULL)
 	{
-		// printf("freeing lexer %d content\n", i);
+		// printf("address of lexer[i] == %p\nfreeing lexer %d content\n", lexer[i], i);
 		free(lexer[i]->content);
 		// printf("freeing lexer %d branch\n", i);
 		free(lexer[i]);
