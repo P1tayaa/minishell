@@ -6,7 +6,7 @@
 /*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/13 13:30:47 by sboulain          #+#    #+#             */
-/*   Updated: 2023/07/13 14:22:40 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/07/14 11:59:49 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ t_data_table	*parsse_things(char *str)
 	i = 0;
 	while (lexer[i] != NULL)
 	{
-		// printf("possition %d, content: \"%s\", tokenID: \"%s\"\n", lexer[i]->possition, lexer[i]->content, lexer[i]->tokenid);
+		printf("possition %d, content: \"%s\", tokenID: \"%s\"\n", lexer[i]->possition, lexer[i]->content, lexer[i]->tokenid);
 		i++;
 	}
 	puts("freeur");
