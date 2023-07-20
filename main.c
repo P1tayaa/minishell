@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:29:45 by omathot           #+#    #+#             */
-/*   Updated: 2023/07/02 14:04:24 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/07/20 15:13:11 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,12 +52,12 @@ feof(3), ferror(3), fgetln(3), fgetws(3), getline(3)
 */
 
 char *executer(char *str, bool no_pipe);
-t_data_table	*parsse_things(char *str);
+t_lexer	**parsse_things(char *str);
 
 int	main(void)
 {
-	char *str;
-	t_data_table *table_pars;
+	char	*str;
+	t_lexer	**lexer;
 	int	i;
 
 	manage_signals();
@@ -67,19 +67,12 @@ int	main(void)
 		// read user input
 		str = read_user_input();
 		// parse user input
-		table_pars = parsse_things(str);
+		lexer = parsse_things(str);
 		i = 0;
 		// c'est pas idea mais c'est un depart
-		while (table_pars->list_of_commands[i] != NULL)
+		if (lexer[1] == NULL)
 		{
-			// break up components of user input (specifically take care with quotes)
-			// verify if correct user input (if not error or ask for more)
-			// expand PATH
-
-			//il faudrai dup fd[0] pour recuper ce qui est imprimer et le resorting en arg
-			// execute
-			executer(table_pars->list_of_commands[i], table_pars->number_pip == 0);
-			i++;
+			executer(lexer[0]->content, true);
 		}
 		// optiona: wait for return value.
 	}
