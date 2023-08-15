@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:29:45 by omathot           #+#    #+#             */
-/*   Updated: 2023/08/14 20:20:24 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/08/15 13:08:00 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,7 +85,7 @@ char	*read_user_input(void)
 {
 	char	*str;
 	
-	str = readline("😎 minishell_OS_1.0$");
+	str = readline("😎 minishell_OS_1.0$ ");
 	add_history(str);
 	// if (EOF)
 	// {
