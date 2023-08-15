@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/20 15:16:04 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/08/15 13:01:00 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/08/15 14:27:09 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,7 @@ char	*get_cmd_path(const char *cmd)
 		if (access(full_path, X_OK) == 0)
 		{
 			free(tmp_path);
-			return strdup(full_path);
+			return (strdup(full_path));
 		}
 		token = ft_strtok(NULL, ":");
 	}
@@ -73,20 +73,28 @@ char	*get_cmd_path(const char *cmd)
 
 void	exec(t_lexer *lexer)
 {
-	char	*args[4];  // Assuming a maximum of one flag and one argument for simplicity.
+	char	*args[4];									// Assuming a maximum of one flag and one argument for simplicity.
+	char	*cmd_path;
 
+	cmd_path = get_cmd_path(lexer->cmd);
+	if (cmd_path == NULL)
+	{
+		perror("Command not found EXEC");
+		return ;
+	}
 	args[0] = lexer->cmd;
 	args[1] = lexer->flags;
 	args[2] = lexer->args;
 	args[3] = NULL;
-	if (fork() == 0)
-	{  // Child process
-		execve (args[0], args, NULL);
+	if (fork() == 0)									// Child process
+	{
+		execve (cmd_path, args, environ);
 		perror ("Execution failed");
 		exit (EXIT_FAILURE);
 	}
 	else
-		wait(NULL);  // Parent waits for child to finish
+		wait(NULL);  									// Parent waits for child to finish
+	free(cmd_path);
 }
 
 int	redir(t_lexer **lexer, int i)
@@ -133,10 +141,11 @@ int	redir(t_lexer **lexer, int i)
 
 void	piping(t_lexer **lexer)
 {
-	int fd[2];
-	int fd_in = 0;  // We start with stdin
-	int i = 0;
-	int	wait_counter;
+	char	*cmd_path; 
+	int		fd[2];
+	int		fd_in = 0;  // We start with stdin
+	int		i = 0;
+	int		wait_counter;
 
 	while (lexer[i])
 	{
@@ -154,8 +163,9 @@ void	piping(t_lexer **lexer)
 				dup2(fd[1], 1);
 				close(fd[1]);
 			}
+			cmd_path = get_cmd_path(lexer[i]->cmd);
 			char *args[4] = {lexer[i]->cmd, lexer[i]->flags, lexer[i]->args, NULL};
-			execve(args[0], args, NULL);
+			execve(cmd_path, args, environ);
 			perror("Execution failed");
 			exit (EXIT_FAILURE);
 		}
