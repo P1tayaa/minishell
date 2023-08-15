@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: omathot <omathot@student.42.fr>            +#+  +:+       +#+         #
+#    By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/03/09 01:41:47 by oscarmathot       #+#    #+#              #
-#    Updated: 2023/06/17 13:28:26 by omathot          ###   ########.fr        #
+#    Updated: 2023/08/14 17:06:18 by oscarmathot      ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,7 +14,7 @@
 #VARIABLES
 
 NAME 	:= minishell
-SRC 	:= main.c quotes.c executer.c parser.c signals.c
+SRC 	:= main.c quotes.c executer.c parser.c signals.c pipe.c free_help.c utils.c
 OBJ 	:= $(SRC:.c=.o)
 LIBFT_A	:= lib/libft/libft.a
 CMP		:= gcc

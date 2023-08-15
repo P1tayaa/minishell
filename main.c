@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:29:45 by omathot           #+#    #+#             */
-/*   Updated: 2023/07/02 14:04:24 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/08/14 20:20:24 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,9 @@ getenv
 dup, dup2, pipe    PIPES
 duplicate stdout environment, have shell write on there, return next stdout environment. 
 
-printf, malloc, free, write, access, open, read,
+access !!!
+
+printf, malloc, free, write, , open, read,
 close, fork, wait, waitpid, wait3, wait4, signal,
 sigaction, sigemptyset, sigaddset, kill, exit,
 , stat, lstat, fstat, unlink, execve,
@@ -52,13 +54,13 @@ feof(3), ferror(3), fgetln(3), fgetws(3), getline(3)
 */
 
 char *executer(char *str, bool no_pipe);
-t_data_table	*parsse_things(char *str);
+t_lexer	**parsse_things(char *str);
 
 int	main(void)
 {
-	char *str;
-	t_data_table *table_pars;
-	int	i;
+	char	*str;
+	t_lexer	**lexer;
+	// int	i;
 
 	manage_signals();
 	while (1)
@@ -67,20 +69,13 @@ int	main(void)
 		// read user input
 		str = read_user_input();
 		// parse user input
-		table_pars = parsse_things(str);
-		i = 0;
+		lexer = parsse_things(str);
+		// i = 0;
 		// c'est pas idea mais c'est un depart
-		while (table_pars->list_of_commands[i] != NULL)
-		{
-			// break up components of user input (specifically take care with quotes)
-			// verify if correct user input (if not error or ask for more)
-			// expand PATH
-
-			//il faudrai dup fd[0] pour recuper ce qui est imprimer et le resorting en arg
-			// execute
-			executer(table_pars->list_of_commands[i], table_pars->number_pip == 0);
-			i++;
-		}
+		if (lexer[1] == NULL)
+			exec(lexer[0]);
+		else
+			piping(lexer);
 		// optiona: wait for return value.
 	}
 	return (0);
@@ -90,7 +85,7 @@ char	*read_user_input(void)
 {
 	char	*str;
 	
-	str = readline("minishell_OS_1.0$ 😀 ");
+	str = readline("😎 minishell_OS_1.0$");
 	add_history(str);
 	// if (EOF)
 	// {
