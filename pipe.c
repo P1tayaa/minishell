@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/20 15:16:04 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/08/15 14:27:09 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/08/16 19:59:49 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,19 @@ int	open_file(char *filename, int mode)
 			S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH));
 	}
 }
+
+/*
+1. The first time you call `strtok`, you pass the string you want to tokenize. `strtok` finds the first delimiter
+in the string, replaces it with a null terminator (`\0`), and returns a pointer to the beginning of the string.
+This effectively gives you the first token.
+2. In subsequent calls, you pass `NULL` as the first argument. `strtok` remembers the string from the previous
+call and continues tokenizing from where it left off. It finds the next delimiter, replaces it with a null terminator,
+and returns a pointer to the next token.
+3. When there are no more tokens, `strtok` returns `NULL`.
+This behavior is standard for the `strtok` function in C. Your implementation, `ft_strtok`,
+appears to mimic this behavior with the `last_token` static variable. So, passing `NULL` to `ft_strtok` in
+subsequent calls is the correct approach to continue tokenizing the same string.
+*/
 
 char	*get_cmd_path(const char *cmd)
 {
@@ -60,12 +73,13 @@ char	*get_cmd_path(const char *cmd)
 	while (token)
 	{
 		concat_path(full_path, token, cmd);
+		printf("\n%s\n", full_path);
 		if (access(full_path, X_OK) == 0)
 		{
 			free(tmp_path);
 			return (strdup(full_path));
 		}
-		token = ft_strtok(NULL, ":");
+		token = ft_strtok(NULL, ":");						// segfault triggers here, but all standards say that this is fine? check strtok implementation
 	}
 	free(tmp_path);
 	return (NULL);

@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/14 17:01:53 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/08/14 17:04:53 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/08/16 19:59:10 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,24 +15,25 @@
 char	*ft_strtok(char *str, const char *delim)
 {
 	static char	*last_token;
+	int			index;
 
 	last_token = NULL;
+	index = 0;
 	if (str == NULL)
-        str = last_token;  // Use the last string if NULL is passed
-	int idx = 0;
-	while (str[idx] != '\0')
+        str = last_token;					// Use the last string if NULL is passed
+	while (str[index] != '\0')
 	{
-		if (strchr(delim, str[idx]))
+		if (strchr(delim, str[index]))
 			break;
-		idx++;
+		index++;
 	}
-	if (str[idx] == '\0')
+	if (str[index] == '\0')					// segfault is here, tho ????
 	{
         last_token = NULL;
         return (str);
     }
-	str[idx] = '\0';
-	last_token = &str[idx + 1];
+	str[index] = '\0';
+	last_token = &str[index + 1];
 	return (str);
 }
 
