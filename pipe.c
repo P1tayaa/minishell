@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/20 15:16:04 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/08/16 19:59:49 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/08/18 16:06:07 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,17 +69,17 @@ char	*get_cmd_path(const char *cmd)
 		return (NULL);
 	}
 	tmp_path = strdup(path);
-	token = ft_strtok(tmp_path, ":");
+	token = strtok(tmp_path, ":");
 	while (token)
 	{
 		concat_path(full_path, token, cmd);
-		printf("\n%s\n", full_path);
+		// printf("%s\n", full_path);
 		if (access(full_path, X_OK) == 0)
 		{
 			free(tmp_path);
 			return (strdup(full_path));
 		}
-		token = ft_strtok(NULL, ":");						// segfault triggers here, but all standards say that this is fine? check strtok implementation
+		token = strtok(NULL, ":");						// segfault triggers here, ft_strtok's got something wrong so using official library AT THE MOMENT ONLY
 	}
 	free(tmp_path);
 	return (NULL);
@@ -87,8 +87,9 @@ char	*get_cmd_path(const char *cmd)
 
 void	exec(t_lexer *lexer)
 {
-	char	*args[4];									// Assuming a maximum of one flag and one argument for simplicity.
+	char	*args[4];  // Assuming a maximum of one flag and one argument for simplicity.
 	char	*cmd_path;
+	pid_t	pid;
 
 	cmd_path = get_cmd_path(lexer->cmd);
 	if (cmd_path == NULL)
@@ -98,16 +99,23 @@ void	exec(t_lexer *lexer)
 	}
 	args[0] = lexer->cmd;
 	args[1] = lexer->flags;
-	args[2] = lexer->args;
-	args[3] = NULL;
-	if (fork() == 0)									// Child process
+	args[1] = lexer->args;
+	args[2] = NULL;
+	pid = fork();
+	if (pid == -1)
 	{
-		execve (cmd_path, args, environ);
-		perror ("Execution failed");
-		exit (EXIT_FAILURE);
+		perror("Fork failed");
+		free(cmd_path);
+		return ;
 	}
-	else
-		wait(NULL);  									// Parent waits for child to finish
+	if (pid == 0)				// Child process
+	{
+		execve(cmd_path, args, environ);
+		perror("Execution failed");
+		exit(EXIT_FAILURE);
+	}
+	else						// Parent process
+		wait(NULL);				// Wait for the child to finish
 	free(cmd_path);
 }
 
