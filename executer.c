@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   executer.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
+/*   By: omathot <omathot@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/13 13:56:36 by sboulain          #+#    #+#             */
-/*   Updated: 2023/06/13 14:23:22 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/06/17 15:03:09 by omathot          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,11 +19,14 @@ void	check_quotes(char *str);
 
 char *executer(char *str, bool no_pipe)
 {
-	char *return_val;
-	char	str2[4096];
-	int		i;
+	extern char	**environ;
+	char		*return_val;
+	char		str2[4096];
+	int			i;
+	int			k;
 
 	i = 0;
+	k = 0;
 	while (ft_isspace(str[i]))
 		i++;
 	str = &str[i];
@@ -37,7 +40,7 @@ char *executer(char *str, bool no_pipe)
 	{
 		if (no_pipe)
 		{
-			printf("%s\n", str);
+			printf("exit\n");
 			exit(EXIT_SUCCESS);
 		}
 	}
@@ -59,8 +62,16 @@ char *executer(char *str, bool no_pipe)
 		if (chdir(&str[3]) != 0)
 			perror("chdir() error");
 	}
+	else if (ft_memcmp(str, "env", 3) == 0)
+	{
+		while (environ[k])
+			printf("%s\n", environ[k++]);
+	}
+	else if (ft_memcmp(str, "^D", 2) == 0)
+    	exit (EXIT_SUCCESS);
 	else
 	{
+		write(1, "proble la\n", 10);
 		check_quotes(str);
 		// printf("minishell: %s: command not found\n", str);
 	}
