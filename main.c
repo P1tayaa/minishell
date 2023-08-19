@@ -3,14 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
+/*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:29:45 by omathot           #+#    #+#             */
-<<<<<<< HEAD
-/*   Updated: 2023/07/12 12:14:12 by sboulain         ###   ########.fr       */
-=======
-/*   Updated: 2023/08/15 13:08:00 by oscarmathot      ###   ########.fr       */
->>>>>>> origin/main
+/*   Updated: 2023/08/19 12:16:59 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,25 +72,10 @@ int	main(void)
 		lexer = parsse_things(str);
 		// i = 0;
 		// c'est pas idea mais c'est un depart
-<<<<<<< HEAD
-		// while (table_pars->list_of_commands[i] != NULL)
-		// {
-		// 	// break up components of user input (specifically take care with quotes)
-		// 	// verify if correct user input (if not error or ask for more)
-		// 	// expand PATH
-
-		// 	//il faudrai dup fd[0] pour recuper ce qui est imprimer et le resorting en arg
-		// 	// execute
-		// 	executer(table_pars->list_of_commands[i], table_pars->number_pip == 0);
-		// 	i++;
-		// }
-		
-=======
 		if (lexer[1] == NULL)
 			exec(lexer[0]);
 		else
 			piping(lexer);
->>>>>>> origin/main
 		// optiona: wait for return value.
 	}
 	return (0);

@@ -3,14 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+         #
+#    By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/03/09 01:41:47 by oscarmathot       #+#    #+#              #
-<<<<<<< HEAD
-#    Updated: 2023/07/22 17:26:53 by sboulain         ###   ########.fr        #
-=======
-#    Updated: 2023/08/14 17:06:18 by oscarmathot      ###   ########.fr        #
->>>>>>> origin/main
+#    Updated: 2023/08/19 12:16:05 by sboulain         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
