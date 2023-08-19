@@ -3,10 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   quotes.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
+/*   By: omathot <omathot@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/12 11:53:41 by omathot           #+#    #+#             */
+<<<<<<< HEAD
 /*   Updated: 2023/06/17 17:18:06 by sboulain         ###   ########.fr       */
+=======
+/*   Updated: 2023/06/17 11:23:14 by omathot          ###   ########.fr       */
+>>>>>>> origin/main
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -288,3 +292,7 @@ int	*get_doll_position(char *str)
 
 // 1. look at first open - pattern matching     'asudgadagg"ausydgasdas"adhad';
 // 2. getenv 
+
+
+
+// we need a function to call when reading user input. spit_text_args doesnt do the job. 
