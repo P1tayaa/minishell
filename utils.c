@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/14 17:01:53 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/08/16 19:59:10 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/08/21 00:51:57 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ char	*ft_strtok(char *str, const char *delim)
 			break;
 		index++;
 	}
-	if (str[index] == '\0')					// segfault is here, tho ????
+	if (str[index] == '\0')					// segfault is here, but what the fuck ????
 	{
         last_token = NULL;
         return (str);
