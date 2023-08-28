@@ -6,7 +6,7 @@
 /*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/13 13:30:47 by sboulain          #+#    #+#             */
-/*   Updated: 2023/08/19 15:17:07 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/08/28 16:08:57 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,6 +106,70 @@ void	move_flags_from_args_to_flags(t_lexer *lexer)
 		lexer->flags = flags;
 }
 
+void	move_file_name_to_file_and_comand_back(t_lexer *lexer_previous, t_lexer *lexer)
+{
+	int i;
+	int	j;
+	char *temp;
+
+	lexer_previous->file = lexer->cmd;
+	lexer->cmd = ft_strtok(lexer->args, " ");
+	i = 0;
+	while (lexer->args[i] != ' ' && lexer->args[i] != '\0')
+		i++;
+	if (lexer->args[i] == '\0')
+	{
+		free(lexer->args);
+		lexer->args = NULL;
+		return ;
+	}
+	temp = malloc(ft_strlen(lexer->args) - i + 1);
+	j = 0;
+	while (lexer->args[i + j] != '\0')
+	{
+		temp[j] = lexer->args[i + j];
+		j++;
+	}
+	temp[j] = '\0';
+	free(lexer->args);
+	lexer->args = temp;
+}
+
+char *remove_back_spaces(char *str)
+{
+	char *str_dup_without_spaces;
+	int	i;
+
+	if (str == NULL)
+		return NULL;
+	i = 0;
+	while (ft_isspace(str[ft_strlen(str) - i]) && ft_strlen(str) - i >= 0)
+		i++;
+	if (i == 0)
+	{
+		str_dup_without_spaces = ft_strdup(str);
+		free(str);
+		return (str_dup_without_spaces);
+	}
+	if (ft_strlen(str) == (size_t)i)
+	{
+		free(str);
+		return (NULL);
+	}
+	str_dup_without_spaces = malloc(ft_strlen(str) - i + 1);
+	if (!str_dup_without_spaces)
+		exit (-1);
+	i = 0;
+	while (!ft_isspace(str[i]))
+	{
+		str_dup_without_spaces[i] = str[i];
+		i++;
+	}
+	str_dup_without_spaces[i] = '\0';
+	free(str);
+	return (str_dup_without_spaces);
+}
+
 t_lexer	**parsse_things(char *str)
 {
 	int	token_num;
@@ -127,6 +191,7 @@ t_lexer	**parsse_things(char *str)
 		lexer[i]->possition = i;
 		lexer[i]->args = NULL;
 		lexer[i]->cmd = NULL;
+		lexer[i]->file = NULL;
 		lexer[i]->flags = NULL;
 		lexer[i]->tokenid[0] = '\0';
 		curser = parse_until_token_id(str, i, lexer, curser);
@@ -134,6 +199,13 @@ t_lexer	**parsse_things(char *str)
 		// * If so put it to the previous function
 		if (ft_char_find(lexer[i]->args, "-") != -1)
 			move_flags_from_args_to_flags(lexer[i]);
+		if (i > 0)
+			if (lexer[i - 1]->tokenid[0] == '<' && lexer[i - 1]->tokenid[1] == '\0')
+				move_file_name_to_file_and_comand_back(lexer[i - 1], lexer[i]);
+		lexer[i]->args = remove_back_spaces(lexer[i]->args);
+		lexer[i]->cmd = remove_back_spaces(lexer[i]->cmd);
+		lexer[i]->file = remove_back_spaces(lexer[i]->file);
+		lexer[i]->flags = remove_back_spaces(lexer[i]->flags);
 		i++;
 	}
 	lexer[i] = NULL;

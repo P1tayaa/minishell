@@ -6,7 +6,7 @@
 /*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/12 11:53:41 by omathot           #+#    #+#             */
-/*   Updated: 2023/08/19 15:53:14 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/08/28 16:56:07 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,8 +73,20 @@ void	check_quotes(char *str)
 	position_single_quotes[num_single_quotes] = -1;
 	position_double_quotes[num_double_quotes] = -1;
 
-	
+	if (num_single_quotes % 2 == 1 || num_double_quotes % 2 == 1)
+	{
+		// * ask for user to finish him phrase
+		printf("missing %d single quotes, and missing %d double quotes", num_single_quotes % 2, num_double_quotes % 2);	 
+		exit (-1);
+	}
 
+	// check if there are single quotes
+
+	// if not just expand all
+
+	// if there are, seperate what is single than expand all
+
+	// if (position_single_quotes[0] < position_double_quotes[0])
 	// // int	i;
 
 	// // i = 0;

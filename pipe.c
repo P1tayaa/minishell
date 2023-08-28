@@ -6,7 +6,7 @@
 /*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/20 15:16:04 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/08/19 14:05:06 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/08/28 15:39:44 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,7 +91,7 @@ char	*get_cmd_path(const char *cmd)
 
 void	exec(t_lexer *lexer)
 {
-	char	*args[4];									// Assuming a maximum of one flag and one argument for simplicity.
+	char	*args[5];									// Assuming a maximum of one flag and one argument for simplicity.
 	char	*cmd_path;
 
 	cmd_path = get_cmd_path(lexer->cmd);
@@ -103,8 +103,9 @@ void	exec(t_lexer *lexer)
 	args[0] = lexer->cmd;
 	args[1] = lexer->flags;
 	args[2] = lexer->args;
-	args[3] = NULL;
-	printf("cmd = (%s)\nflags = (%s)\nargs = (%s)\n",args[0], args[1], args[2]);
+	args[3] = lexer->file;
+	args[4] = NULL;
+	printf("cmd = (%s)\nflags = (%s)\nargs = (%s)\nfile = (%s)\n",args[0], args[1], args[2], args[3]);
 	if (fork() == 0)									// Child process
 	{
 		execve (cmd_path, args, environ);

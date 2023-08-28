@@ -6,7 +6,7 @@
 /*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:29:45 by omathot           #+#    #+#             */
-/*   Updated: 2023/08/19 12:16:59 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/08/28 15:44:36 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,10 +72,22 @@ int	main(void)
 		lexer = parsse_things(str);
 		// i = 0;
 		// c'est pas idea mais c'est un depart
-		if (lexer[1] == NULL)
-			exec(lexer[0]);
-		else
-			piping(lexer);
+		int i;
+		i = 0;
+		while (lexer[i] != NULL)
+		{
+			printf("\nlexer[%d]\n cmd: (%s)\n", i, lexer[i]->cmd);
+			printf("args: (%s)\n", lexer[i]->args);
+			printf("tokenid: (%s)\n", lexer[i]->tokenid);
+			printf("file: (%s)\n", lexer[i]->file);
+			printf("flags: (%s)\n", lexer[i]->flags);
+			i++;
+		}
+		
+		// if (lexer[1] == NULL)
+		// 	exec(lexer[0]);
+		// else
+		// 	piping(lexer);
 		// optiona: wait for return value.
 	}
 	return (0);

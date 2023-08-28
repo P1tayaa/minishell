@@ -6,7 +6,7 @@
 /*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/14 17:01:53 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/08/19 13:31:19 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/08/28 15:24:48 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,8 @@ int ft_char_find(char *str, const char *list_of_char)
 	int i;
 	int	j;
 
+	if (str == NULL)
+		return -1;
 	i = 0;
 	while (str[i] != '\0')
 	{
