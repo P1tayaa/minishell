@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/20 15:16:04 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/08/29 19:09:04 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/08/29 19:26:29 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,19 +30,6 @@ int	open_file(char *filename, int mode)
 			S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH));
 	}
 }
-
-/*
-1. The first time you call `strtok`, you pass the string you want to tokenize. `strtok` finds the first delimiter
-in the string, replaces it with a null terminator (`\0`), and returns a pointer to the beginning of the string.
-This effectively gives you the first token.
-2. In subsequent calls, you pass `NULL` as the first argument. `strtok` remembers the string from the previous
-call and continues tokenizing from where it left off. It finds the next delimiter, replaces it with a null terminator,
-and returns a pointer to the next token.
-3. When there are no more tokens, `strtok` returns `NULL`.
-This behavior is standard for the `strtok` function in C. Your implementation, `ft_strtok`,
-appears to mimic this behavior with the `last_token` static variable. So, passing `NULL` to `ft_strtok` in
-subsequent calls is the correct approach to continue tokenizing the same string.
-*/
 
 char	*get_cmd_path(const char *cmd)
 {
@@ -73,16 +60,13 @@ char	*get_cmd_path(const char *cmd)
 	while (token)
 	{
 		concat_path(full_path, token, cmd);
-		// here ok
-		printf("\n%s\n", full_path);
 		if (access(full_path, X_OK) == 0)
 		{
 			free(tmp_path);
 			return (strdup(full_path));
 		}
-		// puts("test");
 		free(token);
-		token = ft_strtok(NULL, ":");						// segfault triggers here, but all standards say that this is fine? check strtok implementation
+		token = ft_strtok(NULL, ":");
 	}
 	free(token);
 	free(tmp_path);
@@ -91,8 +75,10 @@ char	*get_cmd_path(const char *cmd)
 
 void	exec(t_lexer *lexer)
 {
-	char	*args[5];									// Assuming a maximum of one flag and one argument for simplicity.
+	char	*args[4];  // Assuming a maximum of one flag and one argument for simplicity.
 	char	*cmd_path;
+	int		i;
+	pid_t	pid;
 
 	cmd_path = get_cmd_path(lexer->cmd);
 	if (cmd_path == NULL)
@@ -100,106 +86,156 @@ void	exec(t_lexer *lexer)
 		perror("Command not found EXEC");
 		return ;
 	}
-	args[0] = lexer->cmd;
-	args[1] = lexer->flags;
-	args[2] = lexer->args;
-	args[3] = lexer->file;
-	args[4] = NULL;
-	printf("cmd = (%s)\nflags = (%s)\nargs = (%s)\nfile = (%s)\n",args[0], args[1], args[2], args[3]);
-	if (fork() == 0)									// Child process
+	i = 0;
+	args[i++] = lexer->cmd;
+	if (lexer->flags != NULL)
+		args[i++] = lexer->flags;
+	if (lexer->args != NULL)
+		args[i++] = lexer->args;
+	args[i++] = NULL;
+	i = 0;
+	printf("cmd: (%s)\n", args[i++]);
+	if (lexer->flags != NULL)
+		printf("flags: (%s)\n", args[i++]);
+	if (lexer->args != NULL)
+		printf("args: (%s)\n", args[i++]);
+	pid = fork();
+	if (pid == -1)
 	{
-		execve (cmd_path, args, environ);
-		perror ("Execution failed");
-		exit (EXIT_FAILURE);
+		perror("Fork failed");
+		free(cmd_path);
+		return ;
 	}
-	else
-		wait(NULL);  									// Parent waits for child to finish
+	if (pid == 0)				// Child process
+	{
+		execve(cmd_path, args, environ);
+		perror("Execution failed");
+		exit(EXIT_FAILURE);
+	}
+	else						// Parent process
+		wait(NULL);				// Wait for the child to finish
 	free(cmd_path);
 }
 
-int	redir(t_lexer **lexer, int i)
+int	redirection_handler(t_lexer *lexer)
 {
-	int fd;
-
-	if (strcmp(lexer[i]->tokenid, "<") == 0)
-	{
-		fd = open_file(lexer[i]->cmd, 0);  // Open for reading
-		if (fd == -1)
-		{
-			perror("Error opening file for reading");
-			return (-1);
-		}
-		dup2(fd, 0);  // Redirect standard input to the file
-		close(fd);
-	}
-	else if (strcmp(lexer[i]->tokenid, ">") == 0)
-	{
-		fd = open_file(lexer[i]->cmd, 1);
-		if (fd == -1)
-		{
-			perror("Error opening file for writing");
-			return (-1);
-		}
-		dup2(fd, 1);  // Redirect standard output to the file
-		close(fd);
-	}
-	else if (strcmp(lexer[i]->tokenid, ">>") == 0)
-	{
-		fd = open(lexer[i]->cmd, O_WRONLY | O_CREAT | O_APPEND, 
-					S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH);  // Open for writing, create if doesn't exist, append if exists
-		if (fd == -1)
-		{
-			perror("Error opening file for appending");
-			return (-1);
-		}
-		dup2(fd, 1);  // Redirect standard output to the file
-		close(fd);
-	}
-	// TODO : <<
-    return (0);
+	if (strcmp(lexer->tokenid, "<") == 0)
+		return (open(lexer->file, O_RDONLY));
+	else if (strcmp(lexer->tokenid, ">") == 0)
+		return (open(lexer->file, O_WRONLY | O_CREAT | O_TRUNC, 0644));
+	else if (strcmp(lexer->tokenid, ">>") == 0)
+		return (open(lexer->file, O_WRONLY | O_CREAT | O_APPEND, 0644));
+	// TODO: <<
+	return (-1);
 }
 
+void	set_redirection(t_lexer **lexer, int *input_fd, int j)
+{
+	if (j > 0 && (strcmp(lexer[j-1]->tokenid, "<") == 0 || strcmp(lexer[j-1]->tokenid, ">") == 0 || strcmp(lexer[j-1]->tokenid, ">>") == 0))
+	{
+		*input_fd = redirection_handler(lexer[j-1]);
+		if (*input_fd == -1)
+		{
+			perror("Error setting up redirection");
+			exit(EXIT_FAILURE);
+		}
+	}
+}
+
+// fd[0] = read;
+// fd[1] = write;
 void	piping(t_lexer **lexer)
 {
-	char	*cmd_path; 
+	char	*cmd_path;
+	char	*args[4];
 	int		fd[2];
-	int		fd_in = 0;  // We start with stdin
-	int		i = 0;
-	int		wait_counter;
+	int		pid;
+	int		lex_count = 0;
+	int		i;
+	int		j;
+	int		input_fd = -1;
+	int		output_fd = -1;
+	int		prev_fd;	// To store the read end of the previous pipe
 
-	while (lexer[i])
+	while (lexer[lex_count])
+		lex_count++;
+	prev_fd = -1;
+	j = 0;
+	if (strcmp(lexer[0]->tokenid, "<") == 0)
 	{
-		if (lexer[i+1] && strcmp(lexer[i+1]->tokenid, "|") == 0)	        	// if "|" pipe
-			pipe(fd);
-		if (fork() == 0)														// child process
+		input_fd = redirection_handler(lexer[0]);
+		j++;
+	}
+	// Handle output redirection at the end
+	if (lex_count > 1 && strcmp(lexer[lex_count - 1]->tokenid, ">") == 0)
+	{
+		output_fd = redirection_handler(lexer[lex_count - 2]);
+		lex_count -= 2;  // Adjust the lex_count to not include the output redirection
+	}
+	while (j < lex_count)
+	{
+		// Handle any middle redirections
+		set_redirection(lexer, &input_fd, j);
+		if (pipe(fd) == -1)
+			return ;
+		pid = fork();
+		if (pid == -1)
+			return ;
+		if (pid == 0)  // Child process
 		{
-			if (i != 0)									        				// Not the first command, set up the input from the previous command
+			// If there's an input redirection, use it
+			if (input_fd != -1)
 			{
-				dup2(fd_in, 0);
-				close(fd_in);
+				dup2(input_fd, STDIN_FILENO);
+				close(input_fd);
 			}
-			if (lexer[i+1] && strcmp(lexer[i+1]->tokenid, "|") == 0) 			// If pipe, set up the output to the next command
+			else if (j != 0)  // If not the first command and no input redirection
 			{
-				dup2(fd[1], 1);
-				close(fd[1]);
+				dup2(prev_fd, STDIN_FILENO);
+				close(prev_fd);
 			}
-			cmd_path = get_cmd_path(lexer[i]->cmd);
-			char *args[4] = {lexer[i]->cmd, lexer[i]->flags, lexer[i]->args, NULL};
+			// If this is the last command and there's an output redirection, use it
+			if (j == lex_count - 1 && output_fd != -1)
+			{
+				dup2(output_fd, STDOUT_FILENO);
+				close(output_fd);
+			}
+			else if (j != lex_count - 1)  // Not the last command, set up for next command
+				dup2(fd[1], STDOUT_FILENO);
+			close(fd[0]);
+			close(fd[1]);
+			cmd_path = get_cmd_path(lexer[j]->cmd);
+			i = 0;
+			args[i++] = lexer[j]->cmd;
+			if (lexer[j]->flags != NULL)
+				args[i++] = lexer[j]->flags;
+			if (lexer[j]->args != NULL)
+				args[i++] = lexer[j]->args;
+			args[i++] = NULL;
 			execve(cmd_path, args, environ);
 			perror("Execution failed");
-			exit (EXIT_FAILURE);
+			exit(EXIT_FAILURE);
 		}
-		else															  		// Parent process
+		else  // Parent process
 		{
-			if (lexer[i+1] && strcmp(lexer[i+1]->tokenid, "|") == 0)
-			{
-				close(fd[1]);
-				fd_in = fd[0];
-			}
+			close(fd[1]);
+			if (j != 0)
+				close(prev_fd);
+			prev_fd = fd[0];
 		}
-		i += 2;  // Skip the next token since it's a pipe operator
+		j++;
+		if (input_fd != -1)
+		{
+			close(input_fd);
+			input_fd = -1;
+			j++;
+		}
 	}
-	wait_counter = i / 2;		
-	while (wait_counter--)														// Parent waits for all child processes to finish
-		wait(NULL);
+	close(prev_fd);
+	j = 0;
+	while (j < lex_count)
+	{
+		wait(NULL);  // Wait for all child processes to finish
+		j++;
+	}
 }
