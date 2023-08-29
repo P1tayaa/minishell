@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   pipe.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
+/*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/20 15:16:04 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/08/16 19:59:49 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/08/28 15:39:44 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,21 +73,25 @@ char	*get_cmd_path(const char *cmd)
 	while (token)
 	{
 		concat_path(full_path, token, cmd);
+		// here ok
 		printf("\n%s\n", full_path);
 		if (access(full_path, X_OK) == 0)
 		{
 			free(tmp_path);
 			return (strdup(full_path));
 		}
+		// puts("test");
+		free(token);
 		token = ft_strtok(NULL, ":");						// segfault triggers here, but all standards say that this is fine? check strtok implementation
 	}
+	free(token);
 	free(tmp_path);
 	return (NULL);
 }
 
 void	exec(t_lexer *lexer)
 {
-	char	*args[4];									// Assuming a maximum of one flag and one argument for simplicity.
+	char	*args[5];									// Assuming a maximum of one flag and one argument for simplicity.
 	char	*cmd_path;
 
 	cmd_path = get_cmd_path(lexer->cmd);
@@ -99,7 +103,9 @@ void	exec(t_lexer *lexer)
 	args[0] = lexer->cmd;
 	args[1] = lexer->flags;
 	args[2] = lexer->args;
-	args[3] = NULL;
+	args[3] = lexer->file;
+	args[4] = NULL;
+	printf("cmd = (%s)\nflags = (%s)\nargs = (%s)\nfile = (%s)\n",args[0], args[1], args[2], args[3]);
 	if (fork() == 0)									// Child process
 	{
 		execve (cmd_path, args, environ);
