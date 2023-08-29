@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
+/*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:29:45 by omathot           #+#    #+#             */
-/*   Updated: 2023/08/28 15:44:36 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/08/29 19:26:39 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,10 +84,10 @@ int	main(void)
 			i++;
 		}
 		
-		// if (lexer[1] == NULL)
-		// 	exec(lexer[0]);
-		// else
-		// 	piping(lexer);
+		if (lexer[1] == NULL)
+			exec(lexer[0]);
+		else
+			piping(lexer);
 		// optiona: wait for return value.
 	}
 	return (0);

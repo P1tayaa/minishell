@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+         #
+#    By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/03/09 01:41:47 by oscarmathot       #+#    #+#              #
-#    Updated: 2023/08/19 12:16:05 by sboulain         ###   ########.fr        #
+#    Updated: 2023/08/29 19:26:57 by oscarmathot      ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
