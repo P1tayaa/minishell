@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   quotes.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: omathot <omathot@student.42.fr>            +#+  +:+       +#+        */
+/*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/12 11:53:41 by omathot           #+#    #+#             */
-/*   Updated: 2023/06/17 11:23:14 by omathot          ###   ########.fr       */
+/*   Updated: 2023/08/28 16:56:07 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,24 +23,89 @@ char	*handle_expand_doll(char *str);
 // here *str is &str[3] from main.
 void	check_quotes(char *str)
 {
-	// int	i;
+	int	i;
+	
 
-	// i = 0;
-	// while (str[i])
-	// {
-		// 39 is ascii value for single quotes BUT, \ is in front of it
-		if (str[0] == '\'' && str[ft_strlen(str) - 1] == '\'')
-			printf("%s\n", str);
-		// 34 is ascii value for double quotes,
-		if (str[0] == '\"' && str[ft_strlen(str) - 1] == '\"')
+	// count number of quotes
+	int num_single_quotes;
+	int num_double_quotes;
+	i = 0;
+	num_single_quotes = 0;
+	while (str[i] != '\0')
+	{
+		if (str[i] == '\'')
+			num_single_quotes++;
+		i++;
+	}
+	i = 0;
+	num_double_quotes = 0;
+	while (str[i] != '\0')
+	{
+		if (str[i] == '\"')
+			num_double_quotes++;
+		i++;
+	}
+
+	// get position of all quotes
+	int *position_double_quotes;
+	int *position_single_quotes;
+	position_double_quotes = malloc(sizeof(int) * (num_double_quotes + 1));
+	position_single_quotes = malloc(sizeof(int) * (num_single_quotes + 1));
+	if (!position_double_quotes || !position_single_quotes)
+		exit (-1);
+	i = 0;
+	num_double_quotes = 0;
+	num_single_quotes = 0;
+	while (str[i] != '\0')
+	{
+		if (str[i] == '\'')
 		{
-			char *str_temp;
-			str_temp = handle_expand_doll(str);
-			printf("%s\n", str_temp);
-			free(str_temp);
-			system("leaks -q minishell");
+			position_single_quotes[num_single_quotes] = i;
+			num_single_quotes++;
 		}
-	// }
+		if (str[i] == '\"')
+		{
+			position_double_quotes[num_double_quotes] = i;
+			num_double_quotes++;
+		}
+		i++;
+	}
+	position_single_quotes[num_single_quotes] = -1;
+	position_double_quotes[num_double_quotes] = -1;
+
+	if (num_single_quotes % 2 == 1 || num_double_quotes % 2 == 1)
+	{
+		// * ask for user to finish him phrase
+		printf("missing %d single quotes, and missing %d double quotes", num_single_quotes % 2, num_double_quotes % 2);	 
+		exit (-1);
+	}
+
+	// check if there are single quotes
+
+	// if not just expand all
+
+	// if there are, seperate what is single than expand all
+
+	// if (position_single_quotes[0] < position_double_quotes[0])
+	// // int	i;
+
+	// // i = 0;
+	// // while (str[i])
+	// // {
+	// 	// 39 is ascii value for single quotes BUT, \ is in front of it
+	// 	if (str[0] == '\'' && str[ft_strlen(str) - 1] == '\'')
+	// 		printf("%s\n", str);
+	// 	// 34 is ascii value for double quotes,
+	// 	// if (str[0] == '\"' && str[ft_strlen(str) - 1] == '\"')
+	// 	else
+	// 	{
+	// 		char *str_temp;
+	// 		str_temp = handle_expand_doll(str);
+	// 		printf("%s\n", str_temp);
+	// 		free(str_temp);
+	// 		system("leaks -q minishell");
+	// 	}
+	// // }
 }
 
 char	**spit_text_args(char *str, int	*doll_pos);
@@ -180,7 +245,7 @@ char	**spit_text_args(char *str, int	*doll_pos)
 	string_split = malloc(sizeof(char *) * (total_parts + 2));
 	i = 0;
 	num_doll = 0;
-	while (i <= (total_parts))
+	while (i < (total_parts))
 	{
 		if (i % 2 == 0)
 		{
@@ -189,14 +254,19 @@ char	**spit_text_args(char *str, int	*doll_pos)
 			else
 			{
 				if (doll_pos[num_doll] != -1)
-					
+					if (find_next_space(&str[doll_pos[num_doll - 1]] + 1) == -1 || find_next_space(&str[doll_pos[num_doll - 1]] + 1) > doll_pos[num_doll] - (doll_pos[num_doll - 1] + 1))
+						string_split[i] = ft_strdup("\0");
+					else
 						string_split[i] = ft_strdup_intil_index_n(&str
 							[doll_pos[num_doll - 1] + find_next_space(&str[doll_pos[num_doll - 1]])],
 							doll_pos[num_doll]
 							- (doll_pos[num_doll - 1] + find_next_space(&str[doll_pos[num_doll - 1]])) - 1);
 				else
 					if (find_next_space(&str[doll_pos[num_doll - 1]]) == -1)
-						string_split[i] = ft_strdup("\"");
+						if (find_next_quote(&str[doll_pos[num_doll - 1]]) == -1)
+							string_split[i] = ft_strdup("\0");
+						else
+							string_split[i] = ft_strdup("\"");
 					else
 						string_split[i] = ft_strdup_intil_index_n(&str
 							[doll_pos[num_doll - 1] + find_next_space(&str[doll_pos[num_doll - 1]])],
@@ -206,11 +276,29 @@ char	**spit_text_args(char *str, int	*doll_pos)
 		}
 		else
 		{
-			if (find_next_space(&str[doll_pos[num_doll]] + 1) == -1)
-				temp_str = ft_strdup_intil_index_n(&str[doll_pos[num_doll] + 1], find_next_quote(&str[doll_pos[num_doll] + 1]) - 1);
+			if (find_next_space(&str[doll_pos[num_doll]]) == -1)
+			{
+				if (doll_pos[num_doll + 1] != -1)
+					temp_str = ft_strdup_intil_index_n(&str[doll_pos[num_doll] + 1], doll_pos[num_doll + 1] - (doll_pos[num_doll] + 2));
+				else
+				{
+					if (find_next_quote(&str[doll_pos[num_doll] + 1]) - 1 != -2)
+						temp_str = ft_strdup_intil_index_n(&str[doll_pos[num_doll] + 1], find_next_quote(&str[doll_pos[num_doll] + 1]) - 1);
+					else
+					{
+						printf("%d\n", doll_pos[num_doll] + 1);
+						temp_str = ft_strdup(&str[doll_pos[num_doll] + 1]);
+					}
+				}
+			}
+			else if (doll_pos[num_doll + 1] != -1 && find_next_space(&str[doll_pos[num_doll]] + 1) > doll_pos[num_doll + 1] - (doll_pos[num_doll] + 1))
+			{
+				printf("\n %d, %d\n", doll_pos[num_doll + 1],  doll_pos[num_doll]);
+				temp_str = ft_strdup_intil_index_n(&str[doll_pos[num_doll] + 1], doll_pos[num_doll + 1] - (doll_pos[num_doll] + 2));
+			}
 			else
 				temp_str = ft_strdup_intil_index_n(&str[doll_pos[num_doll] + 1], find_next_space(&str[doll_pos[num_doll]] + 1) - 1);
-
+			printf("\n%s\n", temp_str);
 			string_split[i] = getenv(temp_str);
 			// need to manage if faled
 			free(temp_str);

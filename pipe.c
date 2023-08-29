@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/20 15:16:04 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/08/25 13:58:37 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/08/29 19:09:04 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,31 +69,30 @@ char	*get_cmd_path(const char *cmd)
 		return (NULL);
 	}
 	tmp_path = strdup(path);
-	token = strtok(tmp_path, ":");
+	token = ft_strtok(tmp_path, ":");
 	while (token)
 	{
 		concat_path(full_path, token, cmd);
-		// printf("%s\n", full_path);
+		// here ok
+		printf("\n%s\n", full_path);
 		if (access(full_path, X_OK) == 0)
 		{
 			free(tmp_path);
 			return (strdup(full_path));
 		}
-		token = strtok(NULL, ":");						// segfault triggers here, ft_strtok's got something wrong so using official library AT THE MOMENT ONLY
+		// puts("test");
+		free(token);
+		token = ft_strtok(NULL, ":");						// segfault triggers here, but all standards say that this is fine? check strtok implementation
 	}
+	free(token);
 	free(tmp_path);
 	return (NULL);
 }
 
-
-// test for command and garbage argument.
 void	exec(t_lexer *lexer)
 {
-	char	*args[4];  // Assuming a maximum of one flag and one argument for simplicity.
+	char	*args[5];									// Assuming a maximum of one flag and one argument for simplicity.
 	char	*cmd_path;
-	int		i;
-	// char	*cwd[1024];
-	pid_t	pid;
 
 	cmd_path = get_cmd_path(lexer->cmd);
 	if (cmd_path == NULL)
@@ -101,35 +100,20 @@ void	exec(t_lexer *lexer)
 		perror("Command not found EXEC");
 		return ;
 	}
-	// cwd = getcwd
-	i = 0;
-	args[i++] = lexer->cmd;
-	if (lexer->flags != NULL)
-		args[i++] = lexer->flags;
-	if (lexer->args != NULL)
-		args[i++] = lexer->args;
-	args[i++] = NULL;
-	i = 0;
-	printf("cmd: (%s)\n", args[i++]);
-	if (lexer->flags != NULL)
-		printf("flags: (%s)\n", args[i++]);
-	if (lexer->args != NULL)
-		printf("args: (%s)\n", args[i++]);
-	pid = fork();
-	if (pid == -1)
+	args[0] = lexer->cmd;
+	args[1] = lexer->flags;
+	args[2] = lexer->args;
+	args[3] = lexer->file;
+	args[4] = NULL;
+	printf("cmd = (%s)\nflags = (%s)\nargs = (%s)\nfile = (%s)\n",args[0], args[1], args[2], args[3]);
+	if (fork() == 0)									// Child process
 	{
-		perror("Fork failed");
-		free(cmd_path);
-		return ;
+		execve (cmd_path, args, environ);
+		perror ("Execution failed");
+		exit (EXIT_FAILURE);
 	}
-	if (pid == 0)				// Child process
-	{
-		execve(cmd_path, args, environ);
-		perror("Execution failed");
-		exit(EXIT_FAILURE);
-	}
-	else						// Parent process
-		wait(NULL);				// Wait for the child to finish
+	else
+		wait(NULL);  									// Parent waits for child to finish
 	free(cmd_path);
 }
 
@@ -175,141 +159,47 @@ int	redir(t_lexer **lexer, int i)
     return (0);
 }
 
-// fd[0] = read;
-// fd[1] = write;
-void piping(t_lexer **lexer)
+void	piping(t_lexer **lexer)
 {
-    char	*cmd_path;
-    char	*args[4];
-    int		fd[2];
-    int		previous_fd[2] = {-1, -1};
-    int		pid;
-    int		lex_count = 0;
-    int		i;
-	int		j;
+	char	*cmd_path; 
+	int		fd[2];
+	int		fd_in = 0;  // We start with stdin
+	int		i = 0;
+	int		wait_counter;
 
-    // Determine the number of commands in the pipeline
-	while (lexer[lex_count])
-		lex_count++;
-	j = 0;
-	while (j < lex_count)
+	while (lexer[i])
 	{
-		if (pipe(fd) == -1)
-			return;
-		pid = fork();
-		if (pid == -1)
-			return;
-		if (pid == 0)  // Child process
+		if (lexer[i+1] && strcmp(lexer[i+1]->tokenid, "|") == 0)	        	// if "|" pipe
+			pipe(fd);
+		if (fork() == 0)														// child process
 		{
-			cmd_path = get_cmd_path(lexer[j]->cmd);
-			i = 0;
-			args[i++] = lexer[j]->cmd;
-			if (lexer[j]->flags != NULL)
-				args[i++] = lexer[j]->flags;
-			if (lexer[j]->args != NULL)
-				args[i++] = lexer[j]->args;
-			args[i++] = NULL;
-			if (j != 0)  // Not the first command
-				dup2(previous_fd[0], STDIN_FILENO);
-			if (j != lex_count - 1)  // Not the last command
-				dup2(fd[1], STDOUT_FILENO);
-			close(fd[0]);
-			close(fd[1]);
-			if (previous_fd[0] != -1)
-				close(previous_fd[0]);
-			if (previous_fd[1] != -1)
-				close(previous_fd[1]);
+			if (i != 0)									        				// Not the first command, set up the input from the previous command
+			{
+				dup2(fd_in, 0);
+				close(fd_in);
+			}
+			if (lexer[i+1] && strcmp(lexer[i+1]->tokenid, "|") == 0) 			// If pipe, set up the output to the next command
+			{
+				dup2(fd[1], 1);
+				close(fd[1]);
+			}
+			cmd_path = get_cmd_path(lexer[i]->cmd);
+			char *args[4] = {lexer[i]->cmd, lexer[i]->flags, lexer[i]->args, NULL};
 			execve(cmd_path, args, environ);
 			perror("Execution failed");
-			exit(EXIT_FAILURE);
+			exit (EXIT_FAILURE);
 		}
-        // Parent: Close unused ends of the pipes and store current pipe for the next iteration
-		if (previous_fd[0] != -1)
-			close(previous_fd[0]);
-		if (previous_fd[1] != -1)
-			close(previous_fd[1]);
-		previous_fd[0] = fd[0];
-		previous_fd[1] = fd[1];
-		j++;
+		else															  		// Parent process
+		{
+			if (lexer[i+1] && strcmp(lexer[i+1]->tokenid, "|") == 0)
+			{
+				close(fd[1]);
+				fd_in = fd[0];
+			}
+		}
+		i += 2;  // Skip the next token since it's a pipe operator
 	}
-	close(fd[0]);
-	close(fd[1]);
-	j = 0;
-	while (j < lex_count)
-	{
-		wait(NULL);  // Wait for all child processes to finish
-		j++;
-	}
+	wait_counter = i / 2;		
+	while (wait_counter--)														// Parent waits for all child processes to finish
+		wait(NULL);
 }
-
-
-// void	piping(t_lexer **lexer)
-// {
-// 	char	*cmd_path;
-// 	char	*args[4];
-// 	int		fd[2];
-// 	int		pid1;
-// 	int		pid2;
-// 	int		lex_count;
-// 	int		i;
-
-// 	lex_count = 0;
-// 	i = 0;
-// 	if (pipe(fd) == -1)
-// 		return ;
-// 	pid1 = fork();
-// 	if (pid1 == -1)
-// 		return ;
-// 	if (pid1 == 0)
-// 	{
-// 		cmd_path = get_cmd_path(lexer[lex_count]->cmd);
-// 		args[i++] = lexer[lex_count]->cmd;
-// 		if (lexer[lex_count]->flags != NULL)
-// 			args[i++] = lexer[lex_count]->flags;
-// 		if (lexer[lex_count]->args != NULL)
-// 			args[i++] = lexer[lex_count]->args;
-// 		i = 0;
-// 		printf("cmd: (%s)\n", args[i++]);
-// 		if (lexer[lex_count]->flags != NULL)
-// 			printf("flags: (%s)\n", args[i++]);
-// 		if (lexer[lex_count]->args != NULL)
-// 			printf("args: (%s)\n", args[i++]);
-// 		printf("cmd1 path: %s\n", cmd_path);
-// 		args[i++] = NULL;
-// 		dup2(fd[1], STDOUT_FILENO);
-// 		close(fd[0]);
-// 		close(fd[1]);
-// 		execve(cmd_path, args, environ);
-// 	}
-// 	// printf("\n");
-// 	lex_count++;
-// 	i = 0;
-// 	pid2 = fork();
-// 	if (pid2 == -1)
-// 		return ;
-// 	if (pid2 == 0)
-// 	{
-// 		cmd_path = get_cmd_path(lexer[lex_count]->cmd);
-// 		args[i++] = lexer[lex_count]->cmd;
-// 		if (lexer[lex_count]->flags != NULL)
-// 			args[i++] = lexer[lex_count]->flags;
-// 		if (lexer[lex_count]->args != NULL)
-// 			args[i++] = lexer[lex_count]->args;
-// 		args[i++] = NULL;
-// 		i = 0;
-// 		printf("cmd: (%s)\n", args[i++]);
-// 		if (lexer[lex_count]->flags != NULL)
-// 			printf("flags: (%s)\n", args[i++]);
-// 		if (lexer[lex_count]->args != NULL)
-// 			printf("args: (%s)\n", args[i++]);
-// 		printf("cmd2 path: %s\n", cmd_path);
-// 		dup2(fd[0], STDIN_FILENO);
-// 		close(fd[0]);
-// 		close(fd[1]);
-// 		execve(cmd_path, args, environ);
-// 	}
-// 	close(fd[0]);
-// 	close(fd[1]);
-// 	waitpid(pid1, NULL, 0);
-// 	waitpid(pid2, NULL, 0);
-// }
