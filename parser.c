@@ -6,7 +6,7 @@
 /*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/13 13:30:47 by sboulain          #+#    #+#             */
-/*   Updated: 2023/08/28 16:08:57 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/08/31 16:36:42 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,6 +135,28 @@ void	move_file_name_to_file_and_comand_back(t_lexer *lexer_previous, t_lexer *le
 	lexer->args = temp;
 }
 
+char *remove_front_spaces(char *str)
+{
+	int i;
+	char *str_temp;
+
+	if (str == NULL)
+		return NULL;
+	i = 0;
+	while (ft_isspace(str[i]) && str[i] != '\0')
+	{
+		i++;
+	}
+	if (str[i] == '\0')
+	{
+		free(str);
+		return (NULL);
+	}
+	str_temp = ft_strdup(&str[i]);
+	free(str);
+	return (str_temp);
+}
+
 char *remove_back_spaces(char *str)
 {
 	char *str_dup_without_spaces;
@@ -143,8 +165,10 @@ char *remove_back_spaces(char *str)
 	if (str == NULL)
 		return NULL;
 	i = 0;
-	while (ft_isspace(str[ft_strlen(str) - i]) && ft_strlen(str) - i >= 0)
+	while (ft_isspace(str[ft_strlen(str) - i - 1]) && ft_strlen(str) - i > 0)
 		i++;
+	if (str[0] == 'M')
+		printf("%d spaces, %zu chars", i, ft_strlen(str));
 	if (i == 0)
 	{
 		str_dup_without_spaces = ft_strdup(str);
@@ -202,6 +226,11 @@ t_lexer	**parsse_things(char *str)
 		if (i > 0)
 			if (lexer[i - 1]->tokenid[0] == '<' && lexer[i - 1]->tokenid[1] == '\0')
 				move_file_name_to_file_and_comand_back(lexer[i - 1], lexer[i]);
+		// puts(lexer[i]->args);
+		lexer[i]->args = remove_front_spaces(lexer[i]->args);
+		lexer[i]->cmd = remove_front_spaces(lexer[i]->cmd);
+		lexer[i]->file = remove_front_spaces(lexer[i]->file);
+		lexer[i]->flags = remove_front_spaces(lexer[i]->flags);
 		lexer[i]->args = remove_back_spaces(lexer[i]->args);
 		lexer[i]->cmd = remove_back_spaces(lexer[i]->cmd);
 		lexer[i]->file = remove_back_spaces(lexer[i]->file);
