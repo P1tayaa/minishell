@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
+/*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:30:26 by omathot           #+#    #+#             */
-/*   Updated: 2023/08/29 19:25:34 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/08/31 18:00:10 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,12 @@ typedef struct s_lexer
 	char	*file;
 	int		possition;
 }	t_lexer;
+
+typedef	struct s_list_of_quotes
+{
+	int	*single_quotes;
+	int	*double_quotes;
+}	t_list_of_quotes;
 
 void	manage_signals(void);
 void	exec(t_lexer *lexer);

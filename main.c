@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
+/*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:29:45 by omathot           #+#    #+#             */
-/*   Updated: 2023/08/29 19:26:39 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/08/31 18:31:12 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,40 +55,49 @@ feof(3), ferror(3), fgetln(3), fgetws(3), getline(3)
 
 char *executer(char *str, bool no_pipe);
 t_lexer	**parsse_things(char *str);
+void	check_quotes(char *str);
 
 int	main(void)
 {
 	char	*str;
 	t_lexer	**lexer;
+	bool	quotes_test;
 	// int	i;
 
 	manage_signals();
+	quotes_test = false;
 	while (1)
 	{
 		// intial prompt print
 		// read user input
 		str = read_user_input();
+		if (quotes_test)
+			check_quotes(str);
 		// parse user input
-		lexer = parsse_things(str);
-		// i = 0;
-		// c'est pas idea mais c'est un depart
-		int i;
-		i = 0;
-		while (lexer[i] != NULL)
+		if (!quotes_test)
 		{
-			printf("\nlexer[%d]\n cmd: (%s)\n", i, lexer[i]->cmd);
-			printf("args: (%s)\n", lexer[i]->args);
-			printf("tokenid: (%s)\n", lexer[i]->tokenid);
-			printf("file: (%s)\n", lexer[i]->file);
-			printf("flags: (%s)\n", lexer[i]->flags);
-			i++;
+			lexer = parsse_things(str);
+			// i = 0;
+			// c'est pas idea mais c'est un depart
+			int i;
+			i = 0;
+			while (lexer[i] != NULL)
+			{
+				printf("\nlexer[%d]\n cmd: (%s)\n", i, lexer[i]->cmd);
+				printf("args: (%s)\n", lexer[i]->args);
+				printf("tokenid: (%s)\n", lexer[i]->tokenid);
+				printf("file: (%s)\n", lexer[i]->file);
+				printf("flags: (%s)\n", lexer[i]->flags);
+				i++;
+			}
+			
+			if (lexer[1] == NULL)
+				exec(lexer[0]);
+			else
+				piping(lexer);
+			// optiona: wait for return value.
 		}
 		
-		if (lexer[1] == NULL)
-			exec(lexer[0]);
-		else
-			piping(lexer);
-		// optiona: wait for return value.
 	}
 	return (0);
 }
