@@ -6,7 +6,7 @@
 /*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/13 13:30:47 by sboulain          #+#    #+#             */
-/*   Updated: 2023/08/31 16:36:42 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/09/06 17:05:56 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,6 +115,8 @@ void	move_file_name_to_file_and_comand_back(t_lexer *lexer_previous, t_lexer *le
 	lexer_previous->file = lexer->cmd;
 	lexer->cmd = ft_strtok(lexer->args, " ");
 	i = 0;
+	if (lexer->args == NULL)
+		return ;
 	while (lexer->args[i] != ' ' && lexer->args[i] != '\0')
 		i++;
 	if (lexer->args[i] == '\0')
@@ -250,8 +252,10 @@ bool	is_a_token_id(char *input)
 	int		i;
 	int		j;
 
+	// puts("test");
 	list_of_tokenid = get_list_of_tokenid();
 	i = 0;
+	puts(list_of_tokenid[1]);
 	while (list_of_tokenid[i] != NULL)
 	{
 		j = 0;
@@ -262,6 +266,7 @@ bool	is_a_token_id(char *input)
 		if (list_of_tokenid[i][j] == '\0')
 		{
 			free_list_of_tokenid(list_of_tokenid);
+			puts("return true");
 			return (true);
 		}
 		i++;
@@ -354,22 +359,32 @@ int parse_until_token_id(
 	function_done = false;
 	while (input[i + curser] != '\0')
 	{
+		printf("%d = i\n", curser + i);
 		if (function_done && input[i + curser] == '-')
+		{
 			i = copy_until_space(i, &input[curser], &lexer[current_lex]->flags);
+			// continue ;
+		}
 		if (function_done == false && ft_isspace(input[i + curser]) == false)
 		{
 			i = copy_until_space(i, &input[curser], &lexer[current_lex]->cmd);
 			function_done = true;
-			continue ;
+			// printf("curser + i = %d", i + curser);
+			// continue ;
 		}
 		if (function_done && ft_isspace(input[i + curser]) == false)
-			i = copy_until_tokenid(i, &input[curser], &lexer[current_lex]->args);
-		if (is_a_token_id(&input[i + curser]))
 		{
+			i = copy_until_tokenid(i, &input[curser], &lexer[current_lex]->args);
+			// continue ;
+		}
+		if (is_a_token_id(&input[i + curser]) == true)
+		{
+			puts("arrive!");
 			i = write_the_right_token(i, &input[curser], (lexer[current_lex]->tokenid));
 			break ;
 		}
-		i++;
+		if (ft_isspace(input[i + curser]))
+			i++;
 	}
 	return (curser + i);
 }
