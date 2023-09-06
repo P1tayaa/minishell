@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   free_help.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
+/*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/25 12:36:35 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/07/25 12:38:34 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/09/06 16:44:45 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,12 +43,12 @@ char **get_list_of_tokenid(void)
 	list_of_tokenid = (char **)malloc(sizeof(char *) * 7);
 	if (!list_of_tokenid)
 		exit(1);
-	list_of_tokenid[0] = ft_strdup("||");
-	list_of_tokenid[1] = ft_strdup("|");
-	list_of_tokenid[2] = ft_strdup("<<");
-	list_of_tokenid[3] = ft_strdup("<");
-	list_of_tokenid[4] = ft_strdup(">>");
-	list_of_tokenid[5] = ft_strdup(">");
+	list_of_tokenid[0] = ft_strdup("||\0");
+	list_of_tokenid[1] = ft_strdup("|\0");
+	list_of_tokenid[2] = ft_strdup("<<\0");
+	list_of_tokenid[3] = ft_strdup("<\0");
+	list_of_tokenid[4] = ft_strdup(">>\0");
+	list_of_tokenid[5] = ft_strdup(">\0");
 	if (!list_of_tokenid[0] || !list_of_tokenid[1] || !list_of_tokenid[2]
 		|| !list_of_tokenid[3] || !list_of_tokenid[4] || !list_of_tokenid[5])
 		exit(1);

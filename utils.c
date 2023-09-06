@@ -6,7 +6,7 @@
 /*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/14 17:01:53 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/08/28 15:24:48 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/09/06 17:07:51 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,8 +18,8 @@ char	*ft_strtok(char *str, const char *delim)
 {
 	int			i;
 	int			index_unter_delim;
-	int	static	curser;
-	char static	*str_reminder;
+	static int	curser;
+	static char	*str_reminder;
 	char	*return_char;
 
 	if (str != NULL)
@@ -27,6 +27,8 @@ char	*ft_strtok(char *str, const char *delim)
 		curser = 0;
 		str_reminder = str;
 	}
+	if (str_reminder == NULL)
+		return (NULL);
 	index_unter_delim = ft_char_find(&str_reminder[curser], delim);
 	if (index_unter_delim == -1)
 	{
@@ -98,6 +100,8 @@ void	concat_path(char *buffer, const char *dir, const char *cmd)
 
 	i = 0;
 	j = 0;
+	if (!cmd)
+		return ;
 	while (dir[i] != '\0')
 	{
 		buffer[i] = dir[i];
