@@ -6,7 +6,7 @@
 /*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/12 11:53:41 by omathot           #+#    #+#             */
-/*   Updated: 2023/09/09 17:27:11 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/09/09 18:03:33 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,7 +92,10 @@ void	relocate_quotes(t_list_of_quotes **list_of_quotes, char **str, int	**fake_d
 	str_temp = ft_strjoin(*str, str_temp);
 	free(*str);
 	*str = str_temp;
-	rl_clear_history();
+	//linux
+	// rl_clear_history();
+	//mac
+	clear_history();
 	add_history(str_temp);
 	free((*list_of_quotes)->double_quotes);
 	free((*list_of_quotes)->single_quotes);
