@@ -6,7 +6,7 @@
 /*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:29:45 by omathot           #+#    #+#             */
-/*   Updated: 2023/09/09 14:36:26 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/09/12 14:49:03 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ int	main(void)
 	// int	i;
 
 	manage_signals();
-	quotes_test = true;
+	quotes_test = false;
 	while (1)
 	{
 		// intial prompt print

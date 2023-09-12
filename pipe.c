@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   pipe.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
+/*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/20 15:16:04 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/08/29 19:26:29 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/09/12 15:04:40 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,11 +94,6 @@ void	exec(t_lexer *lexer)
 		args[i++] = lexer->args;
 	args[i++] = NULL;
 	i = 0;
-	printf("cmd: (%s)\n", args[i++]);
-	if (lexer->flags != NULL)
-		printf("flags: (%s)\n", args[i++]);
-	if (lexer->args != NULL)
-		printf("args: (%s)\n", args[i++]);
 	pid = fork();
 	if (pid == -1)
 	{
