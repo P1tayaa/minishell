@@ -6,7 +6,7 @@
 /*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/13 13:30:47 by sboulain          #+#    #+#             */
-/*   Updated: 2023/09/09 17:48:52 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/09/12 14:57:29 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,7 @@ void	move_flags_from_args_to_flags(t_lexer *lexer)
 			{
 				while (!ft_isspace(lexer->args[i]) && lexer->args[i] != '\0')
 				{
+					// puts("flags");
 					// printf("%c", lexer->args[i]);
 					flags_char_len++;
 					i++;
@@ -72,14 +73,16 @@ void	move_flags_from_args_to_flags(t_lexer *lexer)
 		i++;
 	}
 	// puts("test");
-	// printf("number of char that flag %d", flags_char_len);
+	printf("number of char that flag %d, number of char that args %d\n", flags_char_len, args_char_len);
 	// malloc the size
 	if (args_char_len != 0)
+	{
 		args = malloc(sizeof(char) * (args_char_len + 1));
+		if (!args)
+			exit (-1);
+	}
 	else
 		args = NULL;
-	if (!args)
-		exit (-1);
 	flags = malloc(sizeof(char) * (flags_char_len + 1));
 	if (!flags)
 		exit (-1);
@@ -110,6 +113,7 @@ void	move_flags_from_args_to_flags(t_lexer *lexer)
 		{
 			while (!ft_isspace(lexer->args[i]) && lexer->args[i] != '\0')
 			{
+				printf("added char to flags: %c\n", lexer->args[i]);
 				flags[flags_char_len] = lexer->args[i];
 				flags_char_len++;
 				i++;
@@ -125,8 +129,10 @@ void	move_flags_from_args_to_flags(t_lexer *lexer)
 		// }
 		i++;
 	}
+	// puts("test4");
 	flags[flags_char_len] = '\0';
-	args[args_char_len] = '\0';
+	if (args != NULL)
+		args[args_char_len] = '\0';
 
 	// replace flags and args, but join previous flags
 	// puts(flags);
@@ -263,10 +269,12 @@ t_lexer	**parsse_things(char *str)
 		curser = parse_until_token_id(str, i, lexer, curser);
 		// * need to check if flags are writen before the function. 
 		// * If so put it to the previous function
+		puts("Test");
 		if (ft_char_find(lexer[i]->args, "-") != -1)
 		{
 			move_flags_from_args_to_flags(lexer[i]);
 		}
+		puts("test1");
 		if (i > 0)
 		{
 			if (lexer[i - 1]->tokenid[0] == '<' && lexer[i - 1]->tokenid[1] == '\0')
