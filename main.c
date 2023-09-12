@@ -6,7 +6,11 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:29:45 by omathot           #+#    #+#             */
+<<<<<<< HEAD
 /*   Updated: 2023/09/12 14:54:53 by oscarmathot      ###   ########.fr       */
+=======
+/*   Updated: 2023/09/12 14:49:03 by sboulain         ###   ########.fr       */
+>>>>>>> 79a07da (fix flags)
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +70,7 @@ int	main(void)
 	// int	i;
 
 	manage_signals();
-	quotes_test = true;
+	quotes_test = false;
 	while (1)
 	{
 		// intial prompt print
