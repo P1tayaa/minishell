@@ -6,7 +6,7 @@
 /*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/14 17:01:53 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/08/28 15:24:48 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/09/09 17:30:27 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,8 +18,8 @@ char	*ft_strtok(char *str, const char *delim)
 {
 	int			i;
 	int			index_unter_delim;
-	int	static	curser;
-	char static	*str_reminder;
+	static int	curser;
+	static char	*str_reminder;
 	char	*return_char;
 
 	if (str != NULL)
@@ -27,6 +27,8 @@ char	*ft_strtok(char *str, const char *delim)
 		curser = 0;
 		str_reminder = str;
 	}
+	if (str_reminder == NULL)
+		return (NULL);
 	index_unter_delim = ft_char_find(&str_reminder[curser], delim);
 	if (index_unter_delim == -1)
 	{
@@ -44,6 +46,22 @@ char	*ft_strtok(char *str, const char *delim)
 	curser = curser + 1;
 	return_char[i] = '\0';
 	return (return_char);
+}
+
+char *get_string_at_index(char *string, int index)
+{
+	int	i;
+
+	if (string == NULL)
+		return (NULL);
+	i = 0;
+	while (string[i] != '\0')
+	{
+		if (i == index)
+			return (&string[i]);
+		i++;
+	}
+	return (NULL);
 }
 
 int ft_char_find(char *str, const char *list_of_char)
@@ -91,6 +109,26 @@ int ft_char_find(char *str, const char *list_of_char)
 // 	return (str);
 // }
 
+char *str_dup_until_index(char *str, int index)
+{
+	char *str_dup;
+	int i;
+
+	if (index == 0)
+		return (ft_strdup("\0"));
+	str_dup = (char *)malloc(sizeof(char) * (index + 2));
+	if (!str_dup)
+		exit(1);
+	i = 0;
+	while (str[i] != '\0' && i != index)
+	{
+		str_dup[i] = str[i];
+		i++;
+	}
+	str_dup[i] = '\0';
+	return (str_dup);
+}
+
 void	concat_path(char *buffer, const char *dir, const char *cmd)
 {
 	int	i;
@@ -98,6 +136,8 @@ void	concat_path(char *buffer, const char *dir, const char *cmd)
 
 	i = 0;
 	j = 0;
+	if (!cmd)
+		return ;
 	while (dir[i] != '\0')
 	{
 		buffer[i] = dir[i];
@@ -112,4 +152,31 @@ void	concat_path(char *buffer, const char *dir, const char *cmd)
 		j++;
 	}
 	buffer[i] = '\0';
+}
+
+char	*ft_strjoin_with_frees(char *s1, char *s2)
+{
+	size_t	len;
+	char	*ptr;
+
+	if (s1 == NULL)
+	{
+		ptr = ft_strdup(s2);
+		if (s2)
+			free(s2);
+		return (ptr);
+	}
+	len = ft_strlen(s1) + ft_strlen(s2);
+	ptr = malloc(len + 1);
+	if (!ptr)
+		return (NULL);
+	ft_strlcpy(ptr, s1, len + 1);
+	ft_strlcat(ptr, s2, len + 1);
+	if (s1)
+		free(s1);
+	s1 = NULL;
+	if (s2)
+		free(s2);
+	s2 = NULL;
+	return (ptr);
 }

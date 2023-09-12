@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:29:45 by omathot           #+#    #+#             */
-/*   Updated: 2023/09/01 15:47:48 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/09/12 14:54:53 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,7 @@ int	main(void)
 	// int	i;
 
 	manage_signals();
-	quotes_test = false;
+	quotes_test = true;
 	while (1)
 	{
 		// intial prompt print
