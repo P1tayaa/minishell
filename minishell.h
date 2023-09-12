@@ -6,7 +6,7 @@
 /*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:30:26 by omathot           #+#    #+#             */
-/*   Updated: 2023/08/31 18:00:10 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/09/09 16:16:42 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,5 +50,7 @@ void	exec(t_lexer *lexer);
 void	piping(t_lexer **lexer);
 char	*ft_strtok(char *str, const char *delim);
 void	concat_path(char *buffer, const char *dir, const char *cmd);
+char *str_dup_until_index(char *str, int index);
+
 
 #endif
