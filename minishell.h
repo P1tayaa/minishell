@@ -27,7 +27,6 @@
 #include <sys/wait.h>
 
 
-
 typedef struct s_lexer
 {
 	char	tokenid[3];
@@ -44,6 +43,17 @@ typedef	struct s_list_of_quotes
 	int	*single_quotes;
 	int	*double_quotes;
 }	t_list_of_quotes;
+
+typedef struct s_pipedata
+{
+	int		j;
+	int		input_fd;
+	int		output_fd;
+	int		prev_fd;
+	int		lex_count;
+	int		fd[2];
+	t_lexer	**lexer;
+}	t_pipedata;
 
 void	manage_signals(void);
 void	exec(t_lexer *lexer);
