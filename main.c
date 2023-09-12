@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
+/*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:29:45 by omathot           #+#    #+#             */
-/*   Updated: 2023/08/31 18:31:12 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/09/01 15:47:48 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 
 int	main(void); 
 char	*read_user_input(void);
+char	is_prompt_empty(char *str);
 
 
 
@@ -71,6 +72,8 @@ int	main(void)
 		// intial prompt print
 		// read user input
 		str = read_user_input();
+		if (!(is_prompt_empty(str)))
+			continue ;
 		if (quotes_test)
 			check_quotes(str);
 		// parse user input
@@ -100,6 +103,20 @@ int	main(void)
 		
 	}
 	return (0);
+}
+
+char	is_prompt_empty(char *str)
+{
+	int		i;
+	char	is_valid;
+
+	i = 0;
+	is_valid = 0;
+	while (str[i])
+		i++;
+	if (i > 0)
+		is_valid = 1;
+	return (is_valid);
 }
 
 char	*read_user_input(void)
