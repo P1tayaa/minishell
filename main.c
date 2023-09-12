@@ -6,7 +6,7 @@
 /*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:29:45 by omathot           #+#    #+#             */
-/*   Updated: 2023/09/12 14:49:03 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/09/12 17:14:04 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ int	main(void)
 	// int	i;
 
 	manage_signals();
-	quotes_test = false;
+	quotes_test = true;
 	while (1)
 	{
 		// intial prompt print
@@ -74,8 +74,9 @@ int	main(void)
 		if (quotes_test)
 			check_quotes(str);
 		// parse user input
-		if (!quotes_test)
-		{
+		// if (!quotes_test)
+		// {
+			pause();
 			lexer = parsse_things(str);
 			// i = 0;
 			// c'est pas idea mais c'est un depart
@@ -96,7 +97,7 @@ int	main(void)
 			else
 				piping(lexer);
 			// optiona: wait for return value.
-		}
+		// }
 		
 	}
 	return (0);

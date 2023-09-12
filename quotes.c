@@ -6,7 +6,7 @@
 /*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/12 11:53:41 by omathot           #+#    #+#             */
-/*   Updated: 2023/09/12 14:49:11 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/09/12 18:06:00 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -139,6 +139,7 @@ void	find_fake_quotes(t_list_of_quotes **list_of_quotes, char **str, int	**fake_
 				(*fake_double_quotes)[index_fake_double_quotes] = val_of_curent_double_quote;
 			index_fake_double_quotes++;
 			i++;
+			val_of_curent_double_quote = (*list_of_quotes)->double_quotes[i];
 			if ((*list_of_quotes)->double_quotes[i] == -1)
 				break ;
 		}
@@ -274,9 +275,9 @@ void	remove_quotes_and_expand_dollars(char **str, t_list_of_quotes *list_of_quot
 		if (i == list_of_quotes->double_quotes[current_double_quotes_index])
 		{
 			// copy double quotes
-			// printf("i = %d, until %d, curent quotes  \n", i, list_of_quotes->double_quotes[current_double_quotes_index + 1], current_double_quotes_index);
+			printf("i = %d, until %d, curent quotes %d \n", i, list_of_quotes->double_quotes[current_double_quotes_index + 1], current_double_quotes_index);
 
-			str_temp = str_dup_until_index(&(*str)[current_double_quotes_index + 1], list_of_quotes->double_quotes[current_double_quotes_index + 1] - i);
+			str_temp = str_dup_until_index(&(*str)[i + 1], list_of_quotes->double_quotes[current_double_quotes_index + 1] - i - 1);
 			puts(str_temp);
 			str_temp = handle_expand_doll(&str_temp);
 			final_str  = ft_strjoin_with_frees(final_str, str_temp);
@@ -287,7 +288,7 @@ void	remove_quotes_and_expand_dollars(char **str, t_list_of_quotes *list_of_quot
 		else if (i == list_of_quotes->single_quotes[current_single_quotes_index])
 		{
 			// copy single quotes
-			str_temp = str_dup_until_index(&(*str)[current_single_quotes_index + 1], list_of_quotes->single_quotes[current_single_quotes_index + 1] - i);
+			str_temp = str_dup_until_index(&(*str)[i + 1], list_of_quotes->single_quotes[current_single_quotes_index + 1] - i - 1);
 			// str_temp = handle_expand_doll(str_temp);
 			final_str  = ft_strjoin_with_frees(final_str, str_temp);
 			i = list_of_quotes->single_quotes[current_single_quotes_index + 1] + 1;
@@ -334,10 +335,17 @@ void	remove_quotes_and_expand_dollars(char **str, t_list_of_quotes *list_of_quot
 }
 
 // here *str is &str[3] from main.
-void	check_quotes(char *str)
+void	check_quotes(char *str_og)
 {
 	int	i;
 	t_list_of_quotes *list_of_quotes;
+	char *str;
+	str = str_og;
+	// char *str_temp;
+	// str = ft_strjoin("\"", str_og);
+	// str_temp = ft_strjoin(str, "\"");
+	// free(str);
+	// str = str_temp;
 
 	// count number of quotes
 	list_of_quotes = count_and_locate_quotes(str);
@@ -356,10 +364,13 @@ void	check_quotes(char *str)
 	}
 	
 
-	if (list_of_quotes->single_quotes[0] == -1)
+	if (list_of_quotes->single_quotes[0] == -1 && list_of_quotes->double_quotes[0] == -1)
 	{
-		//expand and check for doubles_quotes
-
+		str = handle_expand_doll(&str_og);
+		free(str_og);
+		str_og = str;
+		puts(str);
+		return ;
 	}
 	else
 	{
