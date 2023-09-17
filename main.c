@@ -65,7 +65,7 @@ int	main(void)
 	// int	i;
 
 	manage_signals();
-	quotes_test = true;
+	quotes_test = false;
 	while (1)
 	{
 		// intial prompt print
@@ -76,7 +76,7 @@ int	main(void)
 		// parse user input
 		// if (!quotes_test)
 		// {
-			pause();
+			// pause();
 			lexer = parsse_things(str);
 			// i = 0;
 			// c'est pas idea mais c'est un depart

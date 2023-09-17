@@ -31,17 +31,13 @@ int 	parse_until_token_id(char *input, int current_lex, t_lexer **lexer, int cur
 int ft_char_find(char *str, const char *list_of_char);
 bool	ft_isspace(unsigned char c);
 
-void	move_flags_from_args_to_flags(t_lexer *lexer)
+int count_number_flags_char(int *args_char_len, t_lexer *lexer)
 {
-	int	i;
-	char *args;
-	char *flags;
 	int flags_char_len;
-	int args_char_len;
+	int i;
 
-	// count how many char are to be in flags and args
 	flags_char_len = 0;
-	args_char_len = 0;
+	*args_char_len = 0;
 	i = 0;
 	while (lexer->args[i] != '\0')
 	{
@@ -50,8 +46,6 @@ void	move_flags_from_args_to_flags(t_lexer *lexer)
 			{
 				while (!ft_isspace(lexer->args[i]) && lexer->args[i] != '\0')
 				{
-					// puts("flags");
-					// printf("%c", lexer->args[i]);
 					flags_char_len++;
 					i++;
 				}
@@ -69,12 +63,29 @@ void	move_flags_from_args_to_flags(t_lexer *lexer)
 				flags_char_len++;
 				continue ;
 		}
-		args_char_len++;
+		(*args_char_len)++;
 		i++;
 	}
-	// puts("test");
-	printf("number of char that flag %d, number of char that args %d\n", flags_char_len, args_char_len);
-	// malloc the size
+	return (flags_char_len);
+}
+
+// void	copy_flags_from_args()
+// {
+	
+// }
+
+void	move_flags_from_args_to_flags(t_lexer *lexer)
+{
+	int	i;
+	char *args;
+	char *flags;
+	int flags_char_len;
+	int args_char_len;
+
+	// count how many char are to be in flags and args
+	flags_char_len = count_number_flags_char(&args_char_len, lexer);
+
+
 	if (args_char_len != 0)
 	{
 		args = malloc(sizeof(char) * (args_char_len + 1));
@@ -88,6 +99,7 @@ void	move_flags_from_args_to_flags(t_lexer *lexer)
 		exit (-1);
 
 	// copy in them
+	
 	flags_char_len = 0;
 	args_char_len = 0;
 	i = 0;
@@ -122,11 +134,8 @@ void	move_flags_from_args_to_flags(t_lexer *lexer)
 			flags_char_len++;
 			continue ;
 		}
-		// if (args != NULL)
-		// {
-			args[args_char_len] = lexer->args[i];
-			args_char_len++;
-		// }
+		args[args_char_len] = lexer->args[i];
+		args_char_len++;
 		i++;
 	}
 	// puts("test4");
