@@ -6,7 +6,7 @@
 /*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/25 12:36:35 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/09/06 16:44:45 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/09/18 15:31:17 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,11 @@ void	free_lexer(t_lexer **lexer)
 	free(lexer);
 }
 
+
+/*
+	makes (malloced) a array of strings that contains all tokenid and ends with NULL.
+	tokenid: ||, |, <<, <, >>, >
+*/
 char **get_list_of_tokenid(void)
 {
 	char **list_of_tokenid;
@@ -56,6 +61,9 @@ char **get_list_of_tokenid(void)
 	return (list_of_tokenid);
 }
 
+/*
+	frees the list of tokenid, made with get_list_of_tokenid().
+*/
 void	free_list_of_tokenid(char **list_of_tokenid)
 {
 	int	i;

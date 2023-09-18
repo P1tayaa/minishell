@@ -6,7 +6,7 @@
 /*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/13 13:30:47 by sboulain          #+#    #+#             */
-/*   Updated: 2023/09/12 14:57:29 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/09/18 16:40:02 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,10 @@ int 	parse_until_token_id(char *input, int current_lex, t_lexer **lexer, int cur
 int ft_char_find(char *str, const char *list_of_char);
 bool	ft_isspace(unsigned char c);
 
+/*
+	Return the number of charaters that are going to be moved from arg to flags,
+	And keeps track of how many are going to be left in arg with ARGS_CHAR_LEN
+*/
 int count_number_flags_char(int *args_char_len, t_lexer *lexer)
 {
 	int flags_char_len;
@@ -69,11 +73,28 @@ int count_number_flags_char(int *args_char_len, t_lexer *lexer)
 	return (flags_char_len);
 }
 
-// void	copy_flags_from_args()
-// {
-	
-// }
+/*
+	Malloc in new args and flags with the pointer to the address given in ARGS and FLAGS
+*/
+void	malloc_new_args_and_new_flags(int args_char_len, char **args, char **flags, int flags_char_len)
+{
+	if (args_char_len != 0)
+	{
+		(*args) = malloc(sizeof(char) * (args_char_len + 1));
+		if (!(*args))
+			exit (-1);
+	}
+	else
+		(*args) = NULL;
+	(*flags) = malloc(sizeof(char) * (flags_char_len + 1));
+	if (!(*flags))
+		exit (-1);
+}
 
+/*
+	Move the flags from args to there respective par of the lexer by reconising where the '-'
+	
+*/
 void	move_flags_from_args_to_flags(t_lexer *lexer)
 {
 	int	i;
@@ -85,18 +106,8 @@ void	move_flags_from_args_to_flags(t_lexer *lexer)
 	// count how many char are to be in flags and args
 	flags_char_len = count_number_flags_char(&args_char_len, lexer);
 
-
-	if (args_char_len != 0)
-	{
-		args = malloc(sizeof(char) * (args_char_len + 1));
-		if (!args)
-			exit (-1);
-	}
-	else
-		args = NULL;
-	flags = malloc(sizeof(char) * (flags_char_len + 1));
-	if (!flags)
-		exit (-1);
+	// malloc for size
+	malloc_new_args_and_new_flags(args_char_len, &args, &flags, flags_char_len);
 
 	// copy in them
 	
@@ -159,6 +170,11 @@ void	move_flags_from_args_to_flags(t_lexer *lexer)
 		lexer->flags = flags;
 }
 
+
+/*
+	Put the cmd from current lexer into file of the previus lexer.
+	Than moves the first word from agrs back to cmd, in case cmd was actually a file.
+*/
 void	move_file_name_to_file_and_comand_back(t_lexer *lexer_previous, t_lexer *lexer)
 {
 	int i;
@@ -190,6 +206,10 @@ void	move_file_name_to_file_and_comand_back(t_lexer *lexer_previous, t_lexer *le
 	lexer->args = temp;
 }
 
+/*
+	Return a string with all the characters at the fronts that is a space.
+	It frees the origial STR variable
+*/
 char *remove_front_spaces(char *str)
 {
 	int i;
@@ -212,6 +232,10 @@ char *remove_front_spaces(char *str)
 	return (str_temp);
 }
 
+/*
+	Return a string with all the characters at the back that is a space.
+	It frees the origial STR variable
+*/
 char *remove_back_spaces(char *str)
 {
 	char *str_dup_without_spaces;
@@ -251,7 +275,76 @@ char *remove_back_spaces(char *str)
 	return (str_dup_without_spaces);
 }
 
-t_lexer	**parsse_things(char *str)
+/*
+	Initiates values to zero or null and malloc the new lexer i.
+	
+	LEXER is a pointer to the address of current one of double array of t_lexer (&lexer[i])
+*/
+void	initiate_values_to_zero_NULL(t_lexer **lexer, int i)
+{
+	(*lexer) = (t_lexer *)malloc(sizeof(t_lexer));
+	if (!(*lexer))
+		exit(1);
+	(*lexer)->possition = i;
+	(*lexer)->args = NULL;
+	(*lexer)->cmd = NULL;
+	(*lexer)->file = NULL;
+	(*lexer)->flags = NULL;
+	(*lexer)->tokenid[0] = '\0';
+}
+
+/*
+	Removes the spaces that are at the front and back of all parts of LEXER
+	by using remove_front_spaces() and remove_back_spaces()
+	
+	LEXER is a pointer to the address of current one of double array of t_lexer (&lexer[i])
+*/
+void	removes_front_and_back_redondant_spaces(t_lexer **lexer)
+{
+	(*lexer)->args = remove_front_spaces((*lexer)->args);
+	(*lexer)->cmd = remove_front_spaces((*lexer)->cmd);
+	(*lexer)->file = remove_front_spaces((*lexer)->file);
+	(*lexer)->flags = remove_front_spaces((*lexer)->flags);
+	(*lexer)->args = remove_back_spaces((*lexer)->args);
+	(*lexer)->cmd = remove_back_spaces((*lexer)->cmd);
+	(*lexer)->file = remove_back_spaces((*lexer)->file);
+	(*lexer)->flags = remove_back_spaces((*lexer)->flags);
+}
+
+/*
+	Depending of which one of tokenid (<,>,<<,>>).
+	Place the first word of the user input (cmd) to the right place.
+	Either in file or args.
+
+	PREVIUS_LEXER is a pointer to the address of previus one of double array of t_lexer (&lexer[i - 1])
+	CURRENT_LEXER is a pointer to the address of current one of double array of t_lexer (&lexer[i])
+*/
+void	move_cmd_to_right_place_if_speacific_tokenid(t_lexer **previus_lexer, t_lexer **current_lexer, int i)
+{
+	if (i > 0)
+	{
+		if ((*previus_lexer)->tokenid[0] == '<' && (*previus_lexer)->tokenid[1] == '\0')
+			move_file_name_to_file_and_comand_back((*previus_lexer), (*current_lexer));
+		if ((*previus_lexer)->tokenid[0] == '<' && (*previus_lexer)->tokenid[1] == '<')
+		{
+			(*previus_lexer)->args = (*current_lexer)->cmd;
+			(*current_lexer)->cmd = NULL;
+		}
+		if ((*previus_lexer)->tokenid[0] == '>')
+		{
+			(*previus_lexer)->file = (*current_lexer)->cmd;
+			(*current_lexer)->cmd = NULL;
+		}
+	}
+}
+
+/*
+	Gets the string user input and seperates all info of it into
+	the struct t_lexer for to than be executated
+	
+	STR is the user input
+*/
+t_lexer	**main_parser(char *str)
 {
 	int	token_num;
 	int curser;
@@ -266,50 +359,14 @@ t_lexer	**parsse_things(char *str)
 	curser = 0;
 	while (i <= token_num)
 	{
-		lexer[i] = (t_lexer *)malloc(sizeof(t_lexer));
-		if (!lexer[i])
-			exit(1);
-		lexer[i]->possition = i;
-		lexer[i]->args = NULL;
-		lexer[i]->cmd = NULL;
-		lexer[i]->file = NULL;
-		lexer[i]->flags = NULL;
-		lexer[i]->tokenid[0] = '\0';
+		initiate_values_to_zero_NULL(&lexer[i], i);
 		curser = parse_until_token_id(str, i, lexer, curser);
-		// * need to check if flags are writen before the function. 
-		// * If so put it to the previous function
-		puts("Test");
 		if (ft_char_find(lexer[i]->args, "-") != -1)
 		{
 			move_flags_from_args_to_flags(lexer[i]);
 		}
-		puts("test1");
-		if (i > 0)
-		{
-			if (lexer[i - 1]->tokenid[0] == '<' && lexer[i - 1]->tokenid[1] == '\0')
-				move_file_name_to_file_and_comand_back(lexer[i - 1], lexer[i]);
-			if (lexer[i - 1]->tokenid[0] == '<' && lexer[i - 1]->tokenid[1] == '<')
-			{
-				lexer[i - 1]->args = lexer[i]->cmd;
-				lexer[i]->cmd = NULL;
-			}
-			if (lexer[i - 1]->tokenid[0] == '>')
-			{
-				lexer[i - 1]->file = lexer[i]->cmd;
-				lexer[i]->cmd = NULL;
-			}
-		}
-		// puts(lexer[i]->args);
-		lexer[i]->args = remove_front_spaces(lexer[i]->args);
-		lexer[i]->cmd = remove_front_spaces(lexer[i]->cmd);
-		lexer[i]->file = remove_front_spaces(lexer[i]->file);
-		lexer[i]->flags = remove_front_spaces(lexer[i]->flags);
-		lexer[i]->args = remove_back_spaces(lexer[i]->args);
-		lexer[i]->cmd = remove_back_spaces(lexer[i]->cmd);
-		lexer[i]->file = remove_back_spaces(lexer[i]->file);
-		// puts(lexer[i]->flags);
-		lexer[i]->flags = remove_back_spaces(lexer[i]->flags);
-		// puts(lexer[i]->flags);
+		move_cmd_to_right_place_if_speacific_tokenid(&lexer[i - 1], &lexer[i], i);
+		removes_front_and_back_redondant_spaces(&lexer[i]);
 		i++;
 	}
 	lexer[i] = NULL;
@@ -319,16 +376,18 @@ t_lexer	**parsse_things(char *str)
 
 int	count_char_until_next_token(char *input);
 
+/*
+	Return true if INPUT is of these:
+	tokenid: ||, |, <<, <, >>, >
+*/
 bool	is_a_token_id(char *input)
 {
 	char	**list_of_tokenid;
 	int		i;
 	int		j;
 
-	// puts("test");
 	list_of_tokenid = get_list_of_tokenid();
 	i = 0;
-	// puts(list_of_tokenid[1]);
 	while (list_of_tokenid[i] != NULL)
 	{
 		j = 0;
@@ -339,7 +398,6 @@ bool	is_a_token_id(char *input)
 		if (list_of_tokenid[i][j] == '\0')
 		{
 			free_list_of_tokenid(list_of_tokenid);
-			// puts("return true");
 			return (true);
 		}
 		i++;
@@ -442,7 +500,6 @@ int parse_until_token_id(
 		{
 			i = copy_until_space(i, &input[curser], &lexer[current_lex]->cmd);
 			function_done = true;
-			// printf("curser + i = %d", i + curser);
 			// continue ;
 		}
 		if (function_done && ft_isspace(input[i + curser]) == false)
@@ -452,14 +509,12 @@ int parse_until_token_id(
 		}
 		if (is_a_token_id(&input[i + curser]) == true)
 		{
-			// puts("arrive!");
 			i = write_the_right_token(i, &input[curser], (lexer[current_lex]->tokenid));
 			break ;
 		}
 		if (ft_isspace(input[i + curser]))
 			i++;
 	}
-	// puts(lexer[current_lex]->args);
 	return (curser + i);
 }
 

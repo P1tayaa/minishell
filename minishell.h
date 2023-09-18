@@ -6,7 +6,7 @@
 /*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:30:26 by omathot           #+#    #+#             */
-/*   Updated: 2023/09/12 16:49:51 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/09/18 17:02:53 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,11 @@
 # include <fcntl.h>
 #include <sys/wait.h>
 
-
+typedef struct s_post_quotes
+{
+	char	*content;
+	bool	is_quotes;
+}	t_post_quotes;
 
 typedef struct s_lexer
 {

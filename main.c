@@ -6,14 +6,15 @@
 /*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:29:45 by omathot           #+#    #+#             */
-/*   Updated: 2023/09/12 17:14:04 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/09/18 17:15:26 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
 int	main(void); 
-char	*read_user_input(void);
+char	*read_user_input(bool quotes_test);
+
 
 
 
@@ -54,7 +55,7 @@ feof(3), ferror(3), fgetln(3), fgetws(3), getline(3)
 */
 
 char *executer(char *str, bool no_pipe);
-t_lexer	**parsse_things(char *str);
+t_lexer	**main_parser(char *str);
 void	check_quotes(char *str);
 
 int	main(void)
@@ -65,19 +66,21 @@ int	main(void)
 	// int	i;
 
 	manage_signals();
-	quotes_test = false;
+	quotes_test = true;
 	while (1)
 	{
 		// intial prompt print
 		// read user input
-		str = read_user_input();
+		str = read_user_input(quotes_test);
 		if (quotes_test)
 			check_quotes(str);
 		// parse user input
 		// if (!quotes_test)
 		// {
-			// pause();
-			lexer = parsse_things(str);
+			pause();
+			// puts("");
+			// puts(str);
+			lexer = main_parser(str);
 			// i = 0;
 			// c'est pas idea mais c'est un depart
 			int i;
@@ -103,12 +106,13 @@ int	main(void)
 	return (0);
 }
 
-char	*read_user_input(void)
+char	*read_user_input(bool quotes_test)
 {
 	char	*str;
 	
 	str = readline("😎 minishell_OS_1.0$ ");
-	add_history(str);
+	if (!quotes_test)
+		add_history(str);
 	// if (EOF)
 	// {
 	// 	write(1, "exit\n", 5);

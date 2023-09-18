@@ -6,7 +6,7 @@
 /*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/12 11:53:41 by omathot           #+#    #+#             */
-/*   Updated: 2023/09/12 18:06:00 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/09/18 18:42:34 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,10 +93,10 @@ void	relocate_quotes(t_list_of_quotes **list_of_quotes, char **str, int	**fake_d
 	free(*str);
 	*str = str_temp;
 	//linux
-	rl_clear_history();
+	// rl_clear_history();
 	//mac
 	// clear_history();
-	add_history(str_temp);
+	// add_history(str_temp);
 	free((*list_of_quotes)->double_quotes);
 	free((*list_of_quotes)->single_quotes);
 	free(*list_of_quotes);
@@ -334,70 +334,108 @@ void	remove_quotes_and_expand_dollars(char **str, t_list_of_quotes *list_of_quot
 	puts(final_str);
 }
 
-// here *str is &str[3] from main.
-void	check_quotes(char *str_og)
+// prints list of coordinates of quotes
+void	print_coordines_of_all_quotes(t_list_of_quotes *list_of_quotes)
 {
-	int	i;
-	t_list_of_quotes *list_of_quotes;
-	char *str;
-	str = str_og;
-	// char *str_temp;
-	// str = ft_strjoin("\"", str_og);
-	// str_temp = ft_strjoin(str, "\"");
-	// free(str);
-	// str = str_temp;
+	int i;
 
-	// count number of quotes
-	list_of_quotes = count_and_locate_quotes(str);
 	i = 0;
 	while (list_of_quotes->double_quotes[i] != -1)
 	{
 		printf("double quotes %d at incex %d\n", i, list_of_quotes->double_quotes[i]);
 		i++;
 	}
-
 	i = 0;
 	while (list_of_quotes->single_quotes[i] != -1)
 	{
 		printf("single quotes %d at incex %d\n", i, list_of_quotes->single_quotes[i]);
 		i++;
 	}
-	
+}
+/*
+	finds the next important index that need to be slip
+	INDEX_CUREN_CHAR is where I am
+	function will return until when do I need to copy, before the end or the start of a quotes
+*/
+int	return_index_until_new(t_list_of_quotes *list_of_quotes, int index_curent_char)
+{
+	int	i;
+	bool	have_a_low_sup;
+	int	lowers_superier_inportant_index;
 
+	i = 0;
+	have_a_low_sup = false;
+	lowers_superier_inportant_index = -1;
+	while (list_of_quotes->single_quotes[i] != -1)
+	{
+		if (i % 2 == 1 && (have_a_low_sup == false || list_of_quotes->single_quotes[i] < lowers_superier_inportant_index))
+		{
+			if (have_a_low_sup == false)
+				have_a_low_sup = true;
+			if (list_of_quotes->single_quotes[i] > index_curent_char)
+				lowers_superier_inportant_index = list_of_quotes->single_quotes[i];
+		}
+		if (i % 2 == 1 && index_curent_char == list_of_quotes->single_quotes[i])
+			return (list_of_quotes->single_quotes[i + 1]);
+	}
+	i = 0;
+	while (list_of_quotes->double_quotes[i] != -1)
+	{
+		if (i % 2 == 1 && (have_a_low_sup == false || list_of_quotes->double_quotes[i] < lowers_superier_inportant_index))
+		{
+			if (have_a_low_sup == false)
+				have_a_low_sup = true;
+			if (list_of_quotes->double_quotes[i] > index_curent_char)
+				lowers_superier_inportant_index = list_of_quotes->double_quotes[i];
+		}
+		if (i % 2 == 1 && index_curent_char == list_of_quotes->double_quotes[i])
+			return (list_of_quotes->double_quotes[i + 1]);
+	}
+	return (lowers_superier_inportant_index);
+}
+
+t_post_quotes	**make_post_quotes_content(char *str, t_list_of_quotes *list_of_quotes)
+{
+	t_post_quotes	**content;
+	int				index_current_char;
+
+	index_current_char = 0;
+}
+
+// here *str is &str[3] from main.
+void	check_quotes(char *str_og)
+{
+	t_post_quotes	**content;
+	t_list_of_quotes *list_of_quotes;
+	char *str;
+	str = str_og;
+
+	// count number of quotes
+	list_of_quotes = count_and_locate_quotes(str);
+	// i = 0;
+	print_coordines_of_all_quotes(list_of_quotes);
+	
 	if (list_of_quotes->single_quotes[0] == -1 && list_of_quotes->double_quotes[0] == -1)
 	{
 		str = handle_expand_doll(&str_og);
 		free(str_og);
 		str_og = str;
+		add_history(str);
 		puts(str);
 		return ;
 	}
 	else
 	{
 		chekc_quotes_and_remove_fake_quotes(&list_of_quotes, &str);
-		// check all quotes are in pair from left to right
-		// if not ask user to complete
 	}
 
-	puts("");
-	i = 0;
-	while (list_of_quotes->double_quotes[i] != -1)
-	{
-		printf("double quotes %d at incex %d\n", i, list_of_quotes->double_quotes[i]);
-		i++;
-	}
+	// add_history(str);
+	print_coordines_of_all_quotes(list_of_quotes);
 
-	i = 0;
-	while (list_of_quotes->single_quotes[i] != -1)
-	{
-		printf("single quotes %d at incex %d\n", i, list_of_quotes->single_quotes[i]);
-		i++;
-	}
+	content = make_post_quotes_content(str, list_of_quotes);
+	// remove_quotes_and_expand_dollars(&str, list_of_quotes);
+	
 
-
-	remove_quotes_and_expand_dollars(&str, list_of_quotes);
-	puts("");
-	puts(str);
 
 	// if (num_single_quotes % 2 == 1 || num_double_quotes % 2 == 1)
 	// {
