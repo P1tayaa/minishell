@@ -6,7 +6,7 @@
 /*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/12 11:53:41 by omathot           #+#    #+#             */
-/*   Updated: 2023/09/18 18:42:34 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/09/23 15:45:32 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -354,44 +354,117 @@ void	print_coordines_of_all_quotes(t_list_of_quotes *list_of_quotes)
 }
 /*
 	finds the next important index that need to be slip
+	
 	INDEX_CUREN_CHAR is where I am
 	function will return until when do I need to copy, before the end or the start of a quotes
 */
 int	return_index_until_new(t_list_of_quotes *list_of_quotes, int index_curent_char)
 {
-	int	i;
+	int		i;
 	bool	have_a_low_sup;
-	int	lowers_superier_inportant_index;
+	int		lowers_superier_inportant_index;
 
 	i = 0;
 	have_a_low_sup = false;
 	lowers_superier_inportant_index = -1;
+	// puts("test2");
 	while (list_of_quotes->single_quotes[i] != -1)
 	{
-		if (i % 2 == 1 && (have_a_low_sup == false || list_of_quotes->single_quotes[i] < lowers_superier_inportant_index))
+		if (i % 2 == 0 && (have_a_low_sup == false || list_of_quotes->single_quotes[i] < lowers_superier_inportant_index))
 		{
-			if (have_a_low_sup == false)
-				have_a_low_sup = true;
 			if (list_of_quotes->single_quotes[i] > index_curent_char)
+			{
+				if (have_a_low_sup == false)
+					have_a_low_sup = true;
 				lowers_superier_inportant_index = list_of_quotes->single_quotes[i];
+			}
 		}
-		if (i % 2 == 1 && index_curent_char == list_of_quotes->single_quotes[i])
+		if (i % 2 == 0 && index_curent_char == list_of_quotes->single_quotes[i])
 			return (list_of_quotes->single_quotes[i + 1]);
+		i++;
 	}
 	i = 0;
 	while (list_of_quotes->double_quotes[i] != -1)
 	{
-		if (i % 2 == 1 && (have_a_low_sup == false || list_of_quotes->double_quotes[i] < lowers_superier_inportant_index))
+		if (i % 2 == 0 && (have_a_low_sup == false || list_of_quotes->double_quotes[i] < lowers_superier_inportant_index))
 		{
-			if (have_a_low_sup == false)
-				have_a_low_sup = true;
 			if (list_of_quotes->double_quotes[i] > index_curent_char)
+			{
+				if (have_a_low_sup == false)
+					have_a_low_sup = true;
 				lowers_superier_inportant_index = list_of_quotes->double_quotes[i];
+			}
 		}
-		if (i % 2 == 1 && index_curent_char == list_of_quotes->double_quotes[i])
+		if (i % 2 == 0 && index_curent_char == list_of_quotes->double_quotes[i])
 			return (list_of_quotes->double_quotes[i + 1]);
+		i++;
 	}
 	return (lowers_superier_inportant_index);
+}
+
+/*
+	check if double quotes and single quotes are next to each other or there is text in between.
+	ex: 'test'"test" false
+	ex: 'test'la"test" true
+	
+	END_QUOTES_SURCH is list of quotes where we are looking at the end
+	START_QUOTES_SURCH is the list of quotes where we look at the start
+	I is the current END_QUOTES_SURCH we are looking at
+*/
+bool check_for_quotes_none_quotes(int *end_quotes_surch, int *start_quotes_surch, int i)
+{
+	int		j;
+	bool	have_none_quotes;
+
+	have_none_quotes = true;
+	j = 0;
+	while (start_quotes_surch[j] != -1)
+	{
+		// printf("end is %d, start is %d\n", end_quotes_surch[i], start_quotes_surch[j]);
+		if (end_quotes_surch[i] + 1 == start_quotes_surch[j])
+			have_none_quotes = false;
+		j++;
+	}
+	return (have_none_quotes);
+}
+
+/*
+	Count how many quotes string are separated with ' and " and if there is in between.
+
+	Always assume there is something at the end, it does check, but check for front.
+*/
+int	count_how_many_quotes_content_separated(t_list_of_quotes *list_of_quotes, char *str)
+{
+	int		i;
+	int		num_of_content_parts;
+	
+	i = 0;
+	num_of_content_parts = 0;
+	if (str[0] != '\'' && str[0] != '\"')
+		num_of_content_parts++;
+	while (list_of_quotes->double_quotes[i] != -1)
+	{
+		printf("%d\n", i);
+		if (list_of_quotes->double_quotes[i] % 2 == 1)
+		{
+			if (check_for_quotes_none_quotes(list_of_quotes->double_quotes, list_of_quotes->single_quotes, i))
+				num_of_content_parts++;
+		}
+		i++;
+	}
+	num_of_content_parts = num_of_content_parts + i / 2;
+	i = 0;
+	while (list_of_quotes->single_quotes[i] != -1)
+	{
+		if (list_of_quotes->single_quotes[i] % 2 == 1)
+		{
+			if (check_for_quotes_none_quotes(list_of_quotes->single_quotes, list_of_quotes->double_quotes, i))
+				num_of_content_parts++;
+		}
+		i++;
+	}
+	num_of_content_parts = num_of_content_parts + i / 2;
+	return (num_of_content_parts);
 }
 
 t_post_quotes	**make_post_quotes_content(char *str, t_list_of_quotes *list_of_quotes)
@@ -399,13 +472,57 @@ t_post_quotes	**make_post_quotes_content(char *str, t_list_of_quotes *list_of_qu
 	t_post_quotes	**content;
 	int				index_current_char;
 
+
 	index_current_char = 0;
+	content = malloc(sizeof(t_post_quotes) * (count_how_many_quotes_content_separated(list_of_quotes, str) + 1));
+	if (!content)
+		exit(1);
+	// int	i;
+	int	content_i;
+
+	// i = 0;
+	puts("test");
+	content_i = 0;
+	while (str[index_current_char] != '\0')
+	{
+		if (return_index_until_new(list_of_quotes, index_current_char) == index_current_char + 1)
+			index_current_char++;
+		content[content_i] = malloc(sizeof(t_post_quotes *));
+		printf("%d, looking for %d\n", return_index_until_new(list_of_quotes, index_current_char), index_current_char);
+		if (return_index_until_new(list_of_quotes, index_current_char) == -1)
+		{
+			puts("test");
+			if (str[index_current_char + 1] == '\0')
+				break ;
+			content[content_i]->content = malloc(sizeof(char) * (ft_strlen(str) - index_current_char));
+			ft_strlcpy(content[content_i]->content, &str[index_current_char + 1], ft_strlen(str) - index_current_char);
+			content_i++;
+			break ;
+		}
+		content[content_i]->content = malloc(sizeof(char) * (return_index_until_new(list_of_quotes, index_current_char) - index_current_char));
+		ft_strlcpy(content[content_i]->content, &str[index_current_char + 1], return_index_until_new(list_of_quotes, index_current_char) - index_current_char);
+		printf("%d is: (%s), copy entil %d\n", index_current_char, content[content_i]->content, return_index_until_new(list_of_quotes, index_current_char));
+		index_current_char = return_index_until_new(list_of_quotes, index_current_char);
+		content_i++;
+	}
+	// content_i++;
+	content[content_i] = NULL;
+
+	int i;
+	i = 0;
+	while (content[i]!= NULL)
+	{
+		printf("content %d, is (%s)\n", i, content[i]->content);
+		i++;
+	}
+	
+	return (content);
 }
 
 // here *str is &str[3] from main.
 void	check_quotes(char *str_og)
 {
-	t_post_quotes	**content;
+	// t_post_quotes	**content;
 	t_list_of_quotes *list_of_quotes;
 	char *str;
 	str = str_og;
@@ -432,7 +549,9 @@ void	check_quotes(char *str_og)
 	// add_history(str);
 	print_coordines_of_all_quotes(list_of_quotes);
 
-	content = make_post_quotes_content(str, list_of_quotes);
+	// content = make_post_quotes_content(str, list_of_quotes);
+	make_post_quotes_content(str, list_of_quotes);
+
 	// remove_quotes_and_expand_dollars(&str, list_of_quotes);
 	
 

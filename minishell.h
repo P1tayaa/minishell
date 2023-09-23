@@ -6,7 +6,7 @@
 /*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:30:26 by omathot           #+#    #+#             */
-/*   Updated: 2023/09/18 17:02:53 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/09/23 17:05:55 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ typedef struct s_post_quotes
 {
 	char	*content;
 	bool	is_quotes;
+	bool	have_to_expand;
 }	t_post_quotes;
 
 typedef struct s_lexer

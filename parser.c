@@ -6,7 +6,7 @@
 /*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/13 13:30:47 by sboulain          #+#    #+#             */
-/*   Updated: 2023/09/18 16:40:02 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/09/23 13:35:28 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -340,7 +340,7 @@ void	move_cmd_to_right_place_if_speacific_tokenid(t_lexer **previus_lexer, t_lex
 
 /*
 	Gets the string user input and seperates all info of it into
-	the struct t_lexer for to than be executated
+	the struct t_lexer for to then be executated
 	
 	STR is the user input
 */
