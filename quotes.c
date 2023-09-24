@@ -6,7 +6,7 @@
 /*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/12 11:53:41 by omathot           #+#    #+#             */
-/*   Updated: 2023/09/23 15:45:32 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/09/24 15:07:31 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ Handle " (double quote) which should prevent the shell from interpreting the met
 */
 
 int		*get_doll_position(char *str);
-char	*handle_expand_doll(char **str);
+char	*handle_expand_doll(char *str);
 
 int	get_number_of_real_double_quotes(int **position_double_quotes,  int	*fake_double_quotes)
 {
@@ -242,6 +242,7 @@ t_list_of_quotes *count_and_locate_quotes(char *str)
 }
 
 // char	*handle_expand_doll(char **str);
+
 char	*ft_strjoin_with_frees(char const *s1, char const *s2);
 
 void	remove_quotes_and_expand_dollars(char **str, t_list_of_quotes *list_of_quotes)
@@ -268,7 +269,7 @@ void	remove_quotes_and_expand_dollars(char **str, t_list_of_quotes *list_of_quot
 			i = list_of_quotes->single_quotes[current_single_quotes_index];
 			final_str = str_dup_until_index((*str), list_of_quotes->single_quotes[current_single_quotes_index] - 1);
 		}
-		final_str = handle_expand_doll(&final_str);
+		final_str = handle_expand_doll(final_str);
 	}
 	while ((*str)[i] != '\0')
 	{
@@ -279,7 +280,7 @@ void	remove_quotes_and_expand_dollars(char **str, t_list_of_quotes *list_of_quot
 
 			str_temp = str_dup_until_index(&(*str)[i + 1], list_of_quotes->double_quotes[current_double_quotes_index + 1] - i - 1);
 			puts(str_temp);
-			str_temp = handle_expand_doll(&str_temp);
+			str_temp = handle_expand_doll(str_temp);
 			final_str  = ft_strjoin_with_frees(final_str, str_temp);
 			i = list_of_quotes->double_quotes[current_double_quotes_index + 1] + 1;
 			current_double_quotes_index++;
@@ -300,7 +301,7 @@ void	remove_quotes_and_expand_dollars(char **str, t_list_of_quotes *list_of_quot
 			// copy until double quotes
 			// printf("i = %d, until %d, \n", i, list_of_quotes->double_quotes[current_double_quotes_index]);
 			str_temp = str_dup_until_index(&(*str)[i], list_of_quotes->double_quotes[current_double_quotes_index] - i);
-			str_temp = handle_expand_doll(&str_temp);
+			str_temp = handle_expand_doll(str_temp);
 			final_str  = ft_strjoin_with_frees(final_str, str_temp);
 			i = list_of_quotes->double_quotes[current_double_quotes_index];
 		}
@@ -308,7 +309,7 @@ void	remove_quotes_and_expand_dollars(char **str, t_list_of_quotes *list_of_quot
 		{
 			// copy until single quotes
 			str_temp = str_dup_until_index(&(*str)[i], list_of_quotes->single_quotes[current_single_quotes_index] - i);
-			str_temp = handle_expand_doll(&str_temp);
+			str_temp = handle_expand_doll(str_temp);
 			final_str  = ft_strjoin_with_frees(final_str, str_temp);
 			i = list_of_quotes->single_quotes[current_single_quotes_index];
 		}
@@ -357,8 +358,9 @@ void	print_coordines_of_all_quotes(t_list_of_quotes *list_of_quotes)
 	
 	INDEX_CUREN_CHAR is where I am
 	function will return until when do I need to copy, before the end or the start of a quotes
+	and if EXPANDABLE is not NULL, it changes the values of EXPANDABLE and IN_QUOTES depending on the return
 */
-int	return_index_until_new(t_list_of_quotes *list_of_quotes, int index_curent_char)
+int	return_index_until_new(t_list_of_quotes *list_of_quotes, int index_curent_char, bool *expandable, bool *in_quotes)
 {
 	int		i;
 	bool	have_a_low_sup;
@@ -380,7 +382,14 @@ int	return_index_until_new(t_list_of_quotes *list_of_quotes, int index_curent_ch
 			}
 		}
 		if (i % 2 == 0 && index_curent_char == list_of_quotes->single_quotes[i])
+		{
+			if (expandable != NULL)
+			{
+				(*expandable) = false;
+				(*in_quotes) = true;
+			}
 			return (list_of_quotes->single_quotes[i + 1]);
+		}
 		i++;
 	}
 	i = 0;
@@ -396,8 +405,20 @@ int	return_index_until_new(t_list_of_quotes *list_of_quotes, int index_curent_ch
 			}
 		}
 		if (i % 2 == 0 && index_curent_char == list_of_quotes->double_quotes[i])
+		{
+			if (expandable != NULL)
+			{
+				(*expandable) = true;
+				(*in_quotes) = true;
+			}
 			return (list_of_quotes->double_quotes[i + 1]);
+		}
 		i++;
+	}
+	if (expandable != NULL)
+	{
+		(*expandable) = true;
+		(*in_quotes) = false;
 	}
 	return (lowers_superier_inportant_index);
 }
@@ -444,12 +465,9 @@ int	count_how_many_quotes_content_separated(t_list_of_quotes *list_of_quotes, ch
 		num_of_content_parts++;
 	while (list_of_quotes->double_quotes[i] != -1)
 	{
-		printf("%d\n", i);
 		if (list_of_quotes->double_quotes[i] % 2 == 1)
-		{
 			if (check_for_quotes_none_quotes(list_of_quotes->double_quotes, list_of_quotes->single_quotes, i))
 				num_of_content_parts++;
-		}
 		i++;
 	}
 	num_of_content_parts = num_of_content_parts + i / 2;
@@ -457,10 +475,8 @@ int	count_how_many_quotes_content_separated(t_list_of_quotes *list_of_quotes, ch
 	while (list_of_quotes->single_quotes[i] != -1)
 	{
 		if (list_of_quotes->single_quotes[i] % 2 == 1)
-		{
 			if (check_for_quotes_none_quotes(list_of_quotes->single_quotes, list_of_quotes->double_quotes, i))
 				num_of_content_parts++;
-		}
 		i++;
 	}
 	num_of_content_parts = num_of_content_parts + i / 2;
@@ -471,58 +487,66 @@ t_post_quotes	**make_post_quotes_content(char *str, t_list_of_quotes *list_of_qu
 {
 	t_post_quotes	**content;
 	int				index_current_char;
+	int				content_i;
+	// bool 			expandable;
+	// bool 			in_quotes;
 
 
 	index_current_char = 0;
 	content = malloc(sizeof(t_post_quotes) * (count_how_many_quotes_content_separated(list_of_quotes, str) + 1));
 	if (!content)
 		exit(1);
-	// int	i;
-	int	content_i;
-
-	// i = 0;
-	puts("test");
 	content_i = 0;
 	while (str[index_current_char] != '\0')
 	{
-		if (return_index_until_new(list_of_quotes, index_current_char) == index_current_char + 1)
+		if (return_index_until_new(list_of_quotes, index_current_char, NULL, NULL) == index_current_char + 1)
 			index_current_char++;
-		content[content_i] = malloc(sizeof(t_post_quotes *));
-		printf("%d, looking for %d\n", return_index_until_new(list_of_quotes, index_current_char), index_current_char);
-		if (return_index_until_new(list_of_quotes, index_current_char) == -1)
+		content[content_i] = malloc(sizeof(t_post_quotes));
+		// printf("%d, looking for %d\n", return_index_until_new(list_of_quotes, index_current_char), index_current_char);
+		if (return_index_until_new(list_of_quotes, index_current_char, NULL, NULL) == -1)
 		{
-			puts("test");
 			if (str[index_current_char + 1] == '\0')
+			{
 				break ;
+			}
 			content[content_i]->content = malloc(sizeof(char) * (ft_strlen(str) - index_current_char));
 			ft_strlcpy(content[content_i]->content, &str[index_current_char + 1], ft_strlen(str) - index_current_char);
+			content[content_i]->have_to_expand = true;
+			content[content_i]->is_quotes = false;
 			content_i++;
 			break ;
 		}
-		content[content_i]->content = malloc(sizeof(char) * (return_index_until_new(list_of_quotes, index_current_char) - index_current_char));
-		ft_strlcpy(content[content_i]->content, &str[index_current_char + 1], return_index_until_new(list_of_quotes, index_current_char) - index_current_char);
-		printf("%d is: (%s), copy entil %d\n", index_current_char, content[content_i]->content, return_index_until_new(list_of_quotes, index_current_char));
-		index_current_char = return_index_until_new(list_of_quotes, index_current_char);
+		if (str[0] != '\'' && str[0] != '\"' && index_current_char == 0)
+		{
+			content[content_i]->content = malloc(sizeof(char) * (return_index_until_new(list_of_quotes, index_current_char, NULL, NULL) - index_current_char + 1));
+			ft_strlcpy(content[content_i]->content, &str[index_current_char], return_index_until_new(list_of_quotes, index_current_char, &content[content_i]->have_to_expand, &content[content_i]->is_quotes) - index_current_char + 1);
+		}
+		else
+		{
+			content[content_i]->content = malloc(sizeof(char) * (return_index_until_new(list_of_quotes, index_current_char, NULL, NULL) - index_current_char));
+			ft_strlcpy(content[content_i]->content, &str[index_current_char + 1], return_index_until_new(list_of_quotes, index_current_char, &content[content_i]->have_to_expand, &content[content_i]->is_quotes) - index_current_char);
+		}
+		index_current_char = return_index_until_new(list_of_quotes, index_current_char, NULL, NULL);
 		content_i++;
 	}
 	// content_i++;
 	content[content_i] = NULL;
 
-	int i;
-	i = 0;
-	while (content[i]!= NULL)
-	{
-		printf("content %d, is (%s)\n", i, content[i]->content);
-		i++;
-	}
+
+	// int i;
+	// i = 0;
+	// while (content[i]!= NULL)
+	// {
+	// 	printf("content %d, is (%s), %d is quotes, %d have to expand\n", i, content[i]->content, content[i]->is_quotes, content[i]->have_to_expand);
+	// 	i++;
+	// }
 	
 	return (content);
 }
 
 // here *str is &str[3] from main.
-void	check_quotes(char *str_og)
+void	check_quotes(char *str_og, t_post_quotes ***content)
 {
-	// t_post_quotes	**content;
 	t_list_of_quotes *list_of_quotes;
 	char *str;
 	str = str_og;
@@ -530,11 +554,11 @@ void	check_quotes(char *str_og)
 	// count number of quotes
 	list_of_quotes = count_and_locate_quotes(str);
 	// i = 0;
-	print_coordines_of_all_quotes(list_of_quotes);
+	// print_coordines_of_all_quotes(list_of_quotes);
 	
 	if (list_of_quotes->single_quotes[0] == -1 && list_of_quotes->double_quotes[0] == -1)
 	{
-		str = handle_expand_doll(&str_og);
+		str = handle_expand_doll(str_og);
 		free(str_og);
 		str_og = str;
 		add_history(str);
@@ -547,10 +571,10 @@ void	check_quotes(char *str_og)
 	}
 
 	// add_history(str);
-	print_coordines_of_all_quotes(list_of_quotes);
+	// print_coordines_of_all_quotes(list_of_quotes);
 
 	// content = make_post_quotes_content(str, list_of_quotes);
-	make_post_quotes_content(str, list_of_quotes);
+	(*content) = make_post_quotes_content(str, list_of_quotes);
 
 	// remove_quotes_and_expand_dollars(&str, list_of_quotes);
 	
@@ -595,24 +619,24 @@ char	**spit_text_args(char *str, int	*doll_pos);
 char	*ft_strjoin_double_str(char **spit_text);
 void	split_test_freeur(char **spit_text);
 
-char	*handle_expand_doll(char **str)
+char	*handle_expand_doll(char *str)
 {
 	int	*doll_pos;
 	char **spit_text;
 	char *final_str;
 
 	// printf("{%s}\n",str);
-	doll_pos = get_doll_position((*str));
+	doll_pos = get_doll_position(str);
 	if (doll_pos[0] == -1)
 		{
 			free(doll_pos);
-			return (ft_strdup((*str)));
+			return (ft_strdup(str));
 		}
-	spit_text = spit_text_args((*str), doll_pos);
+	spit_text = spit_text_args(str, doll_pos);
 	final_str = ft_strjoin_double_str(spit_text);
 	split_test_freeur(spit_text);
 	free(doll_pos);
-	puts(final_str);
+	// puts(final_str);
 	return (final_str);
 }
 
