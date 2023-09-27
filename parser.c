@@ -6,7 +6,7 @@
 /*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/13 13:30:47 by sboulain          #+#    #+#             */
-/*   Updated: 2023/09/24 17:43:10 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/09/27 16:42:14 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,7 +111,8 @@ void	move_flags_from_args_to_flags(t_lexer *lexer)
 
 	// copy in them
 	
-	flags_char_len = 0;
+	flags[0] = '-';
+	flags_char_len = 1;
 	args_char_len = 0;
 	i = 0;
 	while (lexer->args[i] != '\0')
@@ -121,19 +122,21 @@ void	move_flags_from_args_to_flags(t_lexer *lexer)
 			// printf("bool status %d", ft_isspace(lexer->args[i - 1]) && lexer->args[i] == '-');
 			if (ft_isspace(lexer->args[i - 1]) && lexer->args[i] == '-')
 			{
+				i++;
 				while (!ft_isspace(lexer->args[i]) && lexer->args[i] != '\0')
 				{
 					flags[flags_char_len] = lexer->args[i];
 					flags_char_len++;
 					i++;
 				}
-				flags[flags_char_len] = ' ';
-				flags_char_len++;
+				// flags[flags_char_len] = ' ';
+				// flags_char_len++;
 				continue ;
 			}
 		}
 		if (i == 0 && lexer->args[i] == '-')
 		{
+			i++;
 			while (!ft_isspace(lexer->args[i]) && lexer->args[i] != '\0')
 			{
 				printf("added char to flags: %c\n", lexer->args[i]);
@@ -141,8 +144,8 @@ void	move_flags_from_args_to_flags(t_lexer *lexer)
 				flags_char_len++;
 				i++;
 			}
-			flags[flags_char_len] = ' ';
-			flags_char_len++;
+			// flags[flags_char_len] = ' ';
+			// flags_char_len++;
 			continue ;
 		}
 		args[args_char_len] = lexer->args[i];
@@ -374,7 +377,7 @@ t_lexer	**main_parser(char *str)
 	return (lexer);
 }
 
-char *get_flags_str(char *str)
+char *get_flags_str(char **str)
 {
 	char	*flags;
 	char	*new_str;
@@ -384,35 +387,46 @@ char *get_flags_str(char *str)
 	int		k;
 	int		num_of_dash;
 
+	// puts("get_flags_str starts");
 	i = 0;
 	flags_char_len = 0;
 	num_of_dash = 0;
-	while (str[i] != '\0')
+	// printf("the is str is (%s)\n", *str);
+	while ((*str)[i] != '\0')
 	{
-		if (ft_isspace(str[i]) == true || i == 0)
-			if (str[i + 1] == '-')
-			{
-				num_of_dash++;
+		// printf("i == %d, curent char is %c\n", i, (*str)[i]);
+		if (ft_isspace((*str)[i]) == true || i == 0)
+		{
+			// puts("is space");
+			if (ft_isspace((*str)[i]))
 				i++;
+			if ((*str)[i] == '-')
+			{
+				// puts("find flag");
+				num_of_dash++;
 				j = 0;
-				while (str[i + j] != '\0' && ft_isspace(str[i + j]))
+				while ((*str)[i + j] != '\0' && ft_isspace((*str)[i + j]) == false)
 				{
 					j++;
 				}
 				i = i + j;
-				flags_char_len =+ j;
+				flags_char_len = flags_char_len + j;
 				continue ;
 			}
+			if ((*str)[i] == '\0')
+				break ;
+		}
 		i++;
 	}
+	// printf("the is flags len is (%d)\n", flags_char_len);
 	if (flags_char_len == 0)
 		return (NULL);
-	flags = malloc(sizeof(char) * flags_char_len);
+	flags = malloc(sizeof(char) * (flags_char_len + 1));
 	if (!flags)
 		exit (1);
-	if (ft_strlen(str) - (sizeof(char) * (flags_char_len + num_of_dash)) != 0)
+	if (ft_strlen((*str)) - (sizeof(char) * (flags_char_len + num_of_dash)) != 0)
 	{
-		new_str = malloc(ft_strlen(str) - (sizeof(char) * (flags_char_len + num_of_dash)));
+		new_str = malloc(ft_strlen((*str)) - (sizeof(char) * (flags_char_len + num_of_dash)) + 1);
 		if (!new_str)
 			exit(1);
 	}
@@ -421,31 +435,50 @@ char *get_flags_str(char *str)
 	i = 0;
 	flags_char_len = 0;
 	k = 0;
-	while (str[i] != '\0')
+	// printf("the is str is (%s)\n", str);
+	while ((*str)[i] != '\0')
 	{
-		if (ft_isspace(str[i]) == true || i == 0)
-			if (str[i + 1] == '-')
-			{
+		// printf("curent char is (%c)\n", str[i]);
+		if (ft_isspace((*str)[i]) == true || i == 0)
+		{
+			if (ft_isspace((*str)[i]))
 				i++;
+			if ((*str)[i] == '-')
+			{
 				j = 0;
-				while (str[i + j] != '\0' && ft_isspace(str[i + j]))
+				i++;
+				while ((*str)[i + j] != '\0' && ft_isspace((*str)[i + j]) == false)
 				{
-					flags[flags_char_len + j] = str[i + j];
+					// printf("char flags is: %c\n", str[i + j]);
+					flags[flags_char_len] = (*str)[i + j];
 					j++;
+					flags_char_len++;
 				}
 				i = i + j;
-				flags_char_len =+ j;
+				// printf("i == %d, char is %c\n", i, str[i]);
 				continue ;
 			}
-		new_str[k] = str[i];
+			if ((*str)[i] == '\0')
+				break ;
+		}
+		// printf("k == %d, char with %c\n", k, str[i]);
+		new_str[k] = (*str)[i];
 		k++;
 		i++;
 	}
+	// puts("end flags");
+	// printf("k == %d\n", k);
+	if (k == 0 && new_str != NULL)
+	{
+		free(new_str);
+		new_str = NULL;
+	}
 	if (new_str != NULL)
 		new_str[k] = '\0';
-	free(str);
-	str = new_str;
-	flags[flags_char_len + j] = '\0';
+	free((*str));
+	(*str) = new_str;
+	// puts(*str);
+	flags[flags_char_len] = '\0';
 	return (flags);
 }
 
@@ -510,9 +543,9 @@ t_lexer	**parser_with_quotes(t_post_quotes **content)
 							lexer[i]->flags = ft_strjoin_with_frees(lexer[i]->flags, ft_strdup(&content[i_content]->content[1]));
 					else
 						if (content[i_content]->have_to_expand)
-							lexer[i]->args = ft_strjoin_with_frees(lexer[i]->args, handle_expand_doll(content[i_content]->content));
+							lexer[i]->args = ft_strjoin_with_frees(lexer[i]->args, ft_strjoin_with_frees(handle_expand_doll(content[i_content]->content), ft_strdup(" ")));
 						else
-							lexer[i]->args = ft_strjoin_with_frees(lexer[i]->args, ft_strdup(content[i_content]->content));
+							lexer[i]->args = ft_strjoin_with_frees(lexer[i]->args, ft_strjoin_with_frees(ft_strdup(content[i_content]->content), ft_strdup(" ")));
 				}
 				i_content++;
 			}
@@ -523,7 +556,6 @@ t_lexer	**parser_with_quotes(t_post_quotes **content)
 				j = 0;
 				while (content[i_content]->content[j] != '\0')
 				{
-					printf("current content %d, is j space %d, j == %d, curent char is %c, is tokenid %d\n",i_content, ft_isspace(content[i_content]->content[j]), j, content[i_content]->content[j], is_a_token_id(&content[i_content]->content[j]));
 					if (function_done == false && ft_isspace(content[i_content]->content[j]) == false)
 					{
 						// puts
@@ -537,15 +569,24 @@ t_lexer	**parser_with_quotes(t_post_quotes **content)
 						char *temp2;
 
 						j = copy_until_tokenid(j, content[i_content]->content, &temp);
-						// TODO: need to add a check for flags here that moves it to flags
-						temp2 = get_flags_str(temp);
-
-						lexer[i]->args = ft_strjoin_with_frees(lexer[i]->args, temp);
+						// : need to add a check for flags here that moves it to flags
+						temp2 = get_flags_str(&temp);
+						// puts(temp2);
+						// pause();
+						if (temp != NULL)
+						{
+							// temp = remove_back_spaces(temp);
+							lexer[i]->args = ft_strjoin_with_frees(lexer[i]->args, ft_strjoin_with_frees(temp, ft_strdup(" ")));
+						}
+						lexer[i]->flags = ft_strjoin_with_frees(lexer[i]->flags, temp2);
+						// free(content[i_content]->content);
+						// content[i_content]->content = temp;
+						// j = 0;
 						// continue ;
 					}
 					if (is_a_token_id(&content[i_content]->content[j]) == true)
 					{
-						puts("test");
+						// puts("test");
 						write_the_right_token(j, content[i_content]->content, (lexer[i]->tokenid));
 						j = j + ft_strlen(lexer[i]->tokenid);
 						function_done = false;
@@ -572,23 +613,30 @@ t_lexer	**parser_with_quotes(t_post_quotes **content)
 				i_content++;
 			}
 		}
+		if (lexer[i]->args != NULL)
+			lexer[i]->args = remove_back_spaces(lexer[i]->args);
+		if (lexer[i]->flags[1] == '\0')
+		{
+			free(lexer[i]->flags);
+			lexer[i]->flags = NULL;
+		}
 		i++;
 	}
 	lexer[i] = NULL;
 	
 	i = 0;
-	while (lexer[i] != NULL)
-	{
-		printf("\nlexer[%d]\n cmd: (%s)\n", i, lexer[i]->cmd);
-		printf("args: (%s)\n", lexer[i]->args);
-		printf("tokenid: (%s)\n", lexer[i]->tokenid);
-		printf("file: (%s)\n", lexer[i]->file);
-		printf("flags: (%s)\n", lexer[i]->flags);
-		i++;
-	}
-	pause();
+	// while (lexer[i] != NULL)
+	// {
+	// 	printf("\nlexer[%d]\n cmd: (%s)\n", i, lexer[i]->cmd);
+	// 	printf("args: (%s)\n", lexer[i]->args);
+	// 	printf("tokenid: (%s)\n", lexer[i]->tokenid);
+	// 	printf("file: (%s)\n", lexer[i]->file);
+	// 	printf("flags: (%s)\n", lexer[i]->flags);
+	// 	i++;
+	// }
+	// pause();
 	
-	return NULL;
+	return lexer;
 }
 
 int	count_char_until_next_token(char *input);
@@ -779,6 +827,7 @@ int	count_token(char *input)
 	list_of_tokenid = get_list_of_tokenid();
 	num_of_token = 0;
 	i = 0;
+	puts(input);
 	while (input[i] != '\0')
 	{
 		j = 0;

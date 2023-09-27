@@ -6,7 +6,7 @@
 /*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/12 11:53:41 by omathot           #+#    #+#             */
-/*   Updated: 2023/09/24 15:07:31 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/09/27 16:37:23 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -545,11 +545,11 @@ t_post_quotes	**make_post_quotes_content(char *str, t_list_of_quotes *list_of_qu
 }
 
 // here *str is &str[3] from main.
-void	check_quotes(char *str_og, t_post_quotes ***content)
+void	check_quotes(char **str_og, t_post_quotes ***content)
 {
 	t_list_of_quotes *list_of_quotes;
 	char *str;
-	str = str_og;
+	str = (*str_og);
 
 	// count number of quotes
 	list_of_quotes = count_and_locate_quotes(str);
@@ -558,9 +558,9 @@ void	check_quotes(char *str_og, t_post_quotes ***content)
 	
 	if (list_of_quotes->single_quotes[0] == -1 && list_of_quotes->double_quotes[0] == -1)
 	{
-		str = handle_expand_doll(str_og);
-		free(str_og);
-		str_og = str;
+		str = handle_expand_doll((*str_og));
+		free((*str_og));
+		(*str_og) = str;
 		add_history(str);
 		puts(str);
 		return ;

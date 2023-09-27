@@ -6,7 +6,7 @@
 /*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:29:45 by omathot           #+#    #+#             */
-/*   Updated: 2023/09/24 14:06:34 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/09/27 16:37:55 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,7 @@ feof(3), ferror(3), fgetln(3), fgetws(3), getline(3)
 
 char *executer(char *str, bool no_pipe);
 t_lexer	**main_parser(char *str);
-void	check_quotes(char *str_og, t_post_quotes ***content);
+void	check_quotes(char **str_og, t_post_quotes ***content);
 t_lexer	**parser_with_quotes(t_post_quotes **content);
 
 int	main(void)
@@ -76,13 +76,14 @@ int	main(void)
 		// read user input
 		str = read_user_input(quotes_test);
 		if (quotes_test)
-			check_quotes(str, &content);
+			check_quotes(&str, &content);
 		// parse user input
 		// if (!quotes_test)
 		// {
 			// pause();
 			// puts("");
 			// puts(str);
+
 			if (content == NULL)
 				lexer = main_parser(str);
 			else
