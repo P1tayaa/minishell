@@ -6,7 +6,7 @@
 /*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/13 13:30:47 by sboulain          #+#    #+#             */
-/*   Updated: 2023/09/27 16:42:14 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/09/29 13:12:44 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,7 +119,6 @@ void	move_flags_from_args_to_flags(t_lexer *lexer)
 	{
 		if (i != 0)
 		{
-			// printf("bool status %d", ft_isspace(lexer->args[i - 1]) && lexer->args[i] == '-');
 			if (ft_isspace(lexer->args[i - 1]) && lexer->args[i] == '-')
 			{
 				i++;
@@ -129,8 +128,6 @@ void	move_flags_from_args_to_flags(t_lexer *lexer)
 					flags_char_len++;
 					i++;
 				}
-				// flags[flags_char_len] = ' ';
-				// flags_char_len++;
 				continue ;
 			}
 		}
@@ -139,20 +136,16 @@ void	move_flags_from_args_to_flags(t_lexer *lexer)
 			i++;
 			while (!ft_isspace(lexer->args[i]) && lexer->args[i] != '\0')
 			{
-				printf("added char to flags: %c\n", lexer->args[i]);
 				flags[flags_char_len] = lexer->args[i];
 				flags_char_len++;
 				i++;
 			}
-			// flags[flags_char_len] = ' ';
-			// flags_char_len++;
 			continue ;
 		}
 		args[args_char_len] = lexer->args[i];
 		args_char_len++;
 		i++;
 	}
-	// puts("test4");
 	flags[flags_char_len] = '\0';
 	if (args != NULL)
 		args[args_char_len] = '\0';
@@ -198,6 +191,8 @@ void	move_file_name_to_file_and_comand_back(t_lexer *lexer_previous, t_lexer *le
 		return ;
 	}
 	temp = malloc(ft_strlen(lexer->args) - i + 1);
+	if (!temp)
+		exit (1);
 	j = 0;
 	while (lexer->args[i + j] != '\0')
 	{
@@ -250,8 +245,6 @@ char *remove_back_spaces(char *str)
 	i = 0;
 	while (ft_isspace(str[ft_strlen(str) - i - 1]) && ft_strlen(str) - i > 0)
 		i++;
-	// if (str[0] == '-')
-	// 	printf("%d spaces, %zu chars", i, ft_strlen(str));
 	how_many_char = ft_strlen(str) - i;
 	if (i == 0)
 	{
@@ -391,15 +384,19 @@ char *get_flags_str(char **str)
 	i = 0;
 	flags_char_len = 0;
 	num_of_dash = 0;
-	// printf("the is str is (%s)\n", *str);
+
+	// Todo: make this a separate funciton
+	// count num of dash and flags char len
 	while ((*str)[i] != '\0')
 	{
-		// printf("i == %d, curent char is %c\n", i, (*str)[i]);
 		if (ft_isspace((*str)[i]) == true || i == 0)
 		{
-			// puts("is space");
 			if (ft_isspace((*str)[i]))
 				i++;
+			if ((*str)[i] == '\0')
+			{
+				break ;
+			}
 			if ((*str)[i] == '-')
 			{
 				// puts("find flag");
@@ -413,12 +410,12 @@ char *get_flags_str(char **str)
 				flags_char_len = flags_char_len + j;
 				continue ;
 			}
-			if ((*str)[i] == '\0')
-				break ;
 		}
 		i++;
 	}
-	// printf("the is flags len is (%d)\n", flags_char_len);
+
+	// Todo: make this a separate funciton
+	// initiate the values in cosponding with num of dash and flags char len
 	if (flags_char_len == 0)
 		return (NULL);
 	flags = malloc(sizeof(char) * (flags_char_len + 1));
@@ -432,13 +429,14 @@ char *get_flags_str(char **str)
 	}
 	else
 		new_str = NULL;
+
+	// Todo: make this a separate funciton
+	// set the values of string, but doesn't add the '-'
 	i = 0;
 	flags_char_len = 0;
 	k = 0;
-	// printf("the is str is (%s)\n", str);
 	while ((*str)[i] != '\0')
 	{
-		// printf("curent char is (%c)\n", str[i]);
 		if (ft_isspace((*str)[i]) == true || i == 0)
 		{
 			if (ft_isspace((*str)[i]))
@@ -449,25 +447,23 @@ char *get_flags_str(char **str)
 				i++;
 				while ((*str)[i + j] != '\0' && ft_isspace((*str)[i + j]) == false)
 				{
-					// printf("char flags is: %c\n", str[i + j]);
 					flags[flags_char_len] = (*str)[i + j];
 					j++;
 					flags_char_len++;
 				}
 				i = i + j;
-				// printf("i == %d, char is %c\n", i, str[i]);
 				continue ;
 			}
 			if ((*str)[i] == '\0')
 				break ;
 		}
-		// printf("k == %d, char with %c\n", k, str[i]);
 		new_str[k] = (*str)[i];
 		k++;
 		i++;
 	}
-	// puts("end flags");
-	// printf("k == %d\n", k);
+	
+	// Todo: make this a separate funciton
+	// null terminate all right string or make them null if they are.
 	if (k == 0 && new_str != NULL)
 	{
 		free(new_str);
@@ -477,7 +473,6 @@ char *get_flags_str(char **str)
 		new_str[k] = '\0';
 	free((*str));
 	(*str) = new_str;
-	// puts(*str);
 	flags[flags_char_len] = '\0';
 	return (flags);
 }
@@ -556,12 +551,31 @@ t_lexer	**parser_with_quotes(t_post_quotes **content)
 				j = 0;
 				while (content[i_content]->content[j] != '\0')
 				{
+					// puts(content[i_content]->content);
 					if (function_done == false && ft_isspace(content[i_content]->content[j]) == false)
 					{
 						// puts
 						j = copy_until_space(j, content[i_content]->content, &lexer[i]->cmd);
 						function_done = true;
 						// continue ;
+					}
+					if (is_a_token_id(&content[i_content]->content[j]) == true)
+					{
+						// puts("test");
+						write_the_right_token(j, content[i_content]->content, (lexer[i]->tokenid));
+						j = j + ft_strlen(lexer[i]->tokenid);
+						function_done = false;
+						if (lexer[i]->flags[1] == '\0')
+						{
+							free(lexer[i]->flags);
+							lexer[i]->flags = NULL;
+						}
+						i++;
+						if (content[i_content]->content[j] != '\0')
+						{
+							initiate_values_to_zero_NULL(&lexer[i], i);
+							lexer[i]->flags = ft_strdup("-");
+						}
 					}
 					if (function_done && ft_isspace(content[i_content]->content[j]) == false)
 					{
@@ -583,24 +597,6 @@ t_lexer	**parser_with_quotes(t_post_quotes **content)
 						// content[i_content]->content = temp;
 						// j = 0;
 						// continue ;
-					}
-					if (is_a_token_id(&content[i_content]->content[j]) == true)
-					{
-						// puts("test");
-						write_the_right_token(j, content[i_content]->content, (lexer[i]->tokenid));
-						j = j + ft_strlen(lexer[i]->tokenid);
-						function_done = false;
-						if (lexer[i]->flags[1] == '\0')
-						{
-							free(lexer[i]->flags);
-							lexer[i]->flags = NULL;
-						}
-						i++;
-						if (content[i_content]->content[j] != '\0')
-						{
-							initiate_values_to_zero_NULL(&lexer[i], i);
-							lexer[i]->flags = ft_strdup("-");
-						}
 					}
 					if (ft_isspace(content[i_content]->content[j]))
 						j++;
@@ -815,7 +811,12 @@ int	count_char_until_next_token(char *input)
 	return (i);
 }
 
-// I think this is lower then n^2 complexity, log(n) I think
+/*
+	Goes threw string input and return the number of tokenID
+	tokenid: ||, |, <<, <, >>, >
+
+	PS: I think this is lower then n^2 complexity, log(n) I think
+*/
 int	count_token(char *input)
 {
 	char	**list_of_tokenid;
@@ -835,13 +836,10 @@ int	count_token(char *input)
 		{
 			k = 0;
 			while (input[i + k] != '\0' &&list_of_tokenid[j][k] == input[i + k])
-			{
 				k++;
-			}
 			if (list_of_tokenid[j][k] == '\0')
 			{
 				i = i + k;
-				// printf(" i = %d, list_of_tokenid %s\n",i , list_of_tokenid[j]);
 				num_of_token++;
 				break ;
 			}

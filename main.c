@@ -6,7 +6,7 @@
 /*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:29:45 by omathot           #+#    #+#             */
-/*   Updated: 2023/09/27 16:37:55 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/09/29 13:24:53 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,14 +69,18 @@ int	main(void)
 
 	manage_signals();
 	quotes_test = true;
-	content = NULL;
 	while (1)
 	{
 		// intial prompt print
 		// read user input
+		content = NULL;
 		str = read_user_input(quotes_test);
 		if (quotes_test)
+		{
 			check_quotes(&str, &content);
+			puts(str);
+			add_history(str);
+		}
 		// parse user input
 		// if (!quotes_test)
 		// {

@@ -6,7 +6,7 @@
 /*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/12 11:53:41 by omathot           #+#    #+#             */
-/*   Updated: 2023/09/27 16:37:23 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/09/29 13:28:18 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,6 +81,11 @@ void	remove_fake_double_quotes(int **position_double_quotes, int	*fake_double_qu
 t_list_of_quotes *count_and_locate_quotes(char *str);
 void	find_fake_quotes(t_list_of_quotes **list_of_quotes, char **str, int	**fake_double_quotes);
 
+
+/*
+	get more user input and adds it to the str (userinput)
+	then refind the quotes and relocate the fakequotes (recursive loop)
+*/
 void	relocate_quotes(t_list_of_quotes **list_of_quotes, char **str, int	**fake_double_quotes)
 {
 	char *str_temp;
@@ -89,7 +94,7 @@ void	relocate_quotes(t_list_of_quotes **list_of_quotes, char **str, int	**fake_d
 		str_temp = readline("\n double quotes > ");
 	else
 		str_temp = readline("\n single quotes > ");
-	str_temp = ft_strjoin(*str, str_temp);
+	str_temp = ft_strjoin(*str, ft_strjoin("\n", str_temp));
 	free(*str);
 	*str = str_temp;
 	//linux
@@ -149,27 +154,28 @@ void	find_fake_quotes(t_list_of_quotes **list_of_quotes, char **str, int	**fake_
 	(*fake_double_quotes)[index_fake_double_quotes] = -1;
 }
 
+/*
+	Find double quotes are surounded by single quotes and remove them from consideration.
+	So if they find it they will change the values of list of quotes.
+
+	
+*/
 void	chekc_quotes_and_remove_fake_quotes(t_list_of_quotes **list_of_quotes, char **str)
 {
 	int	i;
-	// int	j;
-	// int	index_fake_double_quotes;
-	// int	val_of_curent_double_quote;
 	int	*fake_double_quotes;
-	// char *str_temp;
-
-	//! need to make fake_double_quotes malloc better, maybe dup sizeof double quotes or something
-	fake_double_quotes = (int *)malloc(sizeof(int) * 20);
-	find_fake_quotes(list_of_quotes, str, &fake_double_quotes);
+	int	num_of_double_quotes;
 	
-	// printf("fake_double_quotes first is %d\n", fake_double_quotes[0]);
+	num_of_double_quotes = 0;
+	while ((*list_of_quotes)->double_quotes[num_of_double_quotes] != -1)
+	{
+		num_of_double_quotes++;
+	}
+	fake_double_quotes = (int *)malloc(sizeof(int) * (num_of_double_quotes + 1));
+	find_fake_quotes(list_of_quotes, str, &fake_double_quotes);
 	if (fake_double_quotes[0] != -1)
 		remove_fake_double_quotes(&(*list_of_quotes)->double_quotes, fake_double_quotes);
-	// printf("real quotes 2 %d\n", (*list_of_quotes)->double_quotes[1]);
-
 	i = 0;
-	// j = 0;
-	// index_fake_double_quotes = 0;
 	while ((*list_of_quotes)->double_quotes[i] != -1)
 	{
 			if ((*list_of_quotes)->double_quotes[i + 1] == -1)
@@ -183,11 +189,11 @@ void	chekc_quotes_and_remove_fake_quotes(t_list_of_quotes **list_of_quotes, char
 	free(fake_double_quotes);
 }
 
-// int	*count_double_quotes_quotes()
-// {
+/*
+	find the possition of both type of quotes, and return it in the pointer of a struct T_LIST_OF_QUOTES.
 
-// }
-
+	STR is the string we are taking the postion of the quotes, (user inpute)
+*/
 t_list_of_quotes *count_and_locate_quotes(char *str)
 {
 	t_list_of_quotes *list_of_quotes;
@@ -195,6 +201,7 @@ t_list_of_quotes *count_and_locate_quotes(char *str)
 	int num_double_quotes;
 	int i;
 	
+	// count how many " and ' there are
 	i = 0;
 	num_single_quotes = 0;
 	while (str[i] != '\0')
@@ -211,13 +218,16 @@ t_list_of_quotes *count_and_locate_quotes(char *str)
 			num_double_quotes++;
 		i++;
 	}
+
+	// Todo: make this a separate funciton
+	// malloc the list of position of both type of quotes
 	list_of_quotes = malloc(sizeof(t_list_of_quotes));
-	// get position of all quotes
-	
 	list_of_quotes->double_quotes = (int *)malloc(sizeof(int) * (num_double_quotes + 1));
 	list_of_quotes->single_quotes = (int *)malloc(sizeof(int) * (num_single_quotes + 1));
 	if (!list_of_quotes->double_quotes || !list_of_quotes->single_quotes)
 		exit (-1);
+	
+	// put the index location in each list of quotes
 	i = 0;
 	num_double_quotes = 0;
 	num_single_quotes = 0;
@@ -544,24 +554,30 @@ t_post_quotes	**make_post_quotes_content(char *str, t_list_of_quotes *list_of_qu
 	return (content);
 }
 
-// here *str is &str[3] from main.
+/*
+	This the main of the quotes.
+	So if there is not quotes in STR_OG:
+	It expand_doll and and doesn't do anything to content, leaving it NULL;
+	If there is a quotes:
+	It will find them than seperate the content insinde and out side of quotes and puts it into content.
+
+	STR_OF is a pointer to the string, the userinput
+	CONTENT is a pointer to the array of pointer of T_POST_QUOTES, (fake return)
+*/
 void	check_quotes(char **str_og, t_post_quotes ***content)
 {
 	t_list_of_quotes *list_of_quotes;
 	char *str;
 	str = (*str_og);
 
-	// count number of quotes
 	list_of_quotes = count_and_locate_quotes(str);
-	// i = 0;
-	// print_coordines_of_all_quotes(list_of_quotes);
 	
 	if (list_of_quotes->single_quotes[0] == -1 && list_of_quotes->double_quotes[0] == -1)
 	{
 		str = handle_expand_doll((*str_og));
 		free((*str_og));
 		(*str_og) = str;
-		add_history(str);
+		// add_history(str);
 		puts(str);
 		return ;
 	}
@@ -575,7 +591,8 @@ void	check_quotes(char **str_og, t_post_quotes ***content)
 
 	// content = make_post_quotes_content(str, list_of_quotes);
 	(*content) = make_post_quotes_content(str, list_of_quotes);
-
+	(*str_og) = str;
+	
 	// remove_quotes_and_expand_dollars(&str, list_of_quotes);
 	
 
