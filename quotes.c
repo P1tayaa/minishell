@@ -6,7 +6,7 @@
 /*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/12 11:53:41 by omathot           #+#    #+#             */
-/*   Updated: 2023/09/29 13:28:18 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/09/29 15:29:40 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,8 @@ void	remove_fake_double_quotes(int **position_double_quotes, int	*fake_double_qu
 
 	num_of_real_quotes = get_number_of_real_double_quotes(position_double_quotes, fake_double_quotes);
 	real_quotes = (int *)malloc(sizeof(int) * (num_of_real_quotes + 1));
+	if (!real_quotes)
+		exit(1);
 	i = 0;
 	num_of_real_quotes = 0;
 	while ((*position_double_quotes)[i] != -1)
@@ -172,6 +174,8 @@ void	chekc_quotes_and_remove_fake_quotes(t_list_of_quotes **list_of_quotes, char
 		num_of_double_quotes++;
 	}
 	fake_double_quotes = (int *)malloc(sizeof(int) * (num_of_double_quotes + 1));
+	if (!fake_double_quotes)
+		exit(1);
 	find_fake_quotes(list_of_quotes, str, &fake_double_quotes);
 	if (fake_double_quotes[0] != -1)
 		remove_fake_double_quotes(&(*list_of_quotes)->double_quotes, fake_double_quotes);
@@ -222,6 +226,8 @@ t_list_of_quotes *count_and_locate_quotes(char *str)
 	// Todo: make this a separate funciton
 	// malloc the list of position of both type of quotes
 	list_of_quotes = malloc(sizeof(t_list_of_quotes));
+	if (!list_of_quotes)
+		exit(1);
 	list_of_quotes->double_quotes = (int *)malloc(sizeof(int) * (num_double_quotes + 1));
 	list_of_quotes->single_quotes = (int *)malloc(sizeof(int) * (num_single_quotes + 1));
 	if (!list_of_quotes->double_quotes || !list_of_quotes->single_quotes)
@@ -512,6 +518,8 @@ t_post_quotes	**make_post_quotes_content(char *str, t_list_of_quotes *list_of_qu
 		if (return_index_until_new(list_of_quotes, index_current_char, NULL, NULL) == index_current_char + 1)
 			index_current_char++;
 		content[content_i] = malloc(sizeof(t_post_quotes));
+		if (!content[content_i])
+			exit(1);
 		// printf("%d, looking for %d\n", return_index_until_new(list_of_quotes, index_current_char), index_current_char);
 		if (return_index_until_new(list_of_quotes, index_current_char, NULL, NULL) == -1)
 		{
@@ -520,6 +528,8 @@ t_post_quotes	**make_post_quotes_content(char *str, t_list_of_quotes *list_of_qu
 				break ;
 			}
 			content[content_i]->content = malloc(sizeof(char) * (ft_strlen(str) - index_current_char));
+			if (!content[content_i]->content)
+				exit(1);
 			ft_strlcpy(content[content_i]->content, &str[index_current_char + 1], ft_strlen(str) - index_current_char);
 			content[content_i]->have_to_expand = true;
 			content[content_i]->is_quotes = false;
@@ -529,11 +539,15 @@ t_post_quotes	**make_post_quotes_content(char *str, t_list_of_quotes *list_of_qu
 		if (str[0] != '\'' && str[0] != '\"' && index_current_char == 0)
 		{
 			content[content_i]->content = malloc(sizeof(char) * (return_index_until_new(list_of_quotes, index_current_char, NULL, NULL) - index_current_char + 1));
+			if (!content[content_i]->content)
+				exit(1);
 			ft_strlcpy(content[content_i]->content, &str[index_current_char], return_index_until_new(list_of_quotes, index_current_char, &content[content_i]->have_to_expand, &content[content_i]->is_quotes) - index_current_char + 1);
 		}
 		else
 		{
 			content[content_i]->content = malloc(sizeof(char) * (return_index_until_new(list_of_quotes, index_current_char, NULL, NULL) - index_current_char));
+			if (!content[content_i]->content)
+				exit(1);
 			ft_strlcpy(content[content_i]->content, &str[index_current_char + 1], return_index_until_new(list_of_quotes, index_current_char, &content[content_i]->have_to_expand, &content[content_i]->is_quotes) - index_current_char);
 		}
 		index_current_char = return_index_until_new(list_of_quotes, index_current_char, NULL, NULL);
@@ -585,51 +599,8 @@ void	check_quotes(char **str_og, t_post_quotes ***content)
 	{
 		chekc_quotes_and_remove_fake_quotes(&list_of_quotes, &str);
 	}
-
-	// add_history(str);
-	// print_coordines_of_all_quotes(list_of_quotes);
-
-	// content = make_post_quotes_content(str, list_of_quotes);
 	(*content) = make_post_quotes_content(str, list_of_quotes);
 	(*str_og) = str;
-	
-	// remove_quotes_and_expand_dollars(&str, list_of_quotes);
-	
-
-
-	// if (num_single_quotes % 2 == 1 || num_double_quotes % 2 == 1)
-	// {
-	// 	// * ask for user to finish him phrase
-	// 	printf("missing %d single quotes, and missing %d double quotes", num_single_quotes % 2, num_double_quotes % 2);	 
-	// 	exit (-1);
-	// }
-
-	// check if there are single quotes
-
-	// if not just expand all
-
-	// if there are, seperate what is single than expand all
-
-	// if (position_single_quotes[0] < position_double_quotes[0])
-	// // int	i;
-
-	// // i = 0;
-	// // while (str[i])
-	// // {
-	// 	// 39 is ascii value for single quotes BUT, \ is in front of it
-	// 	if (str[0] == '\'' && str[ft_strlen(str) - 1] == '\'')
-	// 		printf("%s\n", str);
-	// 	// 34 is ascii value for double quotes,
-	// 	// if (str[0] == '\"' && str[ft_strlen(str) - 1] == '\"')
-	// 	else
-	// 	{
-	// 		char *str_temp;
-	// 		str_temp = handle_expand_doll(str);
-	// 		printf("%s\n", str_temp);
-	// 		free(str_temp);
-	// 		system("leaks -q minishell");
-	// 	}
-	// // }
 }
 
 char	**spit_text_args(char *str, int	*doll_pos);
@@ -769,6 +740,8 @@ char	**spit_text_args(char *str, int	*doll_pos)
 		num_doll++;
 	total_parts = (num_doll * 2) + 1;
 	string_split = malloc(sizeof(char *) * (total_parts + 2));
+	if (!string_split)
+		exit(1);
 	i = 0;
 	num_doll = 0;
 	while (i < (total_parts))

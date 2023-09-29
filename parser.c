@@ -6,7 +6,7 @@
 /*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/13 13:30:47 by sboulain          #+#    #+#             */
-/*   Updated: 2023/09/29 13:12:44 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/09/29 15:23:45 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -226,6 +226,8 @@ char *remove_front_spaces(char *str)
 		return (NULL);
 	}
 	str_temp = ft_strdup(&str[i]);
+	if (!str_temp)
+		exit(1);
 	free(str);
 	return (str_temp);
 }
@@ -249,6 +251,8 @@ char *remove_back_spaces(char *str)
 	if (i == 0)
 	{
 		str_dup_without_spaces = ft_strdup(str);
+		if (!str_dup_without_spaces)
+			exit(1);
 		free(str);
 		return (str_dup_without_spaces);
 	}
@@ -259,7 +263,7 @@ char *remove_back_spaces(char *str)
 	}
 	str_dup_without_spaces = malloc(ft_strlen(str) - i + 1);
 	if (!str_dup_without_spaces)
-		exit (-1);
+		exit (1);
 	i = 0;
 	while (i < how_many_char)
 	{
@@ -481,16 +485,22 @@ char	*ft_strjoin_with_frees(char const *s1, char const *s2);
 char	*handle_expand_doll(char *str);
 
 bool	is_a_token_id(char *input);
-int	copy_until_tokenid(int i, char *input_after_curser, char **destination);
-int	copy_until_space(int i, char *input_after_curser, char **destination);
-int	write_the_right_token(int i, char *input_after_curser,char tokenid[3]);
+int		copy_until_tokenid(int i, char *input_after_curser, char **destination);
+int		copy_until_space(int i, char *input_after_curser, char **destination);
+int		write_the_right_token(int i, char *input_after_curser,char tokenid[3]);
 
+/*
+	Main parser when there are quotes
+	take the content of input, and put the info in the right parts of a lexer.
+	return that lexeer
+*/
 t_lexer	**parser_with_quotes(t_post_quotes **content)
 {
 	t_lexer **lexer;
 	int	token_num;
 	int i;
 
+	// TODO: make this in a fucntion
 	// malloc the content
 	i = 0;
 	token_num = 0;
@@ -516,11 +526,15 @@ t_lexer	**parser_with_quotes(t_post_quotes **content)
 		{
 			initiate_values_to_zero_NULL(&lexer[i], i);
 			lexer[i]->flags = ft_strdup("-");
+			if (!lexer[i]->flags)
+				exit(1);
 		}
 		while (content[i_content] != NULL)
 		{
 			if (content[i_content]->is_quotes)
 			{
+				// TODO make this a function
+				// depending on the current situation place the content of the quotes in the right place
 				if (function_done == false)
 				{
 					if (content[i_content]->have_to_expand)
@@ -534,11 +548,13 @@ t_lexer	**parser_with_quotes(t_post_quotes **content)
 					if (content[i_content]->content[0] == '-')
 						if (content[i_content]->have_to_expand)
 							lexer[i]->flags = ft_strjoin_with_frees(lexer[i]->flags, handle_expand_doll(&content[i_content]->content[1]));
+						// ! need to protect this malloc with strdup, when puting in a function
 						else
 							lexer[i]->flags = ft_strjoin_with_frees(lexer[i]->flags, ft_strdup(&content[i_content]->content[1]));
 					else
 						if (content[i_content]->have_to_expand)
 							lexer[i]->args = ft_strjoin_with_frees(lexer[i]->args, ft_strjoin_with_frees(handle_expand_doll(content[i_content]->content), ft_strdup(" ")));
+						// ! need to protect this malloc with strdup, when puting in a function
 						else
 							lexer[i]->args = ft_strjoin_with_frees(lexer[i]->args, ft_strjoin_with_frees(ft_strdup(content[i_content]->content), ft_strdup(" ")));
 				}
@@ -551,17 +567,14 @@ t_lexer	**parser_with_quotes(t_post_quotes **content)
 				j = 0;
 				while (content[i_content]->content[j] != '\0')
 				{
-					// puts(content[i_content]->content);
 					if (function_done == false && ft_isspace(content[i_content]->content[j]) == false)
 					{
-						// puts
 						j = copy_until_space(j, content[i_content]->content, &lexer[i]->cmd);
 						function_done = true;
-						// continue ;
 					}
 					if (is_a_token_id(&content[i_content]->content[j]) == true)
 					{
-						// puts("test");
+						//todo make this a funciton
 						write_the_right_token(j, content[i_content]->content, (lexer[i]->tokenid));
 						j = j + ft_strlen(lexer[i]->tokenid);
 						function_done = false;
@@ -575,36 +588,27 @@ t_lexer	**parser_with_quotes(t_post_quotes **content)
 						{
 							initiate_values_to_zero_NULL(&lexer[i], i);
 							lexer[i]->flags = ft_strdup("-");
+							if (!lexer[i]->flags)
+								exit(1);
 						}
 					}
 					if (function_done && ft_isspace(content[i_content]->content[j]) == false)
 					{
+						// TODO make this a function
 						char *temp;
 						char *temp2;
 
 						j = copy_until_tokenid(j, content[i_content]->content, &temp);
-						// : need to add a check for flags here that moves it to flags
 						temp2 = get_flags_str(&temp);
-						// puts(temp2);
-						// pause();
 						if (temp != NULL)
 						{
-							// temp = remove_back_spaces(temp);
+							// ! need to protect this malloc with strdup, when puting in a function
 							lexer[i]->args = ft_strjoin_with_frees(lexer[i]->args, ft_strjoin_with_frees(temp, ft_strdup(" ")));
 						}
 						lexer[i]->flags = ft_strjoin_with_frees(lexer[i]->flags, temp2);
-						// free(content[i_content]->content);
-						// content[i_content]->content = temp;
-						// j = 0;
-						// continue ;
 					}
 					if (ft_isspace(content[i_content]->content[j]))
 						j++;
-					// printf("parse none quotes, j == %d, curent char is %c, is tokenid %d\n", j, content[i_content]->content[j], is_a_token_id(&content[i_content]->content[j]));
-					// usleep(10000);
-					// printf("parse none quotes, j == %d, curent char is %c, is tokenid %d\n", j, content[i_content]->content[j], is_a_token_id(&content[i_content]->content[j]));
-
-					// pause();
 				}
 				i_content++;
 			}
@@ -621,17 +625,6 @@ t_lexer	**parser_with_quotes(t_post_quotes **content)
 	lexer[i] = NULL;
 	
 	i = 0;
-	// while (lexer[i] != NULL)
-	// {
-	// 	printf("\nlexer[%d]\n cmd: (%s)\n", i, lexer[i]->cmd);
-	// 	printf("args: (%s)\n", lexer[i]->args);
-	// 	printf("tokenid: (%s)\n", lexer[i]->tokenid);
-	// 	printf("file: (%s)\n", lexer[i]->file);
-	// 	printf("flags: (%s)\n", lexer[i]->flags);
-	// 	i++;
-	// }
-	// pause();
-	
 	return lexer;
 }
 
@@ -667,6 +660,11 @@ bool	is_a_token_id(char *input)
 	return (false);
 }
 
+/*
+	Copies from index I from INPUT_AFTER_CURSER into pointer to the string DESTINATION
+	But only copies until the end of the string or until a space or until a tokenid.
+	And return the index at whitch it stoped.
+*/
 int	copy_until_space(int i, char *input_after_curser, char **destination)
 {
 	int	j;
@@ -697,6 +695,11 @@ int	copy_until_space(int i, char *input_after_curser, char **destination)
 	return (i + j);
 }
 
+/*
+	Copies from index I from INPUT_AFTER_CURSER into pointer to the string DESTINATION
+	But only copies until the end of the string or until a tokenid.
+	And return the index at whitch it stoped.
+*/
 int	copy_until_tokenid(int i, char *input_after_curser, char **destination)
 {
 	int	j;
@@ -725,6 +728,10 @@ int	copy_until_tokenid(int i, char *input_after_curser, char **destination)
 	return (i + j);
 }
 
+/*
+	write in TOKENID, the token id curently at INPUT_AFTER_CURSER[I]
+	tokenid: ||, |, <<, <, >>, >
+*/
 int	write_the_right_token(int i, char *input_after_curser,char tokenid[3])
 {
 	int	j;
@@ -741,6 +748,11 @@ int	write_the_right_token(int i, char *input_after_curser,char tokenid[3])
 	return (i + j);
 }
 
+/*
+	Puts the right values in the LEXER at index CURRENT_LEX, with the string INPUT.
+	And continue reading the INPUT starting at the curser.
+	and return the new Curser (index at whitch it is done reading)
+*/
 int parse_until_token_id(
 		char *input, int current_lex, t_lexer **lexer, int curser)
 {
@@ -751,22 +763,14 @@ int parse_until_token_id(
 	function_done = false;
 	while (input[i + curser] != '\0')
 	{
-		// printf("%d = i\n", curser + i);
-		// if (function_done && input[i + curser] == '-')
-		// {
-		// 	i = copy_until_space(i, &input[curser], &lexer[current_lex]->flags);
-		// 	// continue ;
-		// }
 		if (function_done == false && ft_isspace(input[i + curser]) == false)
 		{
 			i = copy_until_space(i, &input[curser], &lexer[current_lex]->cmd);
 			function_done = true;
-			// continue ;
 		}
 		if (function_done && ft_isspace(input[i + curser]) == false)
 		{
 			i = copy_until_tokenid(i, &input[curser], &(lexer[current_lex]->args));
-			// continue ;
 		}
 		if (is_a_token_id(&input[i + curser]) == true)
 		{
@@ -778,6 +782,7 @@ int parse_until_token_id(
 	}
 	return (curser + i);
 }
+
 
 int	count_char_until_next_token(char *input)
 {
@@ -795,9 +800,7 @@ int	count_char_until_next_token(char *input)
 		{
 			k = 0;
 			while (list_of_tokenid[j][k] == input[i + k])
-			{
 				k++;
-			}
 			if (list_of_tokenid[j][k] == '\0')
 			{
 				free_list_of_tokenid(list_of_tokenid);
