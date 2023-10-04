@@ -1,0 +1,1 @@
+'echo' -l 'truc a eco' '-f' | ls -l -a

@@ -6,14 +6,15 @@
 /*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:29:45 by omathot           #+#    #+#             */
-/*   Updated: 2023/09/12 14:49:03 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/09/29 13:24:53 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
 int	main(void); 
-char	*read_user_input(void);
+char	*read_user_input(bool quotes_test);
+
 
 
 
@@ -54,29 +55,43 @@ feof(3), ferror(3), fgetln(3), fgetws(3), getline(3)
 */
 
 char *executer(char *str, bool no_pipe);
-t_lexer	**parsse_things(char *str);
-void	check_quotes(char *str);
+t_lexer	**main_parser(char *str);
+void	check_quotes(char **str_og, t_post_quotes ***content);
+t_lexer	**parser_with_quotes(t_post_quotes **content);
 
 int	main(void)
 {
 	char	*str;
 	t_lexer	**lexer;
 	bool	quotes_test;
+	t_post_quotes	**content;
 	// int	i;
 
 	manage_signals();
-	quotes_test = false;
+	quotes_test = true;
 	while (1)
 	{
 		// intial prompt print
 		// read user input
-		str = read_user_input();
+		content = NULL;
+		str = read_user_input(quotes_test);
 		if (quotes_test)
-			check_quotes(str);
-		// parse user input
-		if (!quotes_test)
 		{
-			lexer = parsse_things(str);
+			check_quotes(&str, &content);
+			puts(str);
+			add_history(str);
+		}
+		// parse user input
+		// if (!quotes_test)
+		// {
+			// pause();
+			// puts("");
+			// puts(str);
+
+			if (content == NULL)
+				lexer = main_parser(str);
+			else
+				lexer = parser_with_quotes(content);
 			// i = 0;
 			// c'est pas idea mais c'est un depart
 			int i;
@@ -96,18 +111,19 @@ int	main(void)
 			else
 				piping(lexer);
 			// optiona: wait for return value.
-		}
+		// }
 		
 	}
 	return (0);
 }
 
-char	*read_user_input(void)
+char	*read_user_input(bool quotes_test)
 {
 	char	*str;
 	
 	str = readline("😎 minishell_OS_1.0$ ");
-	add_history(str);
+	if (!quotes_test)
+		add_history(str);
 	// if (EOF)
 	// {
 	// 	write(1, "exit\n", 5);
