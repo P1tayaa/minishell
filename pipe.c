@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   pipe.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
+/*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/20 15:16:04 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/09/12 15:04:40 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/10/04 17:10:18 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,16 +112,23 @@ void	exec(t_lexer *lexer)
 	free(cmd_path);
 }
 
-int	redirection_handler(t_lexer *lexer)
+int redirection_handler(t_lexer *lexer)
 {
+	int	fd;
+
+	fd = -1;
 	if (strcmp(lexer->tokenid, "<") == 0)
-		return (open(lexer->file, O_RDONLY));
+		fd = open(lexer->file, O_RDONLY);
 	else if (strcmp(lexer->tokenid, ">") == 0)
-		return (open(lexer->file, O_WRONLY | O_CREAT | O_TRUNC, 0644));
+		fd = open(lexer->file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
 	else if (strcmp(lexer->tokenid, ">>") == 0)
-		return (open(lexer->file, O_WRONLY | O_CREAT | O_APPEND, 0644));
-	// TODO: <<
-	return (-1);
+		fd = open(lexer->file, O_WRONLY | O_CREAT | O_APPEND, 0644);
+	if (fd == -1)
+	{
+		perror("Error in redirection_handler");
+		exit(EXIT_FAILURE);
+	}
+	return (fd);
 }
 
 void	set_redirection(t_lexer **lexer, int *input_fd, int j)
@@ -137,44 +144,54 @@ void	set_redirection(t_lexer **lexer, int *input_fd, int j)
 	}
 }
 
-void execute_child_process(t_pipedata *data) 
+void	execute_child_process(t_pipedata *data) 
 {
-    char *cmd_path;
-    char *args[4];
-    int i = 0;
+	char	*cmd_path;
+	char	*args[4];
+	int		i;
 
-    // If there's an input redirection, use it
-    if (data->input_fd != -1)
-    {
-        dup2(data->input_fd, STDIN_FILENO);
-        close(data->input_fd);
-    }
-    else if (data->j != 0)  // If not the first command and no input redirection
-    {
-        dup2(data->prev_fd, STDIN_FILENO);
-        close(data->prev_fd);
-    }
-    // If this is the last command and there's an output redirection, use it
-    if (data->j == data->lex_count - 1 && data->output_fd != -1)
-    {
-        dup2(data->output_fd, STDOUT_FILENO);
-        close(data->output_fd);
-    }
-    else if (data->j != data->lex_count - 1)  // Not the last command, set up for next command
-        dup2(data->fd[1], STDOUT_FILENO);
+	i = 0;
+	// If there's an input redirection, use it
+	if (data->input_fd != -1)
+	{
+		dup2(data->input_fd, STDIN_FILENO);
+		close(data->input_fd);
+	}
+	else if (data->j != 0)  // If not the first command and no input redirection
+	{
+		dup2(data->prev_fd, STDIN_FILENO);
+		close(data->prev_fd);
+	}
+	// If this is the last command and there's an output redirection, use it
+	if (data->j == data->lex_count && data->output_fd != -1)
+	{
+		dup2(data->output_fd, STDOUT_FILENO);
+		close(data->output_fd);
+	}
+	else if (data->j != data->lex_count - 1)  // Not the last command, set up for next command
+		dup2(data->fd[1], STDOUT_FILENO);
+	close(data->fd[0]);
+	close(data->fd[1]);
+	cmd_path = get_cmd_path(data->lexer[data->j]->cmd);
+	args[i++] = data->lexer[data->j]->cmd;
+	if (data->lexer[data->j]->flags != NULL)
+		args[i++] = data->lexer[data->j]->flags;
+	if (data->lexer[data->j]->args != NULL)
+		args[i++] = data->lexer[data->j]->args;
+	args[i++] = NULL;
+	execve(cmd_path, args, environ);
+	free(cmd_path);
+	perror("Execution failed");
+	exit(EXIT_FAILURE);
+}
 
-    close(data->fd[0]);
-    close(data->fd[1]);
-    cmd_path = get_cmd_path(data->lexer[data->j]->cmd);
-    args[i++] = data->lexer[data->j]->cmd;
-    if (data->lexer[data->j]->flags != NULL)
-        args[i++] = data->lexer[data->j]->flags;
-    if (data->lexer[data->j]->args != NULL)
-        args[i++] = data->lexer[data->j]->args;
-    args[i++] = NULL;
-    execve(cmd_path, args, environ);
-    perror("Execution failed");
-    exit(EXIT_FAILURE);
+void	initialize_pipedata(t_pipedata *data)
+{
+	data->prev_fd = -1;
+	data->input_fd = -1;
+	data->output_fd = -1;
+	data->lex_count = 0;
+	data->j = 0;
 }
 
 // fd[0] = read;
@@ -183,59 +200,56 @@ void	piping(t_lexer **lexer)
 {
 	t_pipedata	data;
 	int			pid;
+	int			check;			// temporary test to fix output redirections -- seems to have broken input redirection as well tho
 
+	check = -1;
+	data.lexer = lexer;
+	initialize_pipedata(&data);
 	while (lexer[data.lex_count])
 		data.lex_count++;
-	data.prev_fd = -1;
-	data.input_fd = -1;
-	data.output_fd = -1;
-	data.j = 0;
 	if (strcmp(lexer[0]->tokenid, "<") == 0)
 	{
 		data.input_fd = redirection_handler(lexer[0]);
-		// lex_count--;
 		data.j++;
 	}
-	// Handle output redirection at the end
 	if (data.lex_count > 1 && (strcmp(lexer[data.lex_count - 1]->tokenid, ">") == 0 || strcmp(lexer[data.lex_count - 1]->tokenid, ">>") == 0))
 	{
-		data.output_fd = redirection_handler(lexer[data.lex_count - 2]);
-		data.lex_count -= 2;  // Adjust the lex_count to not include the output redirection
+		data.output_fd = redirection_handler(lexer[data.lex_count - 1]);
+		data.lex_count -= 1;  // Adjust the lex_count to not include the NULL lexer
 	}
-	while (data.j < data.lex_count)
-    {
-        // Handle any middle redirections
-        set_redirection(lexer, &data.input_fd, data.j);
-        if (pipe(data.fd) == -1)
-            return;
-        pid = fork();
-        if (pid == -1)
-            return;
-        if (pid == 0)  // Child process
-		{
-            data.lexer = lexer;
+	while (data.j < data.lex_count)		// && lexer[data.j]->cmd != NULL
+	{
+		// Handle any middle redirections
+		// set_redirection(lexer, &data.input_fd, data.j);
+		if (pipe(data.fd) == -1)
+			return ;
+		pid = fork();
+		if (pid == -1)
+			return ;
+		if (pid == 0)  // Child process ------- ! ! ! && check != data.j breaks the normal pipes, need to find a better difference between first and second iteration of same lexer
 			execute_child_process(&data);
-		}
 		else  // Parent process
 		{
-            close(data.fd[1]);
-            if (data.j != 0)
-                close(data.prev_fd);
-            data.prev_fd = data.fd[0];
-        }
-        data.j++;
-        if (data.input_fd != -1)
-        {
-            close(data.input_fd);
-            data.input_fd = -1;
-            data.j++;
-        }
-    }
-    close(data.prev_fd);
-    data.j = 0;
-    while (data.j < data.lex_count)
-    {
-        wait(NULL);  // Wait for all child processes to finish
-        data.j++;
-    }
+			close(data.fd[1]);
+			if (data.j != 0)
+				close(data.prev_fd);
+			data.prev_fd = data.fd[0];
+		}
+		if (check == data.j)
+			data.j++;									// so here we increment to the next lexer; need conditions to not increase if cmd & file != NULL
+		check = data.j;
+		if (data.input_fd != -1)
+		{
+			close(data.input_fd);
+			data.input_fd = -1;
+			data.j++;
+		}
+	}
+	close(data.prev_fd);
+	data.j = 0;
+	while (data.j < data.lex_count)
+	{
+		wait(NULL);  // Wait for all child processes to finish
+		data.j++;
+	}
 }
