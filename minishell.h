@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
+/*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:30:26 by omathot           #+#    #+#             */
-/*   Updated: 2023/09/09 16:16:42 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/10/04 17:24:12 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,12 @@
 # include <fcntl.h>
 #include <sys/wait.h>
 
+typedef struct s_post_quotes
+{
+	char	*content;
+	bool	is_quotes;
+	bool	have_to_expand;
+}	t_post_quotes;
 
 typedef struct s_lexer
 {

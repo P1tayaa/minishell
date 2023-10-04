@@ -6,7 +6,7 @@
 /*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/14 17:01:53 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/09/09 17:30:27 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/09/24 14:26:12 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -153,7 +153,9 @@ void	concat_path(char *buffer, const char *dir, const char *cmd)
 	}
 	buffer[i] = '\0';
 }
-
+/*
+	Joins the S1 and S2 and return it (malloced), and free S1 and S2.
+*/
 char	*ft_strjoin_with_frees(char *s1, char *s2)
 {
 	size_t	len;
