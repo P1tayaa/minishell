@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/13 13:30:47 by sboulain          #+#    #+#             */
-/*   Updated: 2023/10/04 17:25:08 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/10/07 17:57:15 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -833,7 +833,7 @@ int	count_token(char *input)
 	list_of_tokenid = get_list_of_tokenid();
 	num_of_token = 0;
 	i = 0;
-	puts(input);
+	// puts(input);
 	while (input[i] != '\0')
 	{
 		j = 0;

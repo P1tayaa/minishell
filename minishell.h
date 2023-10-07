@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:30:26 by omathot           #+#    #+#             */
-/*   Updated: 2023/10/04 17:24:12 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/10/07 17:56:59 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,10 +52,7 @@ typedef	struct s_list_of_quotes
 
 typedef struct s_pipedata
 {
-	int		j;
 	int		input_fd;
-	int		output_fd;
-	int		prev_fd;
 	int		lex_count;
 	int		fd[2];
 	t_lexer	**lexer;

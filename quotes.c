@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/12 11:53:41 by omathot           #+#    #+#             */
-/*   Updated: 2023/10/04 17:25:44 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/10/04 17:28:16 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,7 +100,7 @@ void	relocate_quotes(t_list_of_quotes **list_of_quotes, char **str, int	**fake_d
 	free(*str);
 	*str = str_temp;
 	//linux
-	rl_clear_history();
+	// rl_clear_history();
 	//mac
 	// clear_history();
 	// add_history(str_temp);
