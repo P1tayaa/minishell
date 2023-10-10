@@ -6,7 +6,7 @@
 /*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:29:45 by omathot           #+#    #+#             */
-/*   Updated: 2023/09/29 13:24:53 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/10/10 15:36:14 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ int	main(void)
 	t_lexer	**lexer;
 	bool	quotes_test;
 	t_post_quotes	**content;
-	// int	i;
+	int	i;
 
 	manage_signals();
 	quotes_test = true;
@@ -74,7 +74,8 @@ int	main(void)
 		// intial prompt print
 		// read user input
 		content = NULL;
-		str = read_user_input(quotes_test);
+		
+		str = ft_strdup(read_user_input(quotes_test));
 		if (quotes_test)
 		{
 			check_quotes(&str, &content);
@@ -91,7 +92,21 @@ int	main(void)
 			if (content == NULL)
 				lexer = main_parser(str);
 			else
+			{
 				lexer = parser_with_quotes(content);
+				// int i;
+				i = 0;
+				while (content[i] != NULL)
+				{
+					printf("int	i == %d\n", i);
+					// free(content[i]->)
+					free(content[i]->content);
+					free(content[i]);
+					i++;
+				}
+				free(content);
+			}
+			free(str);
 			// i = 0;
 			// c'est pas idea mais c'est un depart
 			int i;
@@ -105,14 +120,29 @@ int	main(void)
 				printf("flags: (%s)\n", lexer[i]->flags);
 				i++;
 			}
+			// if (lexer[1] == NULL)
+			// 	exec(lexer[0]);
+			// else
+			// 	piping(lexer);
 			
-			if (lexer[1] == NULL)
-				exec(lexer[0]);
-			else
-				piping(lexer);
 			// optiona: wait for return value.
 		// }
-		
+		i = 0;
+		while (lexer[i] != NULL)
+		{
+			if (lexer[i]->cmd != NULL)
+				free(lexer[i]->cmd);
+			if (lexer[i]->args != NULL)
+				free(lexer[i]->args);
+			if (lexer[i]->file != NULL)
+				free(lexer[i]->file);
+			if (lexer[i]->flags != NULL)
+				free(lexer[i]->flags);
+			free(lexer[i]);
+			i++;
+		}
+		free(lexer);
+			break ;
 	}
 	return (0);
 }
