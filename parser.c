@@ -6,7 +6,7 @@
 /*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/13 13:30:47 by sboulain          #+#    #+#             */
-/*   Updated: 2023/09/29 15:23:45 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/10/12 16:14:06 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,16 @@ int 	parse_until_token_id(char *input, int current_lex, t_lexer **lexer, int cur
 int ft_char_find(char *str, const char *list_of_char);
 bool	ft_isspace(unsigned char c);
 
+void	count_flags_char_len(int *i, int *flags_char_len, t_lexer *lexer)
+{
+	while (!ft_isspace(lexer->args[(*i)]) && lexer->args[(*i)] != '\0')
+	{
+		(*flags_char_len)++;
+		(*i)++;
+	}
+	(*flags_char_len)++;
+}
+
 /*
 	Return the number of charaters that are going to be moved from arg to flags,
 	And keeps track of how many are going to be left in arg with ARGS_CHAR_LEN
@@ -48,27 +58,18 @@ int count_number_flags_char(int *args_char_len, t_lexer *lexer)
 		if (i != 0)
 			if (ft_isspace(lexer->args[i - 1]) && lexer->args[i] == '-')
 			{
-				while (!ft_isspace(lexer->args[i]) && lexer->args[i] != '\0')
-				{
-					flags_char_len++;
-					i++;
-				}
-				flags_char_len++;
+				count_flags_char_len(&i, &flags_char_len, lexer);
 				continue ;
 			}
 		if (i == 0 && lexer->args[i] == '-')
 		{
-			while (!ft_isspace(lexer->args[i]) && lexer->args[i] != '\0')
-				{
-					// printf("%c", lexer->args[i]);
-					flags_char_len++;
-					i++;
-				}
-				flags_char_len++;
-				continue ;
+			count_flags_char_len(&i, &flags_char_len, lexer);
 		}
-		(*args_char_len)++;
-		i++;
+		else
+		{
+			(*args_char_len)++;
+			i++;
+		}
 	}
 	return (flags_char_len);
 }
@@ -78,6 +79,7 @@ int count_number_flags_char(int *args_char_len, t_lexer *lexer)
 */
 void	malloc_new_args_and_new_flags(int args_char_len, char **args, char **flags, int flags_char_len)
 {
+	// printf("args_char_len == %d\n", args_char_len);
 	if (args_char_len != 0)
 	{
 		(*args) = malloc(sizeof(char) * (args_char_len + 1));
@@ -91,29 +93,21 @@ void	malloc_new_args_and_new_flags(int args_char_len, char **args, char **flags,
 		exit (-1);
 }
 
-/*
-	Move the flags from args to there respective par of the lexer by reconising where the '-'
-	
-*/
-void	move_flags_from_args_to_flags(t_lexer *lexer)
+void	move_flag_from_arg_to_flags(int *i, int *flags_char_len, t_lexer *lexer, char **flags)
+{
+	(*i)++;
+	while (!ft_isspace(lexer->args[(*i)]) && lexer->args[(*i)] != '\0')
+	{
+		(*flags)[(*flags_char_len)] = lexer->args[(*i)];
+		(*flags_char_len)++;
+		(*i)++;
+	}
+}
+
+void	move_all_flag_from_arg_to_flags(char **flags, int flags_char_len, int args_char_len, char **args, t_lexer *lexer)
 {
 	int	i;
-	char *args;
-	char *flags;
-	int flags_char_len;
-	int args_char_len;
 
-	// count how many char are to be in flags and args
-	flags_char_len = count_number_flags_char(&args_char_len, lexer);
-
-	// malloc for size
-	malloc_new_args_and_new_flags(args_char_len, &args, &flags, flags_char_len);
-
-	// copy in them
-	
-	flags[0] = '-';
-	flags_char_len = 1;
-	args_char_len = 0;
 	i = 0;
 	while (lexer->args[i] != '\0')
 	{
@@ -121,38 +115,41 @@ void	move_flags_from_args_to_flags(t_lexer *lexer)
 		{
 			if (ft_isspace(lexer->args[i - 1]) && lexer->args[i] == '-')
 			{
-				i++;
-				while (!ft_isspace(lexer->args[i]) && lexer->args[i] != '\0')
-				{
-					flags[flags_char_len] = lexer->args[i];
-					flags_char_len++;
-					i++;
-				}
+				move_flag_from_arg_to_flags(&i, &flags_char_len, lexer, flags);
 				continue ;
 			}
 		}
 		if (i == 0 && lexer->args[i] == '-')
 		{
-			i++;
-			while (!ft_isspace(lexer->args[i]) && lexer->args[i] != '\0')
-			{
-				flags[flags_char_len] = lexer->args[i];
-				flags_char_len++;
-				i++;
-			}
+			move_flag_from_arg_to_flags(&i, &flags_char_len, lexer, flags);
 			continue ;
 		}
-		args[args_char_len] = lexer->args[i];
+		(*args)[args_char_len] = lexer->args[i];
 		args_char_len++;
 		i++;
 	}
-	flags[flags_char_len] = '\0';
-	if (args != NULL)
-		args[args_char_len] = '\0';
+	(*flags)[flags_char_len] = '\0';
+	printf("args_char_len == %d, and args is %p\n", args_char_len, (*args));
+	if ((*args) != NULL)
+		(*args)[args_char_len] = '\0';
+}
 
-	// replace flags and args, but join previous flags
-	// puts(flags);
+/*
+	Move the flags from args to there respective par of the lexer by reconising where the '-'
+	
+*/
+void	move_flags_from_args_to_flags(t_lexer *lexer)
+{
+	char *args;
+	char *flags;
+	int flags_char_len;
+	int args_char_len;
 	char *temp;
+
+	flags_char_len = count_number_flags_char(&args_char_len, lexer);
+	malloc_new_args_and_new_flags(args_char_len, &args, &flags, flags_char_len);
+	flags[0] = '-';
+	move_all_flag_from_arg_to_flags(&flags, 1, 0, &args, lexer);
 	free(lexer->args);
 	lexer->args = args;
 	if (lexer->flags != NULL)
@@ -831,7 +828,7 @@ int	count_token(char *input)
 	list_of_tokenid = get_list_of_tokenid();
 	num_of_token = 0;
 	i = 0;
-	puts(input);
+	// puts(input);
 	while (input[i] != '\0')
 	{
 		j = 0;

@@ -6,7 +6,7 @@
 /*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/14 17:01:53 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/09/24 14:26:12 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/10/12 14:08:03 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -181,4 +181,40 @@ char	*ft_strjoin_with_frees(char *s1, char *s2)
 		free(s2);
 	s2 = NULL;
 	return (ptr);
+}
+/*
+	take STR_OG (usually the arg), and check if there is $?.
+	If it doesn't, it just return STR_OG. 
+	Otherwise it make a copy of STR_OG, but replace $? with NUMBER_REPLACE.
+	Returning the new str, and freeing STR_OG
+*/
+char *replace_doll_question_to_number_with_free(char *str_og, int number_replace)
+{
+	int	i;
+	int	location_of_doll;
+	char *str_return;
+
+	if (str_og == NULL)
+		return NULL;
+	i = 0;
+	location_of_doll = -1;
+	while (str_og[i] != '\0')
+	{
+		if (str_og[i] == '$')
+		{
+			if (str_og[i + 1] == '\0')
+				break ;
+			else if (str_og[i + 1] == '!')
+				if (isspace(str_og[i + 2]) || str_og[i + 2] == '\0')
+					location_of_doll = i;
+		}
+		i++;
+	}
+	if (location_of_doll == -1)
+		return (str_og);
+	str_return = ft_strjoin_with_frees(str_dup_until_index(str_og, location_of_doll), ft_strjoin_with_frees(ft_itoa(number_replace), ft_strdup(&str_og[location_of_doll + 2])));
+	if (!str_return)
+		exit(1);
+	free(str_og);
+	return (str_return);
 }

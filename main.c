@@ -6,7 +6,7 @@
 /*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:29:45 by omathot           #+#    #+#             */
-/*   Updated: 2023/10/10 15:36:14 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/10/12 14:22:10 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,6 +59,10 @@ t_lexer	**main_parser(char *str);
 void	check_quotes(char **str_og, t_post_quotes ***content);
 t_lexer	**parser_with_quotes(t_post_quotes **content);
 
+// ! to remove only here for testing
+char *replace_doll_question_to_number_with_free(char *str_og, int number_replace);
+
+
 int	main(void)
 {
 	char	*str;
@@ -79,8 +83,6 @@ int	main(void)
 		if (quotes_test)
 		{
 			check_quotes(&str, &content);
-			puts(str);
-			add_history(str);
 		}
 		// parse user input
 		// if (!quotes_test)
@@ -113,6 +115,8 @@ int	main(void)
 			i = 0;
 			while (lexer[i] != NULL)
 			{
+				printf("arg was before: %s\n", lexer[i]->args);
+				lexer[i]->args = replace_doll_question_to_number_with_free(lexer[i]->args, 69);
 				printf("\nlexer[%d]\n cmd: (%s)\n", i, lexer[i]->cmd);
 				printf("args: (%s)\n", lexer[i]->args);
 				printf("tokenid: (%s)\n", lexer[i]->tokenid);
@@ -142,7 +146,7 @@ int	main(void)
 			i++;
 		}
 		free(lexer);
-			break ;
+			// break ;
 	}
 	return (0);
 }
