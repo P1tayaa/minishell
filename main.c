@@ -6,64 +6,53 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:29:45 by omathot           #+#    #+#             */
-/*   Updated: 2023/10/07 17:28:54 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/10/13 13:39:48 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-int	main(void); 
+int		main(void); 
 char	*read_user_input(bool quotes_test);
 char	is_prompt_empty(char *str);
-
-
-/*
-void add_history (const char *string)
-Place string at the end of the history list. The associated data field (if any) is set to NULL.
-
-void clear_history (void)
-Clear the history list by deleting all the entries.
-
-char *
-    readline (const char *prompt);
-
-rl_on_new_line,
-rl_nreplace_lie, rl_redisplay,
-
-getcwd
-chdir
-getenv
-
-dup, dup2, pipe    PIPES
-duplicate stdout environment, have shell write on there, return next stdout environment. 
-
-access !!!
-
-printf, malloc, free, write, , open, read,
-close, fork, wait, waitpid, wait3, wait4, signal,
-sigaction, sigemptyset, sigaddset, kill, exit,
-, stat, lstat, fstat, unlink, execve,
-, opendir, readdir, closedir,
-strerror, perror, isatty, ttyname, ttyslot, ioctl,
-, tcsetattr, tcgetattr, tgetent, tgetflag,
-tgetnum, tgetstr, tgoto, tputs
-*/
-
-/*
-feof(3), ferror(3), fgetln(3), fgetws(3), getline(3)
-*/
-
-char *executer(char *str, bool no_pipe);
+char *executer(t_lexer **lexer, t_pipedata *data);
 t_lexer	**main_parser(char *str);
 void	check_quotes(char **str_og, t_post_quotes ***content);
 t_lexer	**parser_with_quotes(t_post_quotes **content);
 
+// void	builtins(t_lexer **lexer)
+// {
+// 	int	lex_count;
+
+// 	lex_count = 0;
+// 	while (lexer[lex_count])
+// 	{
+// 		puts ("I am trying to launch executer function");
+// 		if (ft_memcmp(lexer[lex_count]->cmd, "exit", ft_strlen(lexer[lex_count]->cmd)) == 0)
+// 		{
+// 			if (!(ft_memcmp(lexer[lex_count]->tokenid, "|", ft_strlen(lexer[lex_count]->tokenid))))
+// 				executer(lexer, &data);
+// 			else
+// 				executer(lexer[lex_count]->cmd, false);
+// 		}
+// 		else if (ft_memcmp(lexer[lex_count]->cmd, "clear", ft_strlen(lexer[lex_count]->cmd)) == 0)
+// 			executer(lexer[lex_count]->cmd, true);
+// 		else if (ft_memcmp(lexer[lex_count]->cmd, "pwd", ft_strlen(lexer[lex_count]->cmd)) == 0)
+// 			executer(lexer[lex_count]->cmd, true);
+// 		else if (ft_memcmp(lexer[lex_count]->cmd, "cd", ft_strlen(lexer[lex_count]->cmd)) == 0)
+// 			executer(lexer[lex_count]->cmd, true);
+// 		else if (ft_memcmp(lexer[lex_count]->cmd, "echo", ft_strlen(lexer[lex_count]->cmd)) == 0)
+// 			executer(lexer[lex_count]->cmd, true);
+// 		lex_count++;
+// 	}
+// }
+
 int    main(void)
 {
-    char    *str;
-    t_lexer    **lexer;
-    bool    quotes_test;
-    t_post_quotes    **content;
+    char			*str;
+    t_lexer			**lexer;
+    bool			quotes_test;
+	t_post_quotes	**content;
     // int    i;
 
     manage_signals();
@@ -74,6 +63,8 @@ int    main(void)
         // read user input
         content = NULL;
         str = read_user_input(quotes_test);
+		if (is_prompt_empty(str) == 0)
+			continue ;
         if (quotes_test)
         {
             check_quotes(&str, &content);
@@ -83,16 +74,10 @@ int    main(void)
         // parse user input
         // if (!quotes_test)
         // {
-            // pause();
-            // puts("");
-            // puts(str);
-
             if (content == NULL)
                 lexer = main_parser(str);
             else
                 lexer = parser_with_quotes(content);
-            // i = 0;
-            // c'est pas idea mais c'est un depart
             int i;
             i = 0;
             while (lexer[i] != NULL)
@@ -104,14 +89,29 @@ int    main(void)
                 printf("flags: (%s)\n", lexer[i]->flags);
                 i++;
             }
-            
-            if (lexer[1] == NULL)
-                exec(lexer[0]);
-            else
-                piping(lexer);
+			// builtins(lexer);
+			
+            // while (lexer[lex_count]->cmd)
+			// {
+			// 	puts ("I am trying to launch executer function");
+			// 	if (ft_memcmp(lexer[lex_count]->cmd, "exit", ft_strlen(lexer[lex_count]->cmd)) == 0)
+			// 	{
+			// 		if (!(ft_memcmp(lexer[lex_count]->tokenid, "|", ft_strlen(lexer[lex_count]->tokenid))))
+			// 			executer(lexer[lex_count]->cmd, true);
+			// 	}
+			// 	else if (ft_memcmp(lexer[lex_count]->cmd, "clear", ft_strlen(lexer[lex_count]->cmd)) == 0)
+			// 		executer(lexer[lex_count]->cmd, true);
+			// 	else if (ft_memcmp(lexer[lex_count]->cmd, "pwd", ft_strlen(lexer[lex_count]->cmd)) == 0)
+			// 		executer(lexer[lex_count]->cmd, true);
+			// 	else if (ft_memcmp(lexer[lex_count]->cmd, "cd", ft_strlen(lexer[lex_count]->cmd)) == 0)
+			// 		executer(lexer[lex_count]->cmd, true);
+			// }
+            // if (lexer[1] == NULL)
+            //     exec(lexer[0]);
+            // else
+            piping(lexer);
             // optiona: wait for return value.
         // }
-        
     }
     return (0);
 }

@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:30:26 by omathot           #+#    #+#             */
-/*   Updated: 2023/10/07 17:56:59 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/10/12 20:16:33 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,7 @@ typedef struct s_lexer
 	char	*args;
 	char	*file;
 	int		possition;
+	bool	execd;
 }	t_lexer;
 
 typedef	struct s_list_of_quotes
@@ -64,6 +65,7 @@ void	piping(t_lexer **lexer);
 char	*ft_strtok(char *str, const char *delim);
 void	concat_path(char *buffer, const char *dir, const char *cmd);
 char *str_dup_until_index(char *str, int index);
-
+char *executer(t_lexer **lexer, t_pipedata *data);
+int	is_built_in(t_lexer **lexer, t_pipedata *data);
 
 #endif

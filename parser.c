@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/13 13:30:47 by sboulain          #+#    #+#             */
-/*   Updated: 2023/10/07 17:57:15 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/10/10 17:28:17 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -293,6 +293,7 @@ void	initiate_values_to_zero_NULL(t_lexer **lexer, int i)
 	(*lexer)->file = NULL;
 	(*lexer)->flags = NULL;
 	(*lexer)->tokenid[0] = '\0';
+	(*lexer)->execd = false;
 }
 
 /*

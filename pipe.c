@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/20 15:16:04 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/10/07 17:57:36 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/10/13 14:15:46 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,51 +74,12 @@ char	*get_cmd_path(const char *cmd)
 	return (NULL);
 }
 
-void	exec(t_lexer *lexer)
-{
-	char	*args[4];  // Assuming a maximum of one flag and one argument for simplicity.
-	char	*cmd_path;
-	int		i;
-	pid_t	pid;
-
-	cmd_path = get_cmd_path(lexer->cmd);
-	if (cmd_path == NULL)
-	{
-		perror("Command not found EXEC");
-		return ;
-	}
-	i = 0;
-	args[i++] = lexer->cmd;
-	if (lexer->flags != NULL)
-		args[i++] = lexer->flags;
-	if (lexer->args != NULL)
-		args[i++] = lexer->args;
-	args[i++] = NULL;
-	i = 0;
-	pid = fork();
-	if (pid == -1)
-	{
-		perror("Fork failed");
-		free(cmd_path);
-		return ;
-	}
-	if (pid == 0)				// Child process
-	{
-		execve(cmd_path, args, environ);
-		perror("Execution failed");
-		exit(EXIT_FAILURE);
-	}
-	else						// Parent process
-		wait(NULL);				// Wait for the child to finish
-	free(cmd_path);
-}
 
 int redirection_handler(t_lexer *lexer)
 {
 	int	fd;
 
 	fd = -1;
-	// puts("launches redirection_handler");
 	if (strcmp(lexer->tokenid, "<") == 0)
 		fd = open(lexer->file, O_RDONLY);
 	else if (strcmp(lexer->tokenid, ">") == 0)
@@ -133,85 +94,24 @@ int redirection_handler(t_lexer *lexer)
 	return (fd);
 }
 
-void	set_redirection(t_lexer **lexer, int *input_fd, int j)
+void	execute_child_process(t_pipedata *data)
 {
-	if (j > 0 && (strcmp(lexer[j-1]->tokenid, "<") == 0 || strcmp(lexer[j-1]->tokenid, ">") == 0 || strcmp(lexer[j-1]->tokenid, ">>") == 0))
-	{
-		*input_fd = redirection_handler(lexer[j-1]);
-		if (*input_fd == -1)
-		{
-			perror("Error setting up redirection");
-			exit(EXIT_FAILURE);
-		}
-	}
+	char	*cmd_path;
+	char	*args[4];
+	int		i = 0;
+
+	cmd_path = get_cmd_path(data->lexer[data->lex_count]->cmd);
+	args[i++] = data->lexer[data->lex_count]->cmd;
+	if (data->lexer[data->lex_count]->flags != NULL)
+		args[i++] = data->lexer[data->lex_count]->flags;
+	if (data->lexer[data->lex_count]->args != NULL)
+		args[i++] = data->lexer[data->lex_count]->args;
+	args[i] = NULL;
+	execve(cmd_path, args, environ);
+	free(cmd_path);
+	perror("Execution failed");
+	exit(EXIT_FAILURE);
 }
-
-    // If there's an input redirection, use it
-    // if (data->input_fd != -1)
-    // {
-    //     if (dup2(data->input_fd, STDIN_FILENO) == -1) {
-    //         perror("dup2 input_fd");
-    //         exit(EXIT_FAILURE);
-    //     }
-    //     close(data->input_fd);
-    // }
-    // if (data->lex_count != 0)  // If not the first command and no input redirection
-    // {
-    //     if (dup2(data->input_fd, STDIN_FILENO) == -1) {
-    //         perror("dup2 prev_fd");
-    //         exit(EXIT_FAILURE);
-    //     }
-    //     close(data->input_fd);
-    // }
-
-    // // If this is the last command and there's an output redirection, use it
-	// if (!(data->lexer[data->lex_count + 1]))
-	// {
-    // 	fprintf(stderr, "Debug: output_fd before dup2: %d\n", data->output_fd);  // Debug print
-    // 	if (dup2(data->output_fd, STDOUT_FILENO) == -1) {
-    // 	    perror("dup2 output_fd");
-    // 	    exit(EXIT_FAILURE);
-    // 	}
-    // 	close(data->output_fd);
-	// }
-
-    // // If not the last command, set up for next command
-    // if (data->lexer[data->lex_count + 1]->cmd != NULL)
-    // {
-    //     if (dup2(data->fd[1], STDOUT_FILENO) == -1) {
-    //         perror("dup2 fd[1]");
-    //         exit(EXIT_FAILURE);
-    //     }
-    // }
-
-    // close(data->fd[0]);
-    // close(data->fd[1]);
-
-void execute_child_process(t_pipedata *data) 
-{
-    char *cmd_path;
-    char *args[4];
-    int i = 0;
-
-	// puts("retrieving cmd_path");
-    cmd_path = get_cmd_path(data->lexer[data->lex_count]->cmd);
-	// printf("Command path: %s\n", cmd_path);
-    args[i++] = data->lexer[data->lex_count]->cmd;
-    if (data->lexer[data->lex_count]->flags != NULL)
-        args[i++] = data->lexer[data->lex_count]->flags;
-    if (data->lexer[data->lex_count]->args != NULL)
-	{
-        args[i++] = data->lexer[data->lex_count]->args;
-		// printf("args: %s\n", args[i - 1]);
-	}
-    args[i] = NULL;  // Ensure the args array is NULL-terminated
-    execve(cmd_path, args, environ);
-    free(cmd_path);
-    // If execve returns, it means there was an error
-    perror("Execution failed");
-    exit(EXIT_FAILURE);
-}
-
 
 void	initialize_pipedata(t_pipedata *data)
 {
@@ -219,85 +119,141 @@ void	initialize_pipedata(t_pipedata *data)
 	data->lex_count = 0;
 }
 
-// fd[0] = read;
-// fd[1] = write;
-// void	piping(t_lexer **lexer)
-// {
-// 	t_pipedata	data;
-// 	int			pid;
-// 	int			check;			// temporary test to fix output redirections -- seems to have broken input redirection as well tho
+void	manage_reads_writes(t_pipedata *data, t_lexer **lexer)
+{
+	// if ((*data).input_fd != -1)
+	// {
+	// 	dup2((*data).input_fd, STDIN_FILENO);
+	// 	close((*data).input_fd);
+	// }
+	if (is_built_in(lexer, data) == 1)
+	{
+		puts("i am in isbuilt");
+		dup2((*data).fd[1], STDOUT_FILENO);
+		puts("test");
+		close((*data).fd[1]);
+		puts("test");
+		close((*data).fd[0]);
+		puts("test");
+		return ;
+	}
+	if (lexer[(*data).lex_count]->tokenid[0] == '<')
+	{
+		(*data).fd[0] = redirection_handler(lexer[(*data).lex_count]);
+		dup2((*data).fd[0], STDIN_FILENO);
+		dup2((*data).fd[1], STDOUT_FILENO);
+		(*data).lex_count++;
+	}
+	else if (lexer[(*data).lex_count]->tokenid[0] == '>')
+	{
+		(*data).fd[1] = redirection_handler(lexer[(*data).lex_count]);
+		dup2((*data).fd[1], STDOUT_FILENO);
+		dup2((*data).input_fd, STDIN_FILENO);
+		close((*data).input_fd);
+	}
+	else if ((*data).lex_count != 0 && lexer[(*data).lex_count + 1] != NULL)
+	{
+		dup2((*data).input_fd, STDIN_FILENO);
+		close((*data).input_fd);
+		dup2((*data).fd[1], STDOUT_FILENO);
+	}
+	else if ((*data).lex_count != 0 || (*data).input_fd != -1)			// added top condition here, seems to not break anything? 
+	{
+		puts("I am in here");
+		dup2((*data).input_fd, STDIN_FILENO);
+		close((*data).input_fd);
+	}
+	else
+	{
+		puts("in else");
+		dup2((*data).fd[1], STDOUT_FILENO);
+	}
+	puts("finished managing reads/writes");
+	close((*data).fd[0]);
+	close((*data).fd[1]);
+}
 
-// 	check = -1;
-// 	data.lexer = lexer;
-// 	initialize_pipedata(&data);
-// 	while (lexer[data.lex_count])
-// 		data.lex_count++;
-// 	if (strcmp(lexer[0]->tokenid, "<") == 0)
-// 	{
-// 		data.input_fd = redirection_handler(lexer[0]);
-// 		data.j++;
-// 	}
-// 	if (data.lex_count > 1 && (strcmp(lexer[data.lex_count - 1]->tokenid, ">") == 0 || strcmp(lexer[data.lex_count - 1]->tokenid, ">>") == 0))
-// 	{
-// 		data.output_fd = redirection_handler(lexer[data.lex_count - 1]);
-// 		data.lex_count -= 1;  // Adjust the lex_count to not include the NULL lexer
-// 	}
-// 	while (data.j < data.lex_count)		// && lexer[data.j]->cmd != NULL
-// 	{
-// 		printf("start of while loop where j = %d\n", data.j);
-// 		// Handle any middle redirections
-// 		// set_redirection(lexer, &data.input_fd, data.j);
-// 		if (pipe(data.fd) == -1)
-// 			return ;
-// 		pid = fork();
-// 		printf("pid generated\n");
-// 		if (pid == -1)
-// 			return ;
-// 		if (pid == 0 && lexer[data.j]->already_execd == false)  // Child process ------- ! ! ! && check != data.j breaks the normal pipes, need to find a better difference between first and second iteration of same lexer
-// 		{
-// 			printf("executing child process\n");
-// 			lexer[data.j]->already_execd = true;
-// 			execute_child_process(&data);
-// 		}
-// 		else  // Parent process
-// 		{
-// 			printf("parent process after child termination\n");
-// 			close(data.fd[1]);
-// 			if (data.j != 0)
-// 				close(data.prev_fd);
-// 			data.prev_fd = data.fd[0];
-// 		}
-// 		if (check == data.j)
-// 			data.j++;									// so here we increment to the next lexer; need conditions to not increase if cmd & file != NULL
-// 		check = data.j;
-// 		if (data.input_fd != -1)
-// 		{
-// 			close(data.input_fd);
-// 			data.input_fd = -1;
-// 			data.j++;
-// 		}
-// 	}
-// 	close(data.prev_fd);
-// 	data.j = 0;
-// 	while (data.j < data.lex_count)
-// 	{
-// 		printf("waiting for child process termination");
-// 		wait(NULL);  // Wait for all child processes to finish
-// 		data.j++;
-// 	}
-// }
+void	parent_management(t_pipedata *data, t_lexer **lexer, int pid)
+{
+	int	status;
 
+	status = 0;
+	close((*data).fd[1]); // Close writing end as we are reading from the pipe
+	if ((lexer[(*data).lex_count + 1] == NULL || lexer[(*data).lex_count + 1]->cmd == NULL) && lexer[(*data).lex_count]->tokenid[0] == '<')
+		close((*data).fd[0]);
+	else
+	{
+		puts("set input_fd to fd[0]");
+		(*data).input_fd = (*data).fd[0];
+	}
+	waitpid(pid, &status, 0);
+}
+
+int	is_built_in(t_lexer **lexer, t_pipedata *data)
+{
+	int			i;
+	int			cmd_len;
+	int			builtin_len;
+	const char* builtins[] = {
+        "pwd",
+        "echo",
+        "exit",
+		"clear",
+		"cd",
+		"env",
+		"^D",
+        NULL
+    };
+
+	i = 0;
+	puts("checking builtins");
+	while (builtins[i])
+	{
+		cmd_len = ft_strlen(lexer[(*data).lex_count]->cmd);
+		builtin_len = ft_strlen(builtins[i]);
+		if (cmd_len > builtin_len)
+		{
+			if (ft_strncmp(lexer[(*data).lex_count]->cmd, builtins[i], builtin_len) == 0)
+				return (1);
+		}
+		else if (ft_strncmp(lexer[(*data).lex_count]->cmd, builtins[i], cmd_len) == 0)
+			return (1);
+		i++;
+	}
+	return (0);
+}
 
 void	piping(t_lexer **lexer)
 {
 	t_pipedata	data;
 	int			pid;
-	int			status;
 
 	initialize_pipedata(&data);
 	data.lexer = lexer;
-	while (lexer[data.lex_count] != NULL)
+	puts("pipes");
+	if (lexer[data.lex_count]->tokenid[0] != '<' && is_built_in(lexer, &data) == 1)
 	{
+		puts("built in");
+		if (lexer[1] == NULL)
+		{
+			puts("single builtin");
+			executer(lexer, &data);
+			lexer[data.lex_count]->execd = true;
+		}
+	}
+	if (lexer[1] == NULL && lexer[data.lex_count]->execd == false)
+	{
+		puts("single exec");
+		if ((pid = fork()) == 0)
+		{
+			execute_child_process(&data);
+			exit(EXIT_SUCCESS);
+		}
+		// lexer[data.lex_count]->execd = true;
+	}
+	while (lexer[data.lex_count] != NULL && lexer[data.lex_count]->execd == false)
+	{
+		puts("piping");
 		pipe(data.fd);
 		pid = fork();
 		if (pid == -1)
@@ -307,76 +263,101 @@ void	piping(t_lexer **lexer)
 		}
 		if (pid == 0)
 		{
-			if (data.input_fd != -1)
-            {
-                dup2(data.input_fd, STDIN_FILENO);
-                close(data.input_fd);
-            }
-			if (lexer[data.lex_count]->tokenid[0] == '<')
-			{
-				data.fd[0] = redirection_handler(lexer[data.lex_count]);
-				dup2(data.fd[0], STDIN_FILENO);
-				dup2(data.fd[1], STDOUT_FILENO);
-				data.lex_count++;
-			}
-			else if (lexer[data.lex_count]->tokenid[0] == '>')
-			{
-				data.fd[1] = redirection_handler(lexer[data.lex_count]);
-				dup2(data.fd[1], STDOUT_FILENO);
-			}
-			else if (data.lex_count != 0 && lexer[data.lex_count + 1] != NULL)
-			{
-				dup2(data.input_fd, STDIN_FILENO);
-				close(data.input_fd);
-				dup2(data.fd[1], STDOUT_FILENO);
-			}
-			else if (data.lex_count != 0 )
-			{
-				dup2(data.input_fd, STDIN_FILENO);
-				close(data.input_fd);
-			}
-			else
-				dup2(data.fd[1], STDOUT_FILENO);
-			close(data.fd[0]);
-			close(data.fd[1]);
+			puts("in child process");
+			manage_reads_writes(&data, lexer);
 			if (lexer[data.lex_count]->cmd)
-				execute_child_process(&data);
+			{
+				if (is_built_in(lexer, &data) == 1)
+				{
+					puts("found built in");
+					executer(lexer, &data);
+				}
+				else
+					execute_child_process(&data);
+			}
 		}
 		else  // Parent process
-		{
-			close(data.fd[1]); // Close writing end as we are reading from the pipe
-			if ((lexer[data.lex_count + 1] == NULL || lexer[data.lex_count + 1]->cmd == NULL) && lexer[data.lex_count]->tokenid[0] == '<')
-				close(data.fd[0]);
-			else
-				data.input_fd = data.fd[0];
-			waitpid(pid, &status, 0);
-		}
+			parent_management(&data, lexer, pid);
+		// puts("incrementing lex_count");
 		data.lex_count++;
 	}
 }
 
 
-			// else if (data.lex_count != 0)  // If not the first command and no input redirection
-			// {
-			// 	puts("should show up");
-        	// 	dup2(data.input_fd, STDIN_FILENO);
-			// 	close(data.input_fd);
-			// 	if (lexer[data.lex_count] != NULL)
-			// 		if (lexer[data.lex_count]->cmd != NULL)
-			// 			dup2(data.fd[1], STDOUT_FILENO);
-			// }
+
+		// else
+		// {
+		// 	puts("hardcoded piping builtins");
+		// 	pipe(data.fd);
+		// 	pid = fork();
+		// 	if (pid == 0)
+		// 	{
+		// 		dup2(data.fd[1], STDOUT_FILENO);
+		// 		close(data.fd[1]);
+		// 		close(data.fd[0]);
+		// 		executer(lexer, &data);
+		// 		exit(EXIT_SUCCESS);
+		// 	}
+		// 	lexer[data.lex_count]->execd = true;
+		// 	data.lex_count++;
+		// 	pid = fork();
+		// 	if (pid == 0)
+		// 	{
+		// 		puts("second process");
+		// 		dup2(data.fd[0], STDIN_FILENO);
+		// 		close(data.fd[1]);
+		// 		execute_child_process(&data);
+		// 		exit(EXIT_SUCCESS);
+		// 	}
+		// 	lexer[data.lex_count]->execd = true;
+		// 	close(data.fd[0]);
+		// 	close(data.fd[1]);
+		// 	wait(NULL);
+		// 	wait(NULL);
+		// }
 
 
-			// else if (data.input_fd == -1)
-			// {
-			// 	data.input_fd = data.fd[0];
-			// 	dup2(data.input_fd, STDIN_FILENO);
-			// 	close(data.input_fd);
-			// }
-			// else if (data.input_fd != -1)
-			// {
-			// 	puts("test");
-			// 	dup2(data.input_fd, STDIN_FILENO);
-			// }
-			// if (data.lexer[data.lex_count + 1]->cmd != NULL)
-        	// 	dup2(data.fd[1], STDOUT_FILENO);
+
+
+
+
+
+
+// void	exec(t_lexer *lexer)
+// {
+// 	char	*args[4];  // Assuming a maximum of one flag and one argument for simplicity.
+// 	char	*cmd_path;
+// 	int		i;
+// 	pid_t	pid;
+
+// 	cmd_path = get_cmd_path(lexer->cmd);
+// 	if (cmd_path == NULL)
+// 	{
+// 		perror("Command not found EXEC");
+// 		return ;
+// 	}
+// 	i = 0;
+// 	args[i++] = lexer->cmd;
+// 	if (lexer->flags != NULL)
+// 		args[i++] = lexer->flags;
+// 	if (lexer->args != NULL)
+// 		args[i++] = lexer->args;
+// 	args[i++] = NULL;
+// 	i = 0;
+// 	pid = fork();
+// 	if (pid == -1)
+// 	{
+// 		perror("Fork failed");
+// 		free(cmd_path);
+// 		return ;
+// 	}
+// 	if (pid == 0)				// Child process
+// 	{
+// 		execve(cmd_path, args, environ);
+// 		perror("Execution failed");
+// 		exit(EXIT_FAILURE);
+// 	}
+// 	else						// Parent process
+// 		wait(NULL);				// Wait for the child to finish
+// 	free(cmd_path);
+// }
