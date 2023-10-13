@@ -6,7 +6,7 @@
 /*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:29:45 by omathot           #+#    #+#             */
-/*   Updated: 2023/09/29 13:24:53 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/10/12 14:22:10 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,13 +59,17 @@ t_lexer	**main_parser(char *str);
 void	check_quotes(char **str_og, t_post_quotes ***content);
 t_lexer	**parser_with_quotes(t_post_quotes **content);
 
+// ! to remove only here for testing
+char *replace_doll_question_to_number_with_free(char *str_og, int number_replace);
+
+
 int	main(void)
 {
 	char	*str;
 	t_lexer	**lexer;
 	bool	quotes_test;
 	t_post_quotes	**content;
-	// int	i;
+	int	i;
 
 	manage_signals();
 	quotes_test = true;
@@ -74,12 +78,11 @@ int	main(void)
 		// intial prompt print
 		// read user input
 		content = NULL;
-		str = read_user_input(quotes_test);
+		
+		str = ft_strdup(read_user_input(quotes_test));
 		if (quotes_test)
 		{
 			check_quotes(&str, &content);
-			puts(str);
-			add_history(str);
 		}
 		// parse user input
 		// if (!quotes_test)
@@ -91,13 +94,29 @@ int	main(void)
 			if (content == NULL)
 				lexer = main_parser(str);
 			else
+			{
 				lexer = parser_with_quotes(content);
+				// int i;
+				i = 0;
+				while (content[i] != NULL)
+				{
+					printf("int	i == %d\n", i);
+					// free(content[i]->)
+					free(content[i]->content);
+					free(content[i]);
+					i++;
+				}
+				free(content);
+			}
+			free(str);
 			// i = 0;
 			// c'est pas idea mais c'est un depart
 			int i;
 			i = 0;
 			while (lexer[i] != NULL)
 			{
+				printf("arg was before: %s\n", lexer[i]->args);
+				lexer[i]->args = replace_doll_question_to_number_with_free(lexer[i]->args, 69);
 				printf("\nlexer[%d]\n cmd: (%s)\n", i, lexer[i]->cmd);
 				printf("args: (%s)\n", lexer[i]->args);
 				printf("tokenid: (%s)\n", lexer[i]->tokenid);
@@ -105,14 +124,29 @@ int	main(void)
 				printf("flags: (%s)\n", lexer[i]->flags);
 				i++;
 			}
+			// if (lexer[1] == NULL)
+			// 	exec(lexer[0]);
+			// else
+			// 	piping(lexer);
 			
-			if (lexer[1] == NULL)
-				exec(lexer[0]);
-			else
-				piping(lexer);
 			// optiona: wait for return value.
 		// }
-		
+		i = 0;
+		while (lexer[i] != NULL)
+		{
+			if (lexer[i]->cmd != NULL)
+				free(lexer[i]->cmd);
+			if (lexer[i]->args != NULL)
+				free(lexer[i]->args);
+			if (lexer[i]->file != NULL)
+				free(lexer[i]->file);
+			if (lexer[i]->flags != NULL)
+				free(lexer[i]->flags);
+			free(lexer[i]);
+			i++;
+		}
+		free(lexer);
+			// break ;
 	}
 	return (0);
 }
