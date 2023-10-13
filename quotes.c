@@ -6,7 +6,7 @@
 /*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/12 11:53:41 by omathot           #+#    #+#             */
-/*   Updated: 2023/10/12 14:41:58 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/10/13 15:43:28 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -831,6 +831,7 @@ char	**spit_text_args(char *str, int	*doll_pos)
 	int		total_parts;
 
 	spit_text_args_init(&num_doll, doll_pos, &total_parts, &string_split);
+	printf("%d = dollar num\n", num_doll);
 	i = 0;
 	num_doll = 0;
 	while (i < (total_parts))
