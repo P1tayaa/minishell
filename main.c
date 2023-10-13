@@ -53,81 +53,88 @@ int    main(void)
     t_lexer			**lexer;
     bool			quotes_test;
 	t_post_quotes	**content;
-    // int    i;
+	int	i;
 
-    manage_signals();
-    quotes_test = false;
-    while (1)
-    {
-        // intial prompt print
-        // read user input
-        content = NULL;
-        str = read_user_input(quotes_test);
+	manage_signals();
+	quotes_test = true;
+	while (1)
+	{
+		// intial prompt print
+		// read user input
+		content = NULL;
+		
+		str = ft_strdup(read_user_input(quotes_test));
 		if (is_prompt_empty(str) == 0)
 			continue ;
-        if (quotes_test)
-        {
-            check_quotes(&str, &content);
-            puts(str);
-            add_history(str);
-        }
-        // parse user input
-        // if (!quotes_test)
-        // {
-            if (content == NULL)
-                lexer = main_parser(str);
-            else
-                lexer = parser_with_quotes(content);
-            int i;
-            i = 0;
-            while (lexer[i] != NULL)
-            {
-                printf("\nlexer[%d]\n cmd: (%s)\n", i, lexer[i]->cmd);
-                printf("args: (%s)\n", lexer[i]->args);
-                printf("tokenid: (%s)\n", lexer[i]->tokenid);
-                printf("file: (%s)\n", lexer[i]->file);
-                printf("flags: (%s)\n", lexer[i]->flags);
-                i++;
-            }
-			// builtins(lexer);
-			
-            // while (lexer[lex_count]->cmd)
-			// {
-			// 	puts ("I am trying to launch executer function");
-			// 	if (ft_memcmp(lexer[lex_count]->cmd, "exit", ft_strlen(lexer[lex_count]->cmd)) == 0)
-			// 	{
-			// 		if (!(ft_memcmp(lexer[lex_count]->tokenid, "|", ft_strlen(lexer[lex_count]->tokenid))))
-			// 			executer(lexer[lex_count]->cmd, true);
-			// 	}
-			// 	else if (ft_memcmp(lexer[lex_count]->cmd, "clear", ft_strlen(lexer[lex_count]->cmd)) == 0)
-			// 		executer(lexer[lex_count]->cmd, true);
-			// 	else if (ft_memcmp(lexer[lex_count]->cmd, "pwd", ft_strlen(lexer[lex_count]->cmd)) == 0)
-			// 		executer(lexer[lex_count]->cmd, true);
-			// 	else if (ft_memcmp(lexer[lex_count]->cmd, "cd", ft_strlen(lexer[lex_count]->cmd)) == 0)
-			// 		executer(lexer[lex_count]->cmd, true);
-			// }
-            // if (lexer[1] == NULL)
-            //     exec(lexer[0]);
-            // else
-            piping(lexer);
-            // optiona: wait for return value.
-        // }
-    }
-    return (0);
-}
+		// if (str == NULL)
+		// 	continue ;
+		if (quotes_test)
+		{
+			check_quotes(&str, &content);
+		}
+		// parse user input
+		// if (!quotes_test)
+		// {
+			// pause();
+			// puts("");
+			// puts(str);
 
-char	is_prompt_empty(char *str)
-{
-	int		i;
-	char	is_valid;
-
-	i = 0;
-	is_valid = 0;
-	while (str[i])
-		i++;
-	if (i > 0)
-		is_valid = 1;
-	return (is_valid);
+			if (content == NULL)
+				lexer = main_parser(str);
+			else
+			{
+				lexer = parser_with_quotes(content);
+				// int i;
+				i = 0;
+				while (content[i] != NULL)
+				{
+					printf("int	i == %d\n", i);
+					// free(content[i]->)
+					free(content[i]->content);
+					free(content[i]);
+					i++;
+				}
+				free(content);
+			}
+			free(str);
+			// i = 0;
+			// c'est pas idea mais c'est un depart
+			int i;
+			i = 0;
+			while (lexer[i] != NULL)
+			{
+				// printf("arg was before: %s\n", lexer[i]->args);
+				// lexer[i]->args = replace_doll_question_to_number_with_free(lexer[i]->args, 69);
+				printf("\nlexer[%d]\n cmd: (%s)\n", i, lexer[i]->cmd);
+				printf("args: (%s)\n", lexer[i]->args);
+				printf("tokenid: (%s)\n", lexer[i]->tokenid);
+				printf("file: (%s)\n", lexer[i]->file);
+				printf("flags: (%s)\n", lexer[i]->flags);
+				i++;
+			}
+			piping(lexer);
+			// pause();
+			// pause();
+			// optiona: wait for return value.
+		// }
+		i = 0;
+		while (lexer[i] != NULL)
+		{
+			if (lexer[i]->cmd != NULL)
+				free(lexer[i]->cmd);
+			if (lexer[i]->args != NULL)
+				free(lexer[i]->args);
+			if (lexer[i]->file != NULL)
+				free(lexer[i]->file);
+			if (lexer[i]->flags != NULL)
+				free(lexer[i]->flags);
+			free(lexer[i]);
+			i++;
+		}
+		free(lexer);
+			// break ;
+	}
+	return (0);
 }
 
 char	*read_user_input(bool quotes_test)
@@ -143,4 +150,19 @@ char	*read_user_input(bool quotes_test)
 	// 	exit(EXIT_SUCCESS);
 	// }
 	return (str);
+}
+
+
+char	is_prompt_empty(char *str)
+{
+	int		i;
+	char	is_valid;
+
+	i = 0;
+	is_valid = 0;
+	while (str[i])
+		i++;
+	if (i > 0)
+		is_valid = 1;
+	return (is_valid);
 }

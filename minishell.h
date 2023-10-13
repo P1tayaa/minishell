@@ -66,6 +66,5 @@ char	*ft_strtok(char *str, const char *delim);
 void	concat_path(char *buffer, const char *dir, const char *cmd);
 char *str_dup_until_index(char *str, int index);
 char *executer(t_lexer **lexer, t_pipedata *data);
-int	is_built_in(t_lexer **lexer, t_pipedata *data);
-
+int	is_built_in(t_lexer **lexer, int lex_count);
 #endif

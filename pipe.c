@@ -126,17 +126,6 @@ void	manage_reads_writes(t_pipedata *data, t_lexer **lexer)
 		dup2((*data).input_fd, STDIN_FILENO);
 		close((*data).input_fd);
 	}
-	// if (is_built_in(lexer, data) == 1)
-	// {
-	// 	puts("i am in isbuilt");
-	// 	dup2((*data).fd[1], STDOUT_FILENO);
-	// 	puts("test");
-	// 	close((*data).fd[1]);
-	// 	puts("test");
-	// 	close((*data).fd[0]);
-	// 	puts("test");
-	// 	return ;
-	// }
 	if (lexer[(*data).lex_count]->tokenid[0] == '<')
 	{
 		(*data).fd[0] = redirection_handler(lexer[(*data).lex_count]);
@@ -159,17 +148,11 @@ void	manage_reads_writes(t_pipedata *data, t_lexer **lexer)
 	}
 	else if ((*data).lex_count != 0 || (*data).input_fd != -1)			// added top condition here, seems to not break anything? 
 	{
-		puts("I am in here");
 		dup2((*data).input_fd, STDIN_FILENO);
 		close((*data).input_fd);
 	}
 	else
-	{
-		puts("in else");
 		dup2((*data).fd[1], STDOUT_FILENO);
-		puts("i have dup2d\n");
-	}
-	puts("finished managing reads/writes");
 	close((*data).fd[0]);
 	close((*data).fd[1]);
 }
@@ -179,18 +162,15 @@ void	parent_management(t_pipedata *data, t_lexer **lexer, int pid)
 	int	status;
 
 	status = 0;
-	close((*data).fd[1]); // Close writing end as we are reading from the pipe
-	if ((lexer[(*data).lex_count + 1] == NULL || lexer[(*data).lex_count + 1]->cmd == NULL) && lexer[(*data).lex_count]->tokenid[0] == '<')
+	if ((lexer[(*data).lex_count + 1] == NULL || lexer[(*data).lex_count + 1]->cmd == NULL) && lexer[(*data).lex_count]->tokenid[0] == '<' && lexer[(*data).lex_count]->tokenid[(*data).lex_count] == '>')
 		close((*data).fd[0]);
 	else
-	{
-		puts("set input_fd to fd[0]");
 		(*data).input_fd = (*data).fd[0];
-	}
+	close((*data).fd[1]); // Close writing end as we are reading from the pipe
 	waitpid(pid, &status, 0);
 }
 
-int	is_built_in(t_lexer **lexer, t_pipedata *data)
+int	is_built_in(t_lexer **lexer, int lex_count)
 {
 	int			i;
 	int			cmd_len;
@@ -207,17 +187,16 @@ int	is_built_in(t_lexer **lexer, t_pipedata *data)
     };
 
 	i = 0;
-	puts("checking builtins");
 	while (builtins[i])
 	{
-		cmd_len = ft_strlen(lexer[(*data).lex_count]->cmd);
+		cmd_len = ft_strlen(lexer[lex_count]->cmd);
 		builtin_len = ft_strlen(builtins[i]);
 		if (cmd_len > builtin_len)
 		{
-			if (ft_strncmp(lexer[(*data).lex_count]->cmd, builtins[i], builtin_len) == 0)
+			if (ft_strncmp(lexer[lex_count]->cmd, builtins[i], builtin_len) == 0)
 				return (1);
 		}
-		else if (ft_strncmp(lexer[(*data).lex_count]->cmd, builtins[i], cmd_len) == 0)
+		else if (ft_strncmp(lexer[lex_count]->cmd, builtins[i], cmd_len) == 0)
 			return (1);
 		i++;
 	}
@@ -230,30 +209,28 @@ void	piping(t_lexer **lexer)
 	int			pid;
 
 	initialize_pipedata(&data);
+	if (lexer[0] == NULL)
+		return ;
 	data.lexer = lexer;
-	puts("pipes");
-	if (lexer[data.lex_count]->tokenid[0] != '<' && is_built_in(lexer, &data) == 1)
+	if (lexer[data.lex_count]->tokenid[0] != '<' && is_built_in(lexer, data.lex_count) == 1)
 	{
 		if (lexer[1] == NULL)
 		{
-			puts("single builtin");
 			executer(lexer, &data);
 			lexer[data.lex_count]->execd = true;
 		}
 	}
 	if (lexer[1] == NULL && lexer[data.lex_count]->execd == false)
 	{
-		puts("single exec");
 		if ((pid = fork()) == 0)
 		{
 			execute_child_process(&data);
 			exit(EXIT_SUCCESS);
 		}
 		// lexer[data.lex_count]->execd = true;
-	}
+	} 
 	while (lexer[data.lex_count] != NULL && lexer[data.lex_count]->execd == false)
 	{
-		puts("piping");
 		pipe(data.fd);
 		pid = fork();
 		if (pid == -1)
@@ -263,24 +240,17 @@ void	piping(t_lexer **lexer)
 		}
 		if (pid == 0)
 		{
-			puts("in child process");
 			manage_reads_writes(&data, lexer);
 			if (lexer[data.lex_count]->cmd)
 			{
-				if (is_built_in(lexer, &data) == 1)
-				{
-					puts("found built in");
-					executer(lexer, &data);
-				}
+				if (is_built_in(lexer, data.lex_count) == 1)
+					execute_child_process(&data);
 				else
 					execute_child_process(&data);
 			}
 		}
 		else  // Parent process
-		{
-			puts("count it up");
 			parent_management(&data, lexer, pid);
-		}
 		// puts("incrementing lex_count");
 		data.lex_count++;
 	}
