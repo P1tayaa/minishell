@@ -45,12 +45,14 @@ char *executer(t_lexer **lexer, t_pipedata *data)
 	else if (ft_memcmp(lexer[(*data).lex_count]->cmd, "echo", 4) == 0)
 	{
 		if (lexer[(*data).lex_count]->flags != NULL)
+		{
 			if (ft_memcmp(lexer[(*data).lex_count]->flags, "-n", 2) == 0)
 			{
 				echo_handle(lexer[(*data).lex_count]->args, true);
 				return (return_val);
 			}
-			echo_handle(lexer[(*data).lex_count]->args, false);
+		}
+		echo_handle(lexer[(*data).lex_count]->args, false);
 	}
 	else if (ft_memcmp(lexer[(*data).lex_count]->cmd, "cd", 2) == 0)
 	{

@@ -121,22 +121,22 @@ void	initialize_pipedata(t_pipedata *data)
 
 void	manage_reads_writes(t_pipedata *data, t_lexer **lexer)
 {
-	// if ((*data).input_fd != -1)
-	// {
-	// 	dup2((*data).input_fd, STDIN_FILENO);
-	// 	close((*data).input_fd);
-	// }
-	if (is_built_in(lexer, data) == 1)
+	if ((*data).input_fd != -1)
 	{
-		puts("i am in isbuilt");
-		dup2((*data).fd[1], STDOUT_FILENO);
-		puts("test");
-		close((*data).fd[1]);
-		puts("test");
-		close((*data).fd[0]);
-		puts("test");
-		return ;
+		dup2((*data).input_fd, STDIN_FILENO);
+		close((*data).input_fd);
 	}
+	// if (is_built_in(lexer, data) == 1)
+	// {
+	// 	puts("i am in isbuilt");
+	// 	dup2((*data).fd[1], STDOUT_FILENO);
+	// 	puts("test");
+	// 	close((*data).fd[1]);
+	// 	puts("test");
+	// 	close((*data).fd[0]);
+	// 	puts("test");
+	// 	return ;
+	// }
 	if (lexer[(*data).lex_count]->tokenid[0] == '<')
 	{
 		(*data).fd[0] = redirection_handler(lexer[(*data).lex_count]);
@@ -167,6 +167,7 @@ void	manage_reads_writes(t_pipedata *data, t_lexer **lexer)
 	{
 		puts("in else");
 		dup2((*data).fd[1], STDOUT_FILENO);
+		puts("i have dup2d\n");
 	}
 	puts("finished managing reads/writes");
 	close((*data).fd[0]);
@@ -233,7 +234,6 @@ void	piping(t_lexer **lexer)
 	puts("pipes");
 	if (lexer[data.lex_count]->tokenid[0] != '<' && is_built_in(lexer, &data) == 1)
 	{
-		puts("built in");
 		if (lexer[1] == NULL)
 		{
 			puts("single builtin");
@@ -277,7 +277,10 @@ void	piping(t_lexer **lexer)
 			}
 		}
 		else  // Parent process
+		{
+			puts("count it up");
 			parent_management(&data, lexer, pid);
+		}
 		// puts("incrementing lex_count");
 		data.lex_count++;
 	}
