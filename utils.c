@@ -3,16 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
+/*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/14 17:01:53 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/10/12 14:08:03 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/10/14 01:13:08 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
 int ft_char_find(char *str, const char *list_of_char);
+bool	ft_isspace(unsigned char c);
 
 char	*ft_strtok(char *str, const char *delim)
 {
@@ -205,7 +206,7 @@ char *replace_doll_question_to_number_with_free(char *str_og, int number_replace
 			if (str_og[i + 1] == '\0')
 				break ;
 			else if (str_og[i + 1] == '!')
-				if (isspace(str_og[i + 2]) || str_og[i + 2] == '\0')
+				if (ft_isspace(str_og[i + 2]) || str_og[i + 2] == '\0')
 					location_of_doll = i;
 		}
 		i++;

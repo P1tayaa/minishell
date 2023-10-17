@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/20 15:16:04 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/10/13 14:15:46 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/10/17 15:32:17 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,15 +117,14 @@ void	initialize_pipedata(t_pipedata *data)
 {
 	data->input_fd = -1;
 	data->lex_count = 0;
+	data->og_in = dup(STDIN_FILENO);
+	data->og_out = dup(STDOUT_FILENO);
 }
 
 void	manage_reads_writes(t_pipedata *data, t_lexer **lexer)
 {
 	if ((*data).input_fd != -1)
-	{
 		dup2((*data).input_fd, STDIN_FILENO);
-		close((*data).input_fd);
-	}
 	if (lexer[(*data).lex_count]->tokenid[0] == '<')
 	{
 		(*data).fd[0] = redirection_handler(lexer[(*data).lex_count]);
@@ -135,29 +134,33 @@ void	manage_reads_writes(t_pipedata *data, t_lexer **lexer)
 	}
 	else if (lexer[(*data).lex_count]->tokenid[0] == '>')
 	{
-		(*data).fd[1] = redirection_handler(lexer[(*data).lex_count]);
-		dup2((*data).fd[1], STDOUT_FILENO);
-		dup2((*data).input_fd, STDIN_FILENO);
-		close((*data).input_fd);
+		if (lexer[0]->tokenid[0] == '<')
+		{
+			(*data).fd[1] = redirection_handler(lexer[(*data).lex_count]);
+			dup2((*data).fd[1], STDOUT_FILENO);
+		}
+		else
+		{
+			(*data).fd[1] = redirection_handler(lexer[(*data).lex_count]);
+			dup2((*data).fd[1], STDOUT_FILENO);
+			dup2((*data).input_fd, STDIN_FILENO);
+		}
 	}
 	else if ((*data).lex_count != 0 && lexer[(*data).lex_count + 1] != NULL)
 	{
 		dup2((*data).input_fd, STDIN_FILENO);
-		close((*data).input_fd);
 		dup2((*data).fd[1], STDOUT_FILENO);
 	}
 	else if ((*data).lex_count != 0 || (*data).input_fd != -1)			// added top condition here, seems to not break anything? 
-	{
 		dup2((*data).input_fd, STDIN_FILENO);
-		close((*data).input_fd);
-	}
 	else
 		dup2((*data).fd[1], STDOUT_FILENO);
+	close((*data).input_fd);
 	close((*data).fd[0]);
 	close((*data).fd[1]);
 }
 
-void	parent_management(t_pipedata *data, t_lexer **lexer, int pid)
+int	parent_management(t_pipedata *data, t_lexer **lexer, int pid)
 {
 	int	status;
 
@@ -168,6 +171,8 @@ void	parent_management(t_pipedata *data, t_lexer **lexer, int pid)
 		(*data).input_fd = (*data).fd[0];
 	close((*data).fd[1]); // Close writing end as we are reading from the pipe
 	waitpid(pid, &status, 0);
+	printf("status = %i\n", status);
+	return (status);
 }
 
 int	is_built_in(t_lexer **lexer, int lex_count)
@@ -205,8 +210,9 @@ int	is_built_in(t_lexer **lexer, int lex_count)
 
 void	piping(t_lexer **lexer)
 {
-	t_pipedata	data;
-	int			pid;
+	t_pipedata			data;
+	int					pid;
+	static int			doll;
 
 	initialize_pipedata(&data);
 	if (lexer[0] == NULL)
@@ -216,6 +222,7 @@ void	piping(t_lexer **lexer)
 	{
 		if (lexer[1] == NULL)
 		{
+			lexer[data.lex_count]->args = replace_doll_question_to_number_with_free(lexer[data.lex_count]->args, doll);
 			executer(lexer, &data);
 			lexer[data.lex_count]->execd = true;
 		}
@@ -224,6 +231,7 @@ void	piping(t_lexer **lexer)
 	{
 		if ((pid = fork()) == 0)
 		{
+			lexer[data.lex_count]->args = replace_doll_question_to_number_with_free(lexer[data.lex_count]->args, doll);
 			execute_child_process(&data);
 			exit(EXIT_SUCCESS);
 		}
@@ -231,6 +239,8 @@ void	piping(t_lexer **lexer)
 	} 
 	while (lexer[data.lex_count] != NULL && lexer[data.lex_count]->execd == false)
 	{
+		printf("doll = %i\n", doll);
+		lexer[data.lex_count]->args = replace_doll_question_to_number_with_free(lexer[data.lex_count]->args, doll);
 		pipe(data.fd);
 		pid = fork();
 		if (pid == -1)
@@ -250,10 +260,14 @@ void	piping(t_lexer **lexer)
 			}
 		}
 		else  // Parent process
-			parent_management(&data, lexer, pid);
+			doll = parent_management(&data, lexer, pid);
 		// puts("incrementing lex_count");
 		data.lex_count++;
 	}
+	dup2(data.og_out, STDOUT_FILENO);
+	dup2(data.og_in, STDIN_FILENO);
+	close(data.og_out);
+	close(data.og_in);
 }
 
 

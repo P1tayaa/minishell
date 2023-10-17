@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+         #
+#    By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/03/09 01:41:47 by oscarmathot       #+#    #+#              #
-#    Updated: 2023/10/10 14:59:09 by sboulain         ###   ########.fr        #
+#    Updated: 2023/10/17 15:11:00 by oscarmathot      ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -19,7 +19,7 @@ OBJ 	:= $(SRC:.c=.o)
 LIBFT_A	:= lib/libft/libft.a
 CMP		:= gcc
 # FLAGS 	:= -Werror -Wall -Wextra -g -I lib
-FLAGS 	:= -Werror -Wall -Wextra -g -I lib -fsanitize=address
+FLAGS 	:= -Werror -Wall -Wextra -g -I lib # -fsanitize=address
 
 #---------------------------------
 #FORMATTING AND FUN
