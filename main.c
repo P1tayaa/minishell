@@ -58,6 +58,7 @@ char *executer(char *str, bool no_pipe);
 t_lexer	**main_parser(char *str);
 void	check_quotes(char **str_og, t_post_quotes ***content);
 t_lexer	**parser_with_quotes(t_post_quotes **content);
+char *here_doc_starter(char *wordlocking_for);
 
 // ! to remove only here for testing
 char *replace_doll_question_to_number_with_free(char *str_og, int number_replace);
@@ -123,6 +124,10 @@ int	main(void)
 				printf("file: (%s)\n", lexer[i]->file);
 				printf("flags: (%s)\n", lexer[i]->flags);
 				i++;
+				char * str_test;
+				str_test = here_doc_starter(lexer[i - 1]->args);
+				printf("result : {%s}\n", str_test);
+				free(str_test);
 			}
 			// if (lexer[1] == NULL)
 			// 	exec(lexer[0]);

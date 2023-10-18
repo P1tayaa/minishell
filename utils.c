@@ -218,3 +218,28 @@ char *replace_doll_question_to_number_with_free(char *str_og, int number_replace
 	free(str_og);
 	return (str_return);
 }
+
+int return_biggest_int(int a, int b)
+{
+	if (a > b)
+		return (a);
+	return (b);
+}
+
+char *here_doc_starter(char *wordlocking_for)
+{
+	// int i;
+	char *str_return;
+	char *read_line_str;
+	
+	str_return = NULL;
+	read_line_str = readline(" > ");
+	str_return = ft_strjoin_with_frees(str_return, ft_strjoin("\n", read_line_str));
+	while (ft_strncmp(wordlocking_for, read_line_str, return_biggest_int(ft_strlen(wordlocking_for), ft_strlen(read_line_str)) )!= 0)
+	{
+		read_line_str = readline(" > ");
+		str_return = ft_strjoin_with_frees(str_return, ft_strjoin("\n", read_line_str));
+	}
+	return (str_return);
+}
+
