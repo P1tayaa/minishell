@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:29:45 by omathot           #+#    #+#             */
-/*   Updated: 2023/10/17 15:14:13 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/10/23 10:42:52 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 int		main(void); 
 char	*read_user_input(bool quotes_test);
 char	is_prompt_empty(char *str);
-char *executer(t_lexer **lexer, t_pipedata *data);
+int executer(t_lexer **lexer, t_pipedata *data);
 t_lexer	**main_parser(char *str);
 void	check_quotes(char **str_og, t_post_quotes ***content);
 t_lexer	**parser_with_quotes(t_post_quotes **content);
@@ -88,7 +88,6 @@ int    main(void)
 				i = 0;
 				while (content[i] != NULL)
 				{
-					printf("int	i == %d\n", i);
 					// free(content[i]->)
 					free(content[i]->content);
 					free(content[i]);
@@ -99,6 +98,8 @@ int    main(void)
 			free(str);
 			// i = 0;
 			// c'est pas idea mais c'est un depart
+			
+			
 			int i;
 			i = 0;
 			while (lexer[i] != NULL)
@@ -112,14 +113,15 @@ int    main(void)
 				printf("flags: (%s)\n", lexer[i]->flags);
 				i++;
 			}
+			// pause();
+			
 			piping(lexer);
-			// pause();
-			// pause();
 			// optiona: wait for return value.
 		// }
 		i = 0;
 		while (lexer[i] != NULL)
 		{
+
 			if (lexer[i]->cmd != NULL)
 				free(lexer[i]->cmd);
 			if (lexer[i]->args != NULL)
@@ -128,6 +130,10 @@ int    main(void)
 				free(lexer[i]->file);
 			if (lexer[i]->flags != NULL)
 				free(lexer[i]->flags);
+			lexer[i]->cmd = NULL;
+			lexer[i]->args = NULL;
+			lexer[i]->file = NULL;
+			lexer[i]->flags = NULL;
 			free(lexer[i]);
 			i++;
 		}

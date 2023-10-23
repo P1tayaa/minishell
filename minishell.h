@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:30:26 by omathot           #+#    #+#             */
-/*   Updated: 2023/10/17 15:24:17 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/10/18 21:46:34 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,7 @@ typedef	struct s_list_of_quotes
 
 typedef struct s_pipedata
 {
+	char	***environ; 
 	int		og_in;
 	int		og_out;
 	int		input_fd;
@@ -67,8 +68,9 @@ void	piping(t_lexer **lexer);
 char	*ft_strtok(char *str, const char *delim);
 void	concat_path(char *buffer, const char *dir, const char *cmd);
 char *str_dup_until_index(char *str, int index);
-char *executer(t_lexer **lexer, t_pipedata *data);
+int executer(t_lexer **lexer, t_pipedata *data);
 int	is_built_in(t_lexer **lexer, int lex_count);
 char *replace_doll_question_to_number_with_free(char *str_og, int number_replace);
+char *here_doc_starter(char *wordlocking_for);
 
 #endif
