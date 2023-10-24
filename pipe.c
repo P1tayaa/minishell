@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/20 15:16:04 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/10/23 12:00:31 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/10/24 18:45:33 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -256,25 +256,32 @@ int	is_built_in(t_lexer **lexer, int lex_count)
 	return (0);
 }
 
-void	are_all_commands_thesame(t_lexer **lexer, t_pipedata *data, int *doll)
+int	are_all_commands_thesame(t_lexer **lexer)
 {
 	int	collapse;
+	int	i;
 
+	i = 0;
 	collapse = 0;
+	while (lexer[i] != NULL)
+		i++;
 	while (lexer[collapse] != NULL)
 	{
 		if (lexer[collapse + 1] != NULL)
 		{
 			if (ft_memcmp(lexer[collapse]->cmd, lexer[collapse + 1]->cmd, ft_strlen(lexer[collapse]->cmd)) == 0)
-			{
-				puts("collapsing");
-				lexer[collapse]->args = replace_doll_question_to_number_with_free(lexer[collapse]->args, (*doll));
-				(*doll) = execute_child_process(data);
-				return ;
-			}
+				collapse++;
+			else
+				break ;
 		}
-		collapse++;
+		else
+			break ;
 	}
+	printf("collapse = %i\ni = %i\n", collapse, i);
+	if (collapse + 1 == i)
+		return (1);
+	else
+		return (0);  
 }
 
 void	piping(t_lexer **lexer)
@@ -287,9 +294,31 @@ void	piping(t_lexer **lexer)
 	if (lexer[0] == NULL)
 		return ;
 	data.lexer = lexer;
-	if (lexer[data.lex_count]->cmd != NULL)
-		are_all_commands_thesame(lexer, &data, &doll);
-	if (lexer[data.lex_count]->tokenid[0] != '<' && is_built_in(lexer, data.lex_count) == 1)
+	if (lexer[data.lex_count]->cmd != NULL && lexer[data.lex_count]->execd == false && lexer[data.lex_count]->tokenid[0] != '<')																		// collapse
+	{
+		if (lexer[data.lex_count + 1] != NULL)
+		{
+			if (are_all_commands_thesame(lexer) == 1)
+			{
+				lexer[data.lex_count]->args = replace_doll_question_to_number_with_free(lexer[data.lex_count]->args, doll);
+				pid = fork();
+				if (pid == 0)
+				{
+					execute_child_process(&data);
+					exit(EXIT_SUCCESS);
+				}
+				lexer[data.lex_count]->execd = true;
+				waitpid(pid, &doll, 0);
+				if WIFEXITED(doll)
+					doll = WEXITSTATUS(doll);
+				else if WIFSIGNALED(doll)
+					doll = WTERMSIG(doll);
+				else if WIFSTOPPED(doll)
+					doll = WSTOPSIG(doll);
+			}
+		}
+	}
+	if (lexer[data.lex_count]->tokenid[0] != '<' && is_built_in(lexer, data.lex_count) == 1)					// builtin
 	{
 		if (lexer[1] == NULL)
 		{
@@ -298,7 +327,7 @@ void	piping(t_lexer **lexer)
 			lexer[data.lex_count]->execd = true;
 		}
 	}
-	if (lexer[1] == NULL && lexer[data.lex_count]->execd == false)
+	if (lexer[1] == NULL && lexer[data.lex_count]->execd == false)												// single exec non-built-in
 	{
 		if ((pid = fork()) == 0)
 		{
@@ -314,7 +343,7 @@ void	piping(t_lexer **lexer)
 		else if WIFSTOPPED(doll)
 			doll = WSTOPSIG(doll);
 	}
-	if (lexer[1] != NULL)
+	if (lexer[1] != NULL)																						// piping/redirections
 		while (lexer[data.lex_count] != NULL && lexer[data.lex_count]->execd == false)
 		{
 			lexer[data.lex_count]->args = replace_doll_question_to_number_with_free(lexer[data.lex_count]->args, doll);
@@ -366,81 +395,3 @@ int	are_there_more_cmds(t_lexer **lexer, int current)
 	}
 	return(0);
 }
-
-
-		// else
-		// {
-		// 	puts("hardcoded piping builtins");
-		// 	pipe(data.fd);
-		// 	pid = fork();
-		// 	if (pid == 0)
-		// 	{
-		// 		dup2(data.fd[1], STDOUT_FILENO);
-		// 		close(data.fd[1]);
-		// 		close(data.fd[0]);
-		// 		executer(lexer, &data);
-		// 		exit(EXIT_SUCCESS);
-		// 	}
-		// 	lexer[data.lex_count]->execd = true;
-		// 	data.lex_count++;
-		// 	pid = fork();
-		// 	if (pid == 0)
-		// 	{
-		// 		puts("second process");
-		// 		dup2(data.fd[0], STDIN_FILENO);
-		// 		close(data.fd[1]);
-		// 		execute_child_process(&data);
-		// 		exit(EXIT_SUCCESS);
-		// 	}
-		// 	lexer[data.lex_count]->execd = true;
-		// 	close(data.fd[0]);
-		// 	close(data.fd[1]);
-		// 	wait(NULL);
-		// 	wait(NULL);
-		// }
-
-
-
-
-
-
-
-
-// void	exec(t_lexer *lexer)
-// {
-// 	char	*args[4];  // Assuming a maximum of one flag and one argument for simplicity.
-// 	char	*cmd_path;
-// 	int		i;
-// 	pid_t	pid;
-
-// 	cmd_path = get_cmd_path(lexer->cmd);
-// 	if (cmd_path == NULL)
-// 	{
-// 		perror("Command not found EXEC");
-// 		return ;
-// 	}
-// 	i = 0;
-// 	args[i++] = lexer->cmd;
-// 	if (lexer->flags != NULL)
-// 		args[i++] = lexer->flags;
-// 	if (lexer->args != NULL)
-// 		args[i++] = lexer->args;
-// 	args[i++] = NULL;
-// 	i = 0;
-// 	pid = fork();
-// 	if (pid == -1)
-// 	{
-// 		perror("Fork failed");
-// 		free(cmd_path);
-// 		return ;
-// 	}
-// 	if (pid == 0)				// Child process
-// 	{
-// 		execve(cmd_path, args, environ);
-// 		perror("Execution failed");
-// 		exit(EXIT_FAILURE);
-// 	}
-// 	else						// Parent process
-// 		wait(NULL);				// Wait for the child to finish
-// 	free(cmd_path);
-// }
