@@ -112,13 +112,11 @@ void	move_all_flag_from_arg_to_flags(char **flags, int flags_char_len, int args_
 	while (lexer->args[i] != '\0')
 	{
 		if (i != 0)
-		{
 			if (ft_isspace(lexer->args[i - 1]) && lexer->args[i] == '-')
 			{
 				move_flag_from_arg_to_flags(&i, &flags_char_len, lexer, flags);
 				continue ;
 			}
-		}
 		if (i == 0 && lexer->args[i] == '-')
 		{
 			move_flag_from_arg_to_flags(&i, &flags_char_len, lexer, flags);
@@ -163,6 +161,24 @@ void	move_flags_from_args_to_flags(t_lexer *lexer)
 		lexer->flags = flags;
 }
 
+void	move_file_name_to_file_and_comand_back_p2(t_lexer *lexer, int i)
+{
+	char *temp;
+	int	j;
+
+	temp = malloc(ft_strlen(lexer->args) - i + 1);
+	if (!temp)
+		exit (1);
+	j = 0;
+	while (lexer->args[i + j] != '\0')
+	{
+		temp[j] = lexer->args[i + j];
+		j++;
+	}
+	temp[j] = '\0';
+	free(lexer->args);
+	lexer->args = temp;
+}
 
 /*
 	Put the cmd from current lexer into file of the previus lexer.
@@ -171,8 +187,6 @@ void	move_flags_from_args_to_flags(t_lexer *lexer)
 void	move_file_name_to_file_and_comand_back(t_lexer *lexer_previous, t_lexer *lexer)
 {
 	int i;
-	int	j;
-	char *temp;
 
 	lexer_previous->file = lexer->cmd;
 	lexer->cmd = ft_strtok(lexer->args, " ");
@@ -187,18 +201,7 @@ void	move_file_name_to_file_and_comand_back(t_lexer *lexer_previous, t_lexer *le
 		lexer->args = NULL;
 		return ;
 	}
-	temp = malloc(ft_strlen(lexer->args) - i + 1);
-	if (!temp)
-		exit (1);
-	j = 0;
-	while (lexer->args[i + j] != '\0')
-	{
-		temp[j] = lexer->args[i + j];
-		j++;
-	}
-	temp[j] = '\0';
-	free(lexer->args);
-	lexer->args = temp;
+	move_file_name_to_file_and_comand_back_p2(lexer, i);
 }
 
 /*
@@ -227,6 +230,24 @@ char *remove_front_spaces(char *str)
 		exit(1);
 	free(str);
 	return (str_temp);
+}
+
+char	*remove_back_spaces_p2(char *str, int i, int how_many_char)
+{
+	char *str_dup_without_spaces;
+	
+	str_dup_without_spaces = malloc(ft_strlen(str) - i + 1);
+	if (!str_dup_without_spaces)
+		exit (1);
+	i = 0;
+	while (i < how_many_char)
+	{
+		str_dup_without_spaces[i] = str[i];
+		i++;
+	}
+	str_dup_without_spaces[i] = '\0';
+	free(str);
+	return (str_dup_without_spaces);
 }
 
 /*
@@ -258,17 +279,7 @@ char *remove_back_spaces(char *str)
 		free(str);
 		return (NULL);
 	}
-	str_dup_without_spaces = malloc(ft_strlen(str) - i + 1);
-	if (!str_dup_without_spaces)
-		exit (1);
-	i = 0;
-	while (i < how_many_char)
-	{
-		str_dup_without_spaces[i] = str[i];
-		i++;
-	}
-	str_dup_without_spaces[i] = '\0';
-	free(str);
+	str_dup_without_spaces = remove_back_spaces_p2(str, i, how_many_char);
 	return (str_dup_without_spaces);
 }
 
@@ -359,9 +370,7 @@ t_lexer	**main_parser(char *str)
 		initiate_values_to_zero_NULL(&lexer[i], i);
 		curser = parse_until_token_id(str, i, lexer, curser);
 		if (ft_char_find(lexer[i]->args, "-") != -1)
-		{
 			move_flags_from_args_to_flags(lexer[i]);
-		}
 		move_cmd_to_right_place_if_speacific_tokenid(&lexer[i - 1], &lexer[i], i);
 		removes_front_and_back_redondant_spaces(&lexer[i]);
 		i++;
@@ -369,6 +378,85 @@ t_lexer	**main_parser(char *str)
 	lexer[i] = NULL;
 	i = 0;
 	return (lexer);
+}
+
+// count num of dash and flags char len
+void	count_num_dash_and_flags_char_len(char **str, int i, int *num_of_dash, int *flags_char_len)
+{
+	int j;
+
+	while ((*str)[i] != '\0')
+	{
+		if (ft_isspace((*str)[i]) == true || i == 0)
+		{
+			if (ft_isspace((*str)[i]))
+				i++;
+			if ((*str)[i] == '\0')
+				break ;
+			if ((*str)[i] == '-')
+			{
+				(*num_of_dash)++;
+				j = 0;
+				while ((*str)[i + j] != '\0' && ft_isspace((*str)[i + j]) == false)
+				{
+					j++;
+				}
+				i = i + j;
+				(*flags_char_len) = (*flags_char_len) + j;
+				continue ;
+			}
+		}
+		i++;
+	}
+}
+
+//initiate the values in cosponding with num of dash and flags char len
+char *init_new_flag_str(int flags_char_len, char **str, int num_of_dash)
+{
+	char	*new_str;
+
+	if (ft_strlen((*str)) - (sizeof(char) * (flags_char_len + num_of_dash)) != 0)
+	{
+		new_str = malloc(ft_strlen((*str)) - (sizeof(char) * (flags_char_len + num_of_dash)) + 1);
+		if (!new_str)
+			exit(1);
+	}
+	else
+		new_str = NULL;
+	return (new_str);
+}
+
+// set the values of string, but doesn't add the '-'
+void	set_value_of_flag_str(int *k, int *flags_char_len, char **str, char	*flags, char *new_str)
+{
+	int i;
+	int j;
+
+	i = 0;
+	(*flags_char_len) = 0;
+	(*k) = 0;
+	while ((*str)[i] != '\0')
+	{
+		if (ft_isspace((*str)[i]) == true || i == 0)
+		{
+			if (ft_isspace((*str)[i]))
+				i++;
+			if ((*str)[i] == '-')
+			{
+				j = 0;
+				i++;
+				while ((*str)[i + j] != '\0' && ft_isspace((*str)[i + j]) == false)
+					flags[(*flags_char_len)++] = (*str)[i + j++];
+				i = i + j;
+				continue ;
+			}
+			if ((*str)[i] == '\0')
+				break ;
+		}
+		new_str[(*k)] = (*str)[i];
+		(*k)++;
+		i++;
+	}
 }
 
 char *get_flags_str(char **str)
@@ -385,51 +473,13 @@ char *get_flags_str(char **str)
 	i = 0;
 	flags_char_len = 0;
 	num_of_dash = 0;
-
-	// Todo: make this a separate funciton
-	// count num of dash and flags char len
-	while ((*str)[i] != '\0')
-	{
-		if (ft_isspace((*str)[i]) == true || i == 0)
-		{
-			if (ft_isspace((*str)[i]))
-				i++;
-			if ((*str)[i] == '\0')
-			{
-				break ;
-			}
-			if ((*str)[i] == '-')
-			{
-				// puts("find flag");
-				num_of_dash++;
-				j = 0;
-				while ((*str)[i + j] != '\0' && ft_isspace((*str)[i + j]) == false)
-				{
-					j++;
-				}
-				i = i + j;
-				flags_char_len = flags_char_len + j;
-				continue ;
-			}
-		}
-		i++;
-	}
-
-	// Todo: make this a separate funciton
-	// initiate the values in cosponding with num of dash and flags char len
-	if (flags_char_len == 0)
-		return (NULL);
+	count_num_dash_and_flags_char_len(str, i, &num_of_dash, &flags_char_len);
 	flags = malloc(sizeof(char) * (flags_char_len + 1));
 	if (!flags)
 		exit (1);
-	if (ft_strlen((*str)) - (sizeof(char) * (flags_char_len + num_of_dash)) != 0)
-	{
-		new_str = malloc(ft_strlen((*str)) - (sizeof(char) * (flags_char_len + num_of_dash)) + 1);
-		if (!new_str)
-			exit(1);
-	}
-	else
-		new_str = NULL;
+	if (flags_char_len == 0)
+		return (NULL);
+	new_str = init_new_flag_str(flags_char_len, str, num_of_dash);
 
 	// Todo: make this a separate funciton
 	// set the values of string, but doesn't add the '-'

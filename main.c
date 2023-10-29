@@ -58,9 +58,14 @@ char *executer(char *str, bool no_pipe);
 t_lexer	**main_parser(char *str);
 void	check_quotes(char **str_og, t_post_quotes ***content);
 t_lexer	**parser_with_quotes(t_post_quotes **content);
+char *here_doc_starter(char *wordlocking_for);
+bool	check_export_for_quotes(t_post_quotes	**content);
+
 
 // ! to remove only here for testing
 char *replace_doll_question_to_number_with_free(char *str_og, int number_replace);
+void	test_export_for_main(t_lexer **lexer);
+
 
 
 int	main(void)
@@ -95,6 +100,7 @@ int	main(void)
 				lexer = main_parser(str);
 			else
 			{
+				check_export_for_quotes(content);
 				lexer = parser_with_quotes(content);
 				// int i;
 				i = 0;
@@ -113,6 +119,7 @@ int	main(void)
 			// c'est pas idea mais c'est un depart
 			int i;
 			i = 0;
+			test_export_for_main(lexer);
 			while (lexer[i] != NULL)
 			{
 				printf("arg was before: %s\n", lexer[i]->args);
@@ -123,6 +130,10 @@ int	main(void)
 				printf("file: (%s)\n", lexer[i]->file);
 				printf("flags: (%s)\n", lexer[i]->flags);
 				i++;
+				// char * str_test;
+				// // str_test = here_doc_starter(lexer[i - 1]->args);
+				// printf("result : {%s}\n", str_test);
+				// free(str_test);
 			}
 			// if (lexer[1] == NULL)
 			// 	exec(lexer[0]);
