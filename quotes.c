@@ -111,7 +111,6 @@ void	relocate_quotes(t_list_of_quotes **list_of_quotes, char **str, int	**fake_d
 	}
 }
 
-
 void	find_fake_quotes(t_list_of_quotes **list_of_quotes, char **str, int	**fake_double_quotes)
 {
 	int	i;
@@ -859,7 +858,8 @@ int	*get_doll_position(char *str)
 	num_doll = 0;
 	while (str[i] != '\0')
 		if (str[i++] == '$')
-			num_doll++;
+			if (str[i + 1] != '=')
+				num_doll++;
 	doll_pos = malloc(sizeof(int) * (num_doll + 1));
 	if (!doll_pos)
 		exit(EXIT_FAILURE);
@@ -868,10 +868,11 @@ int	*get_doll_position(char *str)
 	while (str[i] != '\0')
 	{
 		if (str[i] == '$')
-		{
-			doll_pos[num_doll] = i;
-			num_doll++;
-		}
+			if (str[i + 1] != '=')
+			{
+				doll_pos[num_doll] = i;
+				num_doll++;
+			}
 		i++;
 	}
 	doll_pos[num_doll] = -1;

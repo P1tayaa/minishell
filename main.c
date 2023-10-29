@@ -6,13 +6,13 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:29:45 by omathot           #+#    #+#             */
-/*   Updated: 2023/10/28 11:39:06 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/10/29 17:57:19 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-int		main(void); 
+int		main(void);
 char	*read_user_input(bool quotes_test);
 char	is_prompt_empty(char *str);
 int executer(t_lexer **lexer, t_pipedata *data);
@@ -62,7 +62,7 @@ int    main(void)
 		// intial prompt print
 		// read user input
 		content = NULL;
-		
+
 		str = ft_strdup(read_user_input(quotes_test));
 		if (is_prompt_empty(str) == 0)
 			continue ;
@@ -98,8 +98,8 @@ int    main(void)
 			free(str);
 			// i = 0;
 			// c'est pas idea mais c'est un depart
-			
-			
+
+
 			int i;
 			i = 0;
 			while (lexer[i] != NULL)
@@ -113,9 +113,9 @@ int    main(void)
 				printf("flags: (%s)\n", lexer[i]->flags);
 				i++;
 			}
-			// pause();
-			
+
 			piping(lexer);
+			// pause();
 			// optiona: wait for return value.
 		// }
 		i = 0;
@@ -146,7 +146,7 @@ int    main(void)
 char	*read_user_input(bool quotes_test)
 {
 	char	*str;
-	
+
 	str = readline("😎 minishell_OS_1.0$ ");
 	if (!quotes_test)
 		add_history(str);

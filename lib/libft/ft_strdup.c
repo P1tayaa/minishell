@@ -21,6 +21,11 @@ char	*ft_strdup(const char *s1)
 		return (NULL);
 	i = 0;
 	size = 0;
+	if (s1 == NULL)
+	{
+		write(1, "error rull", 10);
+		return (NULL);
+	}
 	while (s1[size])
 		size++;
 	c = malloc(sizeof(char) * (size + 1));

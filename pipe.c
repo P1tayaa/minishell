@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/20 15:16:04 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/10/29 16:19:32 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/10/29 18:08:22 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ int	open_file(char *filename, int mode)
 	}
 	else
 	{
-		return (open(filename, O_CREAT | O_WRONLY | O_TRUNC, 
+		return (open(filename, O_CREAT | O_WRONLY | O_TRUNC,
 			S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH));
 	}
 }
@@ -88,7 +88,7 @@ int redirection_handler(t_lexer *lexer)
 	else if (ft_memcmp(lexer->tokenid, ">>", 2) == 0)
 		fd = open(lexer->file, O_WRONLY | O_CREAT | O_APPEND, 0644);
 	else if (ft_memcmp(lexer->tokenid, "<<", 2) == 0)
-		fd = open(lexer->args, O_WRONLY | O_CREAT | O_TRUNC, 0644);			// O_EXCL   nstead, if filename already exists, 
+		fd = open(lexer->args, O_WRONLY | O_CREAT | O_TRUNC, 0644);			// O_EXCL   nstead, if filename already exists,
 	if (fd == -1)
 	{
 		perror("minishell: ");
@@ -116,7 +116,7 @@ bool	execute_child_process(t_pipedata *data)
 		ft_putstr_fd((*data).lexer[(*data).lex_count]->cmd, STDERR_FILENO);
 		ft_putstr_fd(": command not found\n", STDERR_FILENO);
 		free(cmd_path);
-		return (0);	
+		return (0);
 	}
 	free(cmd_path);
 	return (1);
@@ -125,7 +125,7 @@ bool	execute_child_process(t_pipedata *data)
 void	initialize_pipedata(t_pipedata *data)
 {
 	extern char **environ;
-	
+
 	data->input_fd = -1;
 	data->lex_count = 0;
 	data->og_in = dup(STDIN_FILENO);
@@ -244,7 +244,7 @@ int	manage_reads_writes(t_pipedata *data, t_lexer **lexer)
 		dup2((*data).input_fd, STDIN_FILENO);
 		dup2((*data).fd[1], STDOUT_FILENO);
 	}
-	else if ((*data).lex_count != 0 || (*data).input_fd != -1)			// added top condition here, seems to not break anything? 
+	else if ((*data).lex_count != 0 || (*data).input_fd != -1)			// added top condition here, seems to not break anything?
 		dup2((*data).input_fd, STDIN_FILENO);
 	else
 		dup2((*data).fd[1], STDOUT_FILENO);
@@ -344,7 +344,7 @@ int	are_all_commands_thesame(t_lexer **lexer)
 	if (collapse + 1 == i)
 		return (1);
 	else
-		return (0);  
+		return (0);
 }
 
 void	piping(t_lexer **lexer)
@@ -357,7 +357,7 @@ void	piping(t_lexer **lexer)
 	if (lexer[0] == NULL)
 		return ;
 	data.lexer = lexer;
-	if (lexer[data.lex_count]->cmd != NULL && lexer[data.lex_count]->execd == false && lexer[data.lex_count]->tokenid[0] != '<' && lexer[data.lex_count]->tokenid[0] != '>')																		// collapse
+	if (lexer[data.lex_count]->cmd != NULL && lexer[data.lex_count]->execd == false && lexer[data.lex_count]->tokenid[0] != '<' && lexer[data.lex_count]->tokenid[0] != '>')					// collapse
 	{
 		if (lexer[data.lex_count + 1] != NULL)
 		{
