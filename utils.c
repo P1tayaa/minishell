@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/14 17:01:53 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/10/29 18:10:13 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/10/29 18:16:36 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,7 +73,6 @@ int ft_char_find(char *str, const char *list_of_char)
 	if (str == NULL)
 		return -1;
 	i = 0;
-	// puts(str);
 	while (str[i] != '\0')
 	{
 		j = 0;
@@ -84,7 +83,6 @@ int ft_char_find(char *str, const char *list_of_char)
 			j++;
 		}
 		i++;
-		// printf("\nft_char_find: i == %i\n", i);
 	}
 	return (-1);
 }
@@ -224,9 +222,9 @@ char *replace_doll_question_to_number_with_free(char *str_og, int number_replace
 
 int return_biggest_int(int a, int b)
 {
-	if (a > b)
-		return (a);
-	return (b);
+    if (a > b)
+        return (a);
+    return (b);
 }
 
 char *here_doc_starter(char *wordlocking_for)
