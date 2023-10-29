@@ -13,6 +13,8 @@
 #include "minishell.h"
 
 int ft_char_find(char *str, const char *list_of_char);
+bool	ft_isspace(unsigned char c);
+
 
 char	*ft_strtok(char *str, const char *delim)
 {
@@ -72,6 +74,7 @@ int ft_char_find(char *str, const char *list_of_char)
 	if (str == NULL)
 		return -1;
 	i = 0;
+	puts(str);
 	while (str[i] != '\0')
 	{
 		j = 0;
@@ -82,6 +85,7 @@ int ft_char_find(char *str, const char *list_of_char)
 			j++;
 		}
 		i++;
+		// printf("\nft_char_find: i == %i\n", i);
 	}
 	return (-1);
 }
@@ -243,3 +247,335 @@ char *here_doc_starter(char *wordlocking_for)
 	return (str_return);
 }
 
+bool is_str_export(char *str)
+{
+	if (str[0] == 'e' && str[1] == 'x' && str[2] == 'p'
+		&& str[3] == 'o' && str[4] == 'r' && str[5] == 't' 
+			&& str[6] == '\0')
+			return (true);
+	return (false);
+}
+
+char	*ft_strdup_until_space(char *str)
+{
+	int i;
+
+	i = 0;
+	while (!ft_isspace(str[i]) && str[i] != '\0')
+		i++;
+	return(str_dup_until_index(str, i));
+}
+
+char	*ft_strdup_until_equal(char *str)
+{
+	int i;
+
+	i = 0;
+	while (str[i] != '=' && str[i] != '\0')
+		i++;
+	return(str_dup_until_index(str, i));
+}
+
+int	get_num_export_con(char *arg)
+{
+	int	i;
+	bool	is_space;
+	int		num_var;
+
+	i = 0;
+	is_space = false;
+	num_var = 1;
+	while (arg[i] != '\0')
+	{
+		if (!is_space && !isspace(arg[i]))
+		{
+			num_var++;
+			is_space = true;
+		}
+		else
+			if (isspace(arg[i]))
+				is_space = false;
+		i++;
+	}
+	return (num_var * 2);
+}
+
+bool	ft_isspace(unsigned char c);
+
+char **get_word_one_by_one(char *str)
+{
+	char **all_world;
+	// char ***all_world_pointer;
+	int i;
+	int	i_all_world;
+
+	all_world = malloc(sizeof(char *) * ((get_num_export_con(str) * 2) + 1));
+	i = 0;
+	i_all_world = 0;
+	puts(str);
+	while (str[i] != '\0')
+	{
+		while (ft_isspace(str[i]))
+		{
+			i++;
+		}
+		
+		all_world[i_all_world] = ft_strdup_until_space(&str[i]);
+		if (str[i + ft_strlen(all_world[i_all_world])] == '\0')
+		{
+			i_all_world++;
+			break ;
+		}
+		i = i + ft_strlen(all_world[i_all_world]) + 1;
+		i_all_world++;
+	}
+	printf("i_all_world = %i\n", i_all_world);
+	all_world[i_all_world] = NULL;
+	i = 0;
+	puts("");
+	puts("");
+
+	while (all_world[i] != NULL)
+	{
+		printf("content i == %i, is (%s)\n", i, all_world[i]);
+		i++;
+	}
+	puts("");
+	puts("");
+	puts("");
+	return (all_world);
+}
+
+char **get_export_var(char *arg_of_export)
+{
+	// char *var_name;
+	// char *var_content;
+	char **work_split;
+	char **export_content;
+	int		i_export_content;
+	int		i_work_split;
+
+	// char *str_tok_arg;
+
+	i_export_content = 0;
+	i_work_split = 0;
+	export_content = malloc(sizeof(char *) * ((get_num_export_con(arg_of_export) * 2) + 3));
+	work_split = get_word_one_by_one(arg_of_export);
+	while (work_split[i_work_split] != NULL)
+	{
+		i_work_split++;
+	}
+	i_work_split = 0;
+	while (work_split[i_work_split] != NULL)
+	{
+		// puts(work_split[i_work_split]);
+		export_content[i_export_content] = ft_strdup_until_equal(work_split[i_work_split]);
+		i_export_content++;
+		if (ft_strlen(export_content[i_export_content - 1]) == ft_strlen(work_split[i_work_split]))
+			export_content[i_export_content] = ft_strdup("\0");
+		else
+			export_content[i_export_content] = ft_strdup(&((work_split[i_work_split])[ft_strlen(export_content[i_export_content - 1]) + 1]));
+		i_export_content++;
+		free(work_split[i_work_split]);
+		i_work_split++;
+	}
+	puts("test finito");
+	free(work_split);
+	export_content[i_export_content] = NULL;
+	return (export_content);
+}
+
+void export_content_freeur(char **export_content)
+{
+	int i;
+
+	i = 0;
+	while (export_content[i] != NULL)
+	{
+		free(export_content[i]);
+		i++;
+	}
+	free(export_content);
+}
+
+void	test_export_for_main(t_lexer **lexer)
+{
+	char **export_content;
+	int i;
+
+	if (is_str_export(lexer[0]->args) == true)
+	{
+		export_content = get_export_var(lexer[0]->args);
+		puts("testoep");
+		if (export_content == NULL)
+			printf("error\n");
+		else
+		{
+			i = 0;
+			while (export_content[i] != NULL)
+			{
+				printf("content i == %i, is (%s)\n", i, export_content[i]);
+				i++;
+			}
+		}
+	}
+	pause();
+}
+
+int	counte_num_new_var(t_post_quotes	**content)
+{
+	int i;
+	int	num_of_vars;
+
+	i = 0;
+	while (content[i] != NULL)
+	{
+		if (content[i]->is_quotes)
+		{
+			num_of_vars++;
+		}
+		else
+		{
+			num_of_vars =+ get_num_export_con(content[i]->content);
+		}
+		i++;
+	}
+	printf("num of var in quotes is : %i\n", num_of_vars);
+	return (num_of_vars * 2);
+}
+
+bool	is_all_space(char *str)
+{
+	int i;
+
+	i = 0;
+	while (str[i] != '\0')
+	{
+		if (!ft_isspace(str[i]))
+			return (false);
+		i++;
+	}
+	return (true);
+}
+
+bool	check_if_array_str_is_empty(char **array_str)
+{
+	int i;
+
+	if (array_str == NULL)
+		return (true);
+	i = 0;
+	while (array_str[i])
+	{
+		if (array_str[i][0] != '\0')
+			return (false);
+		i++;
+	}
+	return (true);
+}
+
+char	get_last_char(char *str)
+{
+	int i;
+
+	while (str[i] != '\0')
+	{
+		i++;
+	}
+	i--;
+	return(str[i]);
+}
+
+bool	check_export_for_quotes(t_post_quotes	**content)
+{
+	int 		i;
+	int 		j;
+	int			i_export_content;
+	char 		**export_content;
+	char		**temp_var_from_no_quotes;
+
+	if (is_str_export(content[0]->content) == false)
+		return (false);
+	export_content = malloc(sizeof(char *) * ((counte_num_new_var(content) * 2) + 1));
+	i = 1;
+	i_export_content = 0;
+	while (content[i] != NULL)
+	{
+		printf("doing content %i, and writing item %d\n", i, i_export_content);
+		if (content[i]->is_quotes)
+		{
+			// if (i % 2 == 0)
+			// {
+			// 	//name of var
+				
+			// }
+			// else
+			// {
+			// 	//content of var
+
+			// }
+			export_content[i_export_content] = ft_strdup(content[i]->content);
+			i_export_content++;
+		}
+		else
+		{
+			if (is_all_space(content[i]->content) == false)
+			{
+				temp_var_from_no_quotes = get_export_var(content[i]->content);
+				if (check_if_array_str_is_empty(temp_var_from_no_quotes) == true)
+				{
+					puts("ALL EMPTY NONE QUOTES");
+					export_content_freeur(temp_var_from_no_quotes);
+					i++;
+					continue ;
+				}
+				j = 0;
+				if (i_export_content % 2 == 1 && content[i]->content[0] == '=')
+					j++;
+				if (i_export_content % 2 == 1 && content[i]->content[0] != '=')
+				{
+					export_content[i_export_content] = ft_strdup("");
+					i_export_content++;
+				}
+				printf("j == %i\n", j);
+				while (temp_var_from_no_quotes[j] != NULL)
+				{
+					printf("temp_var is %i == (%s), coping in %i\n", j,temp_var_from_no_quotes[j], i_export_content);
+					// if ()
+					// if (j != 0)
+					// 	if (temp_var_from_no_quotes[j + 1] == NULL && temp_var_from_no_quotes[j][0] == '\0')
+					// 		break ;
+					export_content[i_export_content] = temp_var_from_no_quotes[j];
+					j++;
+					i_export_content++;
+				}
+				free(temp_var_from_no_quotes);
+			}
+			else if (i_export_content % 2 == 1)
+			{
+				puts("contentless nonequotes");
+				export_content[i_export_content] = ft_strdup("");
+				i_export_content++;
+			}
+			// {
+
+			// }
+		}
+		i++;
+	}
+	printf("%d is where null is \n", i_export_content);
+	export_content[i_export_content] = NULL;
+	i = 0;
+	while (export_content[i] != NULL)
+	{
+		if (i % 2 == 0)
+			printf("(%s)", export_content[i]);
+		else 
+			printf(" = (%s)\n", export_content[i]);
+		i++;
+	}
+	printf("\n");
+
+	pause();
+	return (true);
+}
