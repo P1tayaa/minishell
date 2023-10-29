@@ -6,13 +6,14 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/20 15:16:04 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/10/24 18:45:33 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/10/29 16:19:32 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
 int	are_there_more_cmds(t_lexer **lexer, int current);
+char	*ft_strjoin_with_frees(char *s1, char *s2);
 
 int	open_file(char *filename, int mode)
 {
@@ -87,7 +88,7 @@ int redirection_handler(t_lexer *lexer)
 	else if (ft_memcmp(lexer->tokenid, ">>", 2) == 0)
 		fd = open(lexer->file, O_WRONLY | O_CREAT | O_APPEND, 0644);
 	else if (ft_memcmp(lexer->tokenid, "<<", 2) == 0)
-		fd = open(lexer->args, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+		fd = open(lexer->args, O_WRONLY | O_CREAT | O_TRUNC, 0644);			// O_EXCL   nstead, if filename already exists, 
 	if (fd == -1)
 	{
 		perror("minishell: ");
@@ -132,12 +133,32 @@ void	initialize_pipedata(t_pipedata *data)
 	data->environ = &environ;
 }
 
+int	are_there_previous_cmds(t_lexer **lexer, t_pipedata *data)
+{
+	int	i;
+
+	i = (*data).lex_count;
+	while (i >= 0)
+	{
+		if (lexer[i] != NULL)
+		{
+			if (lexer[i]->cmd != NULL)
+				return (i);
+		}
+		i--;
+	}
+	return (-1);
+}
+
 int	manage_reads_writes(t_pipedata *data, t_lexer **lexer)
 {
 	int	i;
+	int	out_files;
+	int	temp_fd;
 	char	*str;
 
 	i = (*data).lex_count;
+	temp_fd = 0;
 	if ((*data).input_fd != -1)
 		dup2((*data).input_fd, STDIN_FILENO);
 	if (lexer[(*data).lex_count]->tokenid[0] == '<')
@@ -145,14 +166,12 @@ int	manage_reads_writes(t_pipedata *data, t_lexer **lexer)
 		if (lexer[(*data).lex_count]->tokenid[1] == '<')
 		{
 			// write(redirection_handler(*lexer), str, ft_strlen(str));
-			(*data).fd[1] = redirection_handler(lexer[(*data).lex_count]);
 			str = here_doc_starter(lexer[(*data).lex_count]->args);						// eeeeeh it couldn't be that easy
+			lexer[(*data).lex_count]->file = ft_strjoin_with_frees(lexer[(*data).lex_count]->file, ft_strdup("heredoc"));
+			(*data).fd[1] = redirection_handler(lexer[(*data).lex_count]);
 			write((*data).fd[1], str, ft_strlen(str));
 			if (lexer[(*data).lex_count + 1]->cmd != NULL)
-			{
-				puts("this should not print");
 				dup2((*data).fd[1], STDOUT_FILENO);
-			}
 			free(str);
 			close((*data).input_fd);
 			close((*data).fd[0]);
@@ -169,20 +188,52 @@ int	manage_reads_writes(t_pipedata *data, t_lexer **lexer)
 			i--;
 		(*data).fd[0] = redirection_handler(lexer[i]);
 		dup2((*data).fd[0], STDIN_FILENO);
-		if (are_there_more_cmds(lexer, (*data).lex_count) != 0)
+		printf("are there more commands? = %i\nAre there previous commands? = %i\n", are_there_more_cmds(lexer, (*data).lex_count), are_there_previous_cmds(lexer, data));
+		if (are_there_more_cmds(lexer, (*data).lex_count) != 0 && are_there_previous_cmds(lexer, data) != -1)
+		{
+			puts("im dumb");
 			dup2((*data).fd[1], STDOUT_FILENO);
+		}
 		if (lexer[(*data).lex_count]->cmd == NULL && lexer[(*data).lex_count + 1]->tokenid[0] != '<')
 			(*data).lex_count++;
 	}
 	else if (lexer[(*data).lex_count]->tokenid[0] == '>')
 	{
+		out_files = (*data).lex_count;
+		while (lexer[out_files] != NULL)
+		{
+			puts("loop");
+			if (lexer[out_files + 1] != NULL)
+			{
+				if (lexer[out_files + 1]->tokenid[0] == '>')
+				{
+					puts("found multiple output redirections");
+					temp_fd = open(lexer[out_files]->file, O_WRONLY | O_CREAT | O_APPEND, 0644);
+					close(temp_fd);
+					out_files++;
+				}
+				else
+					break ;
+			}
+		}
+		printf("outfile = %i\n", out_files);
+		if (out_files != 0)
+		{
+			if (lexer[out_files - 1]->tokenid[0] == '>')
+			{
+				puts("here");
+				(*data).fd[1] = open(lexer[out_files]->file, O_WRONLY | O_CREAT | O_APPEND, 0644);
+				dup2((*data).fd[1], STDOUT_FILENO);
+			}
+		}
 		if (lexer[0]->tokenid[0] == '<')
 		{
 			(*data).fd[1] = redirection_handler(lexer[(*data).lex_count]);
 			dup2((*data).fd[1], STDOUT_FILENO);
 		}
-		else
+		else if (out_files == (*data).lex_count)
 		{
+			puts("gey");
 			(*data).fd[1] = redirection_handler(lexer[(*data).lex_count]);
 			dup2((*data).fd[1], STDOUT_FILENO);
 			dup2((*data).input_fd, STDIN_FILENO);
@@ -236,6 +287,9 @@ int	is_built_in(t_lexer **lexer, int lex_count)
 		"cd",
 		"env",
 		"^D",
+		"unset",
+		"export",
+		"poop",
         NULL
     };
 
@@ -267,17 +321,26 @@ int	are_all_commands_thesame(t_lexer **lexer)
 		i++;
 	while (lexer[collapse] != NULL)
 	{
+		puts("1");
 		if (lexer[collapse + 1] != NULL)
 		{
-			if (ft_memcmp(lexer[collapse]->cmd, lexer[collapse + 1]->cmd, ft_strlen(lexer[collapse]->cmd)) == 0)
-				collapse++;
+			if (ft_strlen(lexer[collapse]->cmd) < ft_strlen(lexer[collapse + 1]->cmd))
+			{
+				if (ft_memcmp(lexer[collapse]->cmd, lexer[collapse + 1]->cmd, ft_strlen(lexer[collapse]->cmd)) == 0)
+					collapse++;
+			}
+			if (ft_strlen(lexer[collapse]->cmd) >= ft_strlen(lexer[collapse + 1]->cmd))
+			{
+				if (ft_memcmp(lexer[collapse]->cmd, lexer[collapse + 1]->cmd, ft_strlen(lexer[collapse + 1]->cmd)) == 0)
+					collapse++;
+			}
 			else
 				break ;
 		}
 		else
 			break ;
 	}
-	printf("collapse = %i\ni = %i\n", collapse, i);
+	// printf("collapse = %i\ni = %i\n", collapse, i);
 	if (collapse + 1 == i)
 		return (1);
 	else
@@ -294,12 +357,14 @@ void	piping(t_lexer **lexer)
 	if (lexer[0] == NULL)
 		return ;
 	data.lexer = lexer;
-	if (lexer[data.lex_count]->cmd != NULL && lexer[data.lex_count]->execd == false && lexer[data.lex_count]->tokenid[0] != '<')																		// collapse
+	if (lexer[data.lex_count]->cmd != NULL && lexer[data.lex_count]->execd == false && lexer[data.lex_count]->tokenid[0] != '<' && lexer[data.lex_count]->tokenid[0] != '>')																		// collapse
 	{
 		if (lexer[data.lex_count + 1] != NULL)
 		{
+			puts("hey");
 			if (are_all_commands_thesame(lexer) == 1)
 			{
+				puts("here?");
 				lexer[data.lex_count]->args = replace_doll_question_to_number_with_free(lexer[data.lex_count]->args, doll);
 				pid = fork();
 				if (pid == 0)
@@ -346,6 +411,7 @@ void	piping(t_lexer **lexer)
 	if (lexer[1] != NULL)																						// piping/redirections
 		while (lexer[data.lex_count] != NULL && lexer[data.lex_count]->execd == false)
 		{
+			puts("hey 2");
 			lexer[data.lex_count]->args = replace_doll_question_to_number_with_free(lexer[data.lex_count]->args, doll);
 			pipe(data.fd);
 			pid = fork();

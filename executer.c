@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/13 13:56:36 by sboulain          #+#    #+#             */
-/*   Updated: 2023/10/18 14:56:08 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/10/29 16:19:16 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,14 +16,19 @@ void	echo_handle(char *str, bool has_n);
 void	rtrim(char *str);
 bool	ft_isspace(unsigned char c);
 void	check_quotes(char *str);
+char	***get_env(void);
+void	set_env(char *name, char *value, char ***environment);
+int		unset_env(char *name, char ***environment);
+void	print_env(char ***environment);
+void	print_export(char ***environment);
 
 int executer(t_lexer **lexer, t_pipedata *data)
 {
 	int			return_val;
 	char		str2[4096];
-	int			i;
+	// int			i;
 
-	i = 0;
+	// i = 0;
 	return_val = 0;
 	if (ft_memcmp(lexer[(*data).lex_count]->cmd, "clear", 5) == 0)
 	{
@@ -69,11 +74,21 @@ int executer(t_lexer **lexer, t_pipedata *data)
 			return(1);
 		}
 	}
+	
+	// !! environment stuff !!
 	else if (ft_memcmp(lexer[(*data).lex_count]->cmd, "env", 3) == 0)
+		print_env(get_env());
+	else if (ft_memcmp(lexer[(*data).lex_count]->cmd, "unset", 5) == 0)
+		unset_env(ft_strdup("x"), get_env());
+	// else if (ft_memcmp(lexer[(*data).lex_count]->cmd, "export x", 8) == 0)
+	// 	set_env(ft_strdup("x"), ft_strdup("10"), get_env());
+	else if (ft_memcmp(lexer[(*data).lex_count]->cmd, "export", 6) == 0)
+		print_export(get_env());
+	else if (ft_memcmp(lexer[(*data).lex_count]->cmd, "poop", 4) == 0)
 	{
-		while ((*(*data).environ)[i])
-			printf("%s\n", (*(*data).environ)[i++]);
+		set_env(ft_strdup("x"), ft_strdup("10"), get_env());
 	}
+	
 	else if (ft_memcmp(lexer[(*data).lex_count]->cmd, "^D", 2) == 0)
     	exit (EXIT_SUCCESS);
 	return (return_val);

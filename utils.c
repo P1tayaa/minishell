@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/14 17:01:53 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/10/23 11:17:07 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/10/28 11:44:53 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -240,5 +240,6 @@ char *here_doc_starter(char *wordlocking_for)
         str_return = ft_strjoin_with_frees(str_return, ft_strjoin("\n", read_line_str));
         read_line_str = readline(" > ");
     }
+	str_return = ft_strjoin_with_frees(str_return, ft_strdup("\n"));
     return (str_return);
 }
