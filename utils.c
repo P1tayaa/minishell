@@ -346,14 +346,10 @@ char **get_word_one_by_one(char *str)
 
 char **get_export_var(char *arg_of_export)
 {
-	// char *var_name;
-	// char *var_content;
 	char **work_split;
 	char **export_content;
 	int		i_export_content;
 	int		i_work_split;
-
-	// char *str_tok_arg;
 
 	i_export_content = 0;
 	i_work_split = 0;
@@ -486,7 +482,13 @@ char	get_last_char(char *str)
 	return(str[i]);
 }
 
-bool	check_export_for_quotes(t_post_quotes	**content)
+void	set_env(char *name, char *value, char ***environment);
+char	***get_env(void);
+void	print_export(char ***environment);
+void free_content(t_post_quotes **content);
+void	lexer_free(t_lexer **lexer);
+
+bool	check_export_for_quotes(t_post_quotes	***content, t_lexer ***lexer)
 {
 	int 		i;
 	int 		j;
@@ -494,34 +496,39 @@ bool	check_export_for_quotes(t_post_quotes	**content)
 	char 		**export_content;
 	char		**temp_var_from_no_quotes;
 
-	if (is_str_export(content[0]->content) == false)
+
+	if (is_str_export((*lexer)[0]->cmd) == false)
 		return (false);
-	export_content = malloc(sizeof(char *) * ((counte_num_new_var(content) * 2) + 1));
+	if ((*lexer)[1] != NULL)
+	{
+		printf("Can't pipe export\n");
+		lexer_free((*lexer));
+		free_content((*content));
+		return (true);
+	}
+	if ((*lexer)[0]->args == NULL)
+	{
+		print_export(get_env());
+		lexer_free((*lexer));
+		free_content((*content));
+		return (true);
+	}
+	export_content = malloc(sizeof(char *) * ((counte_num_new_var((*content)) * 2) + 1));
 	i = 1;
 	i_export_content = 0;
-	while (content[i] != NULL)
+	while ((*content)[i] != NULL)
 	{
 		printf("doing content %i, and writing item %d\n", i, i_export_content);
-		if (content[i]->is_quotes)
+		if ((*content)[i]->is_quotes)
 		{
-			// if (i % 2 == 0)
-			// {
-			// 	//name of var
-				
-			// }
-			// else
-			// {
-			// 	//content of var
-
-			// }
-			export_content[i_export_content] = ft_strdup(content[i]->content);
+			export_content[i_export_content] = ft_strdup((*content)[i]->content);
 			i_export_content++;
 		}
 		else
 		{
-			if (is_all_space(content[i]->content) == false)
+			if (is_all_space((*content)[i]->content) == false)
 			{
-				temp_var_from_no_quotes = get_export_var(content[i]->content);
+				temp_var_from_no_quotes = get_export_var((*content)[i]->content);
 				if (check_if_array_str_is_empty(temp_var_from_no_quotes) == true)
 				{
 					puts("ALL EMPTY NONE QUOTES");
@@ -530,9 +537,9 @@ bool	check_export_for_quotes(t_post_quotes	**content)
 					continue ;
 				}
 				j = 0;
-				if (i_export_content % 2 == 1 && content[i]->content[0] == '=')
+				if (i_export_content % 2 == 1 && (*content)[i]->content[0] == '=')
 					j++;
-				if (i_export_content % 2 == 1 && content[i]->content[0] != '=')
+				if (i_export_content % 2 == 1 && (*content)[i]->content[0] != '=')
 				{
 					export_content[i_export_content] = ft_strdup("");
 					i_export_content++;
@@ -541,10 +548,6 @@ bool	check_export_for_quotes(t_post_quotes	**content)
 				while (temp_var_from_no_quotes[j] != NULL)
 				{
 					printf("temp_var is %i == (%s), coping in %i\n", j,temp_var_from_no_quotes[j], i_export_content);
-					// if ()
-					// if (j != 0)
-					// 	if (temp_var_from_no_quotes[j + 1] == NULL && temp_var_from_no_quotes[j][0] == '\0')
-					// 		break ;
 					export_content[i_export_content] = temp_var_from_no_quotes[j];
 					j++;
 					i_export_content++;
@@ -557,25 +560,27 @@ bool	check_export_for_quotes(t_post_quotes	**content)
 				export_content[i_export_content] = ft_strdup("");
 				i_export_content++;
 			}
-			// {
-
-			// }
 		}
 		i++;
 	}
-	printf("%d is where null is \n", i_export_content);
-	export_content[i_export_content] = NULL;
+	// printf("%d is where null is \n", i_export_content);
+	// export_content[i_export_content] = NULL;
+	// i = 0;
+	// while (export_content[i] != NULL)
+	// {
+	// 	if (i % 2 == 0)
+	// 		printf("(%s)", export_content[i]);
+	// 	else 
+	// 		printf(" = (%s)\n", export_content[i]);
+	// 	i++;
+	// }
+	
 	i = 0;
+
 	while (export_content[i] != NULL)
 	{
-		if (i % 2 == 0)
-			printf("(%s)", export_content[i]);
-		else 
-			printf(" = (%s)\n", export_content[i]);
-		i++;
+		set_env(export_content[i], export_content[i + 1], get_env());
+		i += 2;
 	}
-	printf("\n");
-
-	pause();
 	return (true);
 }

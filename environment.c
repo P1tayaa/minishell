@@ -59,7 +59,7 @@ void	set_env(char *name, char *value, char ***environment)
 	if (!to_set)
 		exit(EXIT_FAILURE);
 	// if it has a value, add the equal, else do not put the equal (important so we don't print in env)
-	if (name[ft_strlen(name)] == '=')
+	if (value[0] != '\0')
 		to_set = ft_strjoin_with_frees(ft_strjoin_with_frees(name, ft_strdup("=")), value);
 	else
 		to_set = ft_strdup(name);

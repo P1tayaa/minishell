@@ -19,6 +19,10 @@ int executer(t_lexer **lexer, t_pipedata *data);
 t_lexer	**main_parser(char *str);
 void	check_quotes(char **str_og, t_post_quotes ***content);
 t_lexer	**parser_with_quotes(t_post_quotes **content);
+bool	check_export_for_quotes(t_post_quotes	***content, t_lexer ***lexer);
+
+bool is_str_export(char *str);
+char **get_export_var(char *arg_of_export);
 
 // void	builtins(t_lexer **lexer)
 // {
@@ -47,13 +51,90 @@ t_lexer	**parser_with_quotes(t_post_quotes **content);
 // 	}
 // }
 
+void	lexer_free(t_lexer **lexer)
+{
+	int i;
+	i = 0;
+	while (lexer[i] != NULL)
+	{
+
+		if (lexer[i]->cmd != NULL)
+			free(lexer[i]->cmd);
+		if (lexer[i]->args != NULL)
+			free(lexer[i]->args);
+		if (lexer[i]->file != NULL)
+			free(lexer[i]->file);
+		if (lexer[i]->flags != NULL)
+			free(lexer[i]->flags);
+		lexer[i]->cmd = NULL;
+		lexer[i]->args = NULL;
+		lexer[i]->file = NULL;
+		lexer[i]->flags = NULL;
+		free(lexer[i]);
+		i++;
+	}
+	free(lexer);
+}
+
+void free_content(t_post_quotes **content)
+{
+	int i;
+
+	i = 0;
+	while (content[i] != NULL)
+	{
+		free(content[i]->content);
+		free(content[i]);
+		i++;
+	}
+	free(content);
+}
+
+
+void	set_env(char *name, char *value, char ***environment);
+char	***get_env(void);
+void	print_export(char ***environment);
+
+bool export_andle_no_quotes(t_lexer ***lexer)
+{
+	char **var_prept;
+	int i;
+
+	if (is_str_export((*lexer)[0]->cmd))
+	{
+		if ((*lexer)[1] != NULL)
+		{
+			printf("Can't pipe export\n");
+			lexer_free((*lexer));
+			return (true);
+		}
+		if ((*lexer)[0]->args == NULL)
+		{
+			print_export(get_env());
+			lexer_free((*lexer));
+			return (true);
+		}
+		var_prept = get_export_var((*lexer)[0]->args);
+		i = 0;
+		while (var_prept[i] != NULL)
+		{
+			set_env(var_prept[i], var_prept[i + 1], get_env());
+			i += 2;
+		}
+	}
+	else
+		return (false);
+	lexer_free((*lexer));
+	return (true);
+}
+
 int    main(void)
 {
     char			*str;
     t_lexer			**lexer;
     bool			quotes_test;
 	t_post_quotes	**content;
-	int	i;
+	// int	i;e
 
 	manage_signals();
 	quotes_test = true;
@@ -84,16 +165,20 @@ int    main(void)
 			else
 			{
 				lexer = parser_with_quotes(content);
+				if (check_export_for_quotes(&content, &lexer))
+					continue ;
 				// int i;
-				i = 0;
-				while (content[i] != NULL)
+				if (is_str_export(lexer[0]->cmd))
 				{
-					// free(content[i]->)
-					free(content[i]->content);
-					free(content[i]);
-					i++;
+					if (lexer[1] != NULL)
+						printf("Can't pipe export\n");
+					else
+						get_export_var(lexer[0]->args);
+					lexer_free(lexer);
+					free_content(content);
+					continue ;
 				}
-				free(content);
+				free_content(content);
 			}
 			free(str);
 			// i = 0;
@@ -113,31 +198,14 @@ int    main(void)
 				printf("flags: (%s)\n", lexer[i]->flags);
 				i++;
 			}
-
-			piping(lexer);
+			if (export_andle_no_quotes(&lexer))
+				continue ;
+			else
+				piping(lexer);
 			// pause();
 			// optiona: wait for return value.
 		// }
-		i = 0;
-		while (lexer[i] != NULL)
-		{
-
-			if (lexer[i]->cmd != NULL)
-				free(lexer[i]->cmd);
-			if (lexer[i]->args != NULL)
-				free(lexer[i]->args);
-			if (lexer[i]->file != NULL)
-				free(lexer[i]->file);
-			if (lexer[i]->flags != NULL)
-				free(lexer[i]->flags);
-			lexer[i]->cmd = NULL;
-			lexer[i]->args = NULL;
-			lexer[i]->file = NULL;
-			lexer[i]->flags = NULL;
-			free(lexer[i]);
-			i++;
-		}
-		free(lexer);
+		lexer_free(lexer);
 			// break ;
 	}
 	return (0);
