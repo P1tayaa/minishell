@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/20 15:16:04 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/10/29 18:25:27 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/10/29 22:26:39 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -182,10 +182,6 @@ int	manage_reads_writes(t_pipedata *data, t_lexer **lexer)
 			else
 				return (manage_reads_writes(data, lexer));
 		}
-		while (lexer[i]->tokenid[0] == '<')
-			i++;
-		if (i != (*data).lex_count)
-			i--;
 		(*data).fd[0] = redirection_handler(lexer[i]);
 		dup2((*data).fd[0], STDIN_FILENO);
 		printf("are there more commands? = %i\nAre there previous commands? = %i\n", are_there_more_cmds(lexer, (*data).lex_count), are_there_previous_cmds(lexer, data));
