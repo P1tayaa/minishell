@@ -94,6 +94,7 @@ void free_content(t_post_quotes **content)
 void	set_env(char *name, char *value, char ***environment);
 char	***get_env(void);
 void	print_export(char ***environment);
+void export_content_freeur(char ***export_content);
 
 bool export_andle_no_quotes(t_lexer ***lexer)
 {
@@ -118,6 +119,21 @@ bool export_andle_no_quotes(t_lexer ***lexer)
 		i = 0;
 		while (var_prept[i] != NULL)
 		{
+			if (ft_isdigit(var_prept[i][0]) == 1)
+			{
+				printf("Minishell: export: `%s", var_prept[i]);
+				if (var_prept[i + 1][0] != '\0')
+					printf("=%s", var_prept[i + 1]);
+				printf("': not a valid identifier\n");
+				while (var_prept[i] != NULL)
+				{
+					free(var_prept[i]);
+					i++;
+				}
+				free(var_prept);
+				lexer_free((*lexer));
+				return (true);
+			}
 			set_env(var_prept[i], var_prept[i + 1], get_env());
 			i += 2;
 		}
@@ -125,6 +141,7 @@ bool export_andle_no_quotes(t_lexer ***lexer)
 	else
 		return (false);
 	lexer_free((*lexer));
+	free(var_prept);
 	return (true);
 }
 
@@ -167,6 +184,8 @@ int    main(void)
 				lexer = parser_with_quotes(content);
 				if (check_export_for_quotes(&content, &lexer))
 					continue ;
+				// if (check_unset_for_quotes(&content, &lexer))
+				// 	continue ;
 				// int i;
 				if (is_str_export(lexer[0]->cmd))
 				{
