@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/29 12:56:41 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/10/29 16:14:46 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/10/30 16:08:50 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,58 @@ char	*malloc_and_write_line(char *copy, char *og)
 	return (copy);
 }
 
+
+void	swap(char *str1, char *str2)
+{
+	char temp[1000];
+
+	strcpy(temp, str1);
+	strcpy(str1, str2);
+	strcpy(str2, temp);
+}
+
+void	recursiveBubble(char **environment, int string_count, int loop, int index)
+{
+    if (loop == string_count - 1)
+		return;  // Base condition for outer recursion
+    if (index == string_count - loop - 1)
+        recursiveBubble(environment, string_count, loop + 1, 0);		// // If we've reached the end of the inner loop for this pass, move to the next pass
+	else
+	{
+        if (strcmp(environment[index], environment[index + 1]) > 0)
+            swap(environment[index], environment[index + 1]);
+        recursiveBubble(environment, string_count, loop, index + 1);
+    }
+}
+
+void	printArray(char **environment, int string_count, int idx)
+{
+	if (idx == string_count)
+		return;
+
+	printf("%s\n", environment[idx]);
+	printArray(environment, string_count, idx + 1);
+}
+
+void	ascii_sort(char **environment)
+{
+	int		count;
+	char	**sorted_environment;
+
+	count = 0;
+	while (environment[count] != NULL)
+		count++;
+	sorted_environment = (char **)malloc(sizeof(count + 1));
+	count = 0;
+	while (environment[count] != NULL)
+	{
+		sorted_environment[count] = (char *)malloc(sizeof(ft_strlen(environment[count])));
+		sorted_environment[count] = ft_strdup(environment[count]);
+		count++;
+	}
+	recursiveBubble(sorted_environment, count, 0, 0);
+	printArray(sorted_environment, count, 0);
+}
 
 // frees name and value
 void	set_env(char *name, char *value, char ***environment)

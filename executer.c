@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/13 13:56:36 by sboulain          #+#    #+#             */
-/*   Updated: 2023/10/29 16:19:16 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/10/30 15:37:31 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@ void	set_env(char *name, char *value, char ***environment);
 int		unset_env(char *name, char ***environment);
 void	print_env(char ***environment);
 void	print_export(char ***environment);
+void	ascii_sort(char **environment);
 
 int executer(t_lexer **lexer, t_pipedata *data)
 {
@@ -84,7 +85,7 @@ int executer(t_lexer **lexer, t_pipedata *data)
 	// else if (ft_memcmp(lexer[(*data).lex_count]->cmd, "export x", 8) == 0)
 	// 	set_env(ft_strdup("x"), ft_strdup("10"), get_env());
 	else if (ft_memcmp(lexer[(*data).lex_count]->cmd, "export", 6) == 0)
-		print_export(get_env());
+		ascii_sort((*get_env()));
 	else if (ft_memcmp(lexer[(*data).lex_count]->cmd, "poop", 4) == 0)
 	{
 		set_env(ft_strdup("x"), ft_strdup("\0"), get_env());
