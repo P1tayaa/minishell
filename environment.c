@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/29 12:56:41 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/10/30 16:52:56 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/10/30 17:36:18 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,50 +90,40 @@ void	set_env(char *name, char *value, char ***environment)
 {
 	int		i;
 	char	*to_set;
-	size_t	name_len; 
+	// size_t	name_len; 
 	size_t	value_len;
 	char	**new_environment;
 
 	i = 0;
-    name_len = ft_strlen(name);
+    // name_len = ft_strlen(name);
     value_len = ft_strlen(value);
 	while ((*environment)[i])
 	{
-		if (ft_memcmp((*environment)[i], name, ft_strlen(name)) == 0 && (*environment)[i][ft_strlen(name)] == '=')
+		if (ft_memcmp((*environment)[i], name, ft_strlen(name)) == 0)
 		{
+			if (value_len == 0)
+				break ;
 			free((*environment)[i]);
-			(*environment)[i] = NULL;
-			break;
+			to_set = ft_strjoin_with_frees(ft_strjoin_with_frees(name, ft_strdup("=")), value);
+			(*environment)[i] = to_set;
+			return ;
 		}
-		else if (ft_memcmp((*environment)[i], name, ft_strlen(name)) == 0)
-			break ;
 		i++;
 	}
-	if (value_len != 0)
-		to_set = (char *) malloc(name_len + value_len + 2);  // +2 for '=' and '\0'
-	else
-		to_set = (char *) malloc(name_len + 1);
-	if (!to_set)
-		exit(EXIT_FAILURE);
-	// if it has a value, add the equal, else do not put the equal (important so we don't print in env)
-	if (value[0] != '\0')
-		to_set = ft_strjoin_with_frees(ft_strjoin_with_frees(name, ft_strdup("=")), value);
-	else
-		to_set = ft_strdup(name);
-	if (!(ft_strchr((*environment)[i], '=')))
-		(*environment)[i] = to_set;
-	else
+	if (environment[i] == NULL)
 	{
-		puts("should appear");
-		new_environment = (char **) realloc((*environment), (i + 2) * sizeof(char *));
-		if (!new_environment)
+		new_environment = (char **) ft_realloc((*environment), (i + 2) * sizeof(char *));
+		if (value_len == 0)
 		{
-			free(to_set);
-			exit(EXIT_FAILURE);
+			puts("should see me");
+			to_set = ft_strdup(name);
 		}
+		else
+			to_set = ft_strjoin_with_frees(ft_strjoin_with_frees(name, ft_strdup("=")), value);
 		(*environment) = new_environment;
 		(*environment)[i] = to_set;
-		(*environment)[i + 1] = NULL;  // Terminate the array
+		(*environment)[i + 1] = NULL;
+
 	}
 }
 
@@ -167,7 +157,7 @@ void	print_export(char ***environment)
 	int	i;
 
 	i = 0;
-	while ((*environment)[i])
+	while ((*environment)[i] != NULL)
 	{
 		printf("declare -x %s\n", (*environment)[i]);
 		i++;

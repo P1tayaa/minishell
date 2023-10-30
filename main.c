@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:29:45 by omathot           #+#    #+#             */
-/*   Updated: 2023/10/30 16:15:26 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/10/30 17:11:20 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,6 +116,16 @@ bool export_andle_no_quotes(t_lexer ***lexer)
 			return (true);
 		}
 		var_prept = get_export_var((*lexer)[0]->args);
+		i = 0;
+		while (var_prept[i] != NULL)
+		{
+			if (i % 2 == 0)
+				printf("(%s)", var_prept[i]);
+			else 
+				printf(" = (%s)\n", var_prept[i]);
+			i++;
+		}
+	printf("\n");
 		i = 0;
 		while (var_prept[i] != NULL)
 		{

@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/20 15:16:04 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/10/29 22:26:39 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/10/30 16:56:27 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -284,9 +284,6 @@ int	is_built_in(t_lexer **lexer, int lex_count)
 		"cd",
 		"env",
 		"^D",
-		"unset",
-		"export",
-		"poop",
         NULL
     };
 

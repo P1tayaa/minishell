@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/13 13:56:36 by sboulain          #+#    #+#             */
-/*   Updated: 2023/10/30 15:37:31 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/10/30 16:57:06 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,16 +80,16 @@ int executer(t_lexer **lexer, t_pipedata *data)
 
 	else if (ft_memcmp(lexer[(*data).lex_count]->cmd, "env", 3) == 0)
 		print_env(get_env());
-	else if (ft_memcmp(lexer[(*data).lex_count]->cmd, "unset", 5) == 0)
-		unset_env(ft_strdup("x"), get_env());
-	// else if (ft_memcmp(lexer[(*data).lex_count]->cmd, "export x", 8) == 0)
-	// 	set_env(ft_strdup("x"), ft_strdup("10"), get_env());
-	else if (ft_memcmp(lexer[(*data).lex_count]->cmd, "export", 6) == 0)
-		ascii_sort((*get_env()));
-	else if (ft_memcmp(lexer[(*data).lex_count]->cmd, "poop", 4) == 0)
-	{
-		set_env(ft_strdup("x"), ft_strdup("\0"), get_env());
-	}
+	// else if (ft_memcmp(lexer[(*data).lex_count]->cmd, "unset", 5) == 0)
+	// 	unset_env(ft_strdup("x"), get_env());
+	// // else if (ft_memcmp(lexer[(*data).lex_count]->cmd, "export x", 8) == 0)
+	// // 	set_env(ft_strdup("x"), ft_strdup("10"), get_env());
+	// else if (ft_memcmp(lexer[(*data).lex_count]->cmd, "export", 6) == 0)
+	// 	ascii_sort((*get_env()));
+	// else if (ft_memcmp(lexer[(*data).lex_count]->cmd, "poop", 4) == 0)
+	// {
+	// 	set_env(ft_strdup("x"), ft_strdup("\0"), get_env());
+	// }
 	
 	//--------------------------------------------------------------------------------------------
 	else if (ft_memcmp(lexer[(*data).lex_count]->cmd, "^D", 2) == 0)
