@@ -188,6 +188,12 @@ void	move_file_name_to_file_and_comand_back(t_lexer *lexer_previous, t_lexer *le
 	int i;
 
 	lexer_previous->file = lexer->cmd;
+	if (lexer->args == NULL)
+	{
+		lexer->cmd = NULL;
+		lexer->args = NULL;
+		return ;
+	}
 	lexer->cmd = ft_strtok(lexer->args, " ");
 	i = 0;
 	if (lexer->args == NULL)
