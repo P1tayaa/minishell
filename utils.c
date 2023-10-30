@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/14 17:01:53 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/10/29 18:16:36 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/10/30 13:41:07 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -529,6 +529,7 @@ bool	check_export_for_quotes(t_post_quotes	***content, t_lexer ***lexer)
 			if (is_all_space((*content)[i]->content) == false)
 			{
 				temp_var_from_no_quotes = get_export_var((*content)[i]->content);
+				printf("content[i] = %s\n", (*content)[i]->content);
 				if (check_if_array_str_is_empty(temp_var_from_no_quotes) == true)
 				{
 					puts("ALL EMPTY NONE QUOTES");
@@ -564,16 +565,16 @@ bool	check_export_for_quotes(t_post_quotes	***content, t_lexer ***lexer)
 		i++;
 	}
 	// printf("%d is where null is \n", i_export_content);
-	// export_content[i_export_content] = NULL;
-	// i = 0;
-	// while (export_content[i] != NULL)
-	// {
-	// 	if (i % 2 == 0)
-	// 		printf("(%s)", export_content[i]);
-	// 	else 
-	// 		printf(" = (%s)\n", export_content[i]);
-	// 	i++;
-	// }
+	export_content[i_export_content] = NULL;
+	i = 0;
+	while (export_content[i] != NULL)
+	{
+		if (i % 2 == 0)
+			printf("(%s)", export_content[i]);
+		else 
+			printf(" = (%s)\n", export_content[i]);
+		i++;
+	}
 	
 	i = 0;
 
