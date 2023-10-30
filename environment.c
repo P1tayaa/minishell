@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/29 12:56:41 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/10/30 16:08:50 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/10/30 16:52:56 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,9 +105,14 @@ void	set_env(char *name, char *value, char ***environment)
 			(*environment)[i] = NULL;
 			break;
 		}
+		else if (ft_memcmp((*environment)[i], name, ft_strlen(name)) == 0)
+			break ;
 		i++;
 	}
-	to_set = (char *) malloc(name_len + value_len + 2);  // +2 for '=' and '\0'
+	if (value_len != 0)
+		to_set = (char *) malloc(name_len + value_len + 2);  // +2 for '=' and '\0'
+	else
+		to_set = (char *) malloc(name_len + 1);
 	if (!to_set)
 		exit(EXIT_FAILURE);
 	// if it has a value, add the equal, else do not put the equal (important so we don't print in env)
@@ -115,7 +120,7 @@ void	set_env(char *name, char *value, char ***environment)
 		to_set = ft_strjoin_with_frees(ft_strjoin_with_frees(name, ft_strdup("=")), value);
 	else
 		to_set = ft_strdup(name);
-	if ((*environment)[i])
+	if (!(ft_strchr((*environment)[i], '=')))
 		(*environment)[i] = to_set;
 	else
 	{
