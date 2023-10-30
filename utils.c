@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/14 17:01:53 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/10/30 13:41:07 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/10/30 16:19:44 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -247,21 +247,13 @@ char *here_doc_starter(char *wordlocking_for)
 
 bool is_str_export(char *str)
 {
-	if (str[0] == 'e' && str[1] == 'x' && str[2] == 'p'
-		&& str[3] == 'o' && str[4] == 'r' && str[5] == 't' 
-			&& str[6] == '\0')
-			return (true);
+	if (ft_strlen(str) == 6)
+		if (str[0] == 'e' && str[1] == 'x' && str[2] == 'p'
+			&& str[3] == 'o' && str[4] == 'r' && str[5] == 't' 
+				&& str[6] == '\0')
+				return (true);
 	return (false);
 }
-
-bool is_str_unset(char *str)
-{
-	if (str[0] == 'u' && str[1] == 'n' && str[2] == 's'
-		&& str[3] == 'e' && str[4] == 't' && str[5] == '\0')
-			return (true);
-	return (false);
-}
-
 
 char	*ft_strdup_until_space(char *str)
 {
@@ -319,11 +311,14 @@ char **get_word_one_by_one(char *str)
 	all_world = malloc(sizeof(char *) * ((get_num_export_con(str) * 2) + 1));
 	i = 0;
 	i_all_world = 0;
-	// puts(str);
+	puts(str);
 	while (str[i] != '\0')
 	{
 		while (ft_isspace(str[i]))
+		{
 			i++;
+		}
+		
 		all_world[i_all_world] = ft_strdup_until_space(&str[i]);
 		if (str[i + ft_strlen(all_world[i_all_world])] == '\0')
 		{
@@ -333,7 +328,20 @@ char **get_word_one_by_one(char *str)
 		i = i + ft_strlen(all_world[i_all_world]) + 1;
 		i_all_world++;
 	}
+	printf("i_all_world = %i\n", i_all_world);
 	all_world[i_all_world] = NULL;
+	i = 0;
+	puts("");
+	puts("");
+
+	while (all_world[i] != NULL)
+	{
+		printf("content i == %i, is (%s)\n", i, all_world[i]);
+		i++;
+	}
+	puts("");
+	puts("");
+	puts("");
 	return (all_world);
 }
 
@@ -366,24 +374,23 @@ char **get_export_var(char *arg_of_export)
 		free(work_split[i_work_split]);
 		i_work_split++;
 	}
-	// puts("test finito");
+	puts("test finito");
 	free(work_split);
 	export_content[i_export_content] = NULL;
 	return (export_content);
 }
 
-void export_content_freeur(char ***export_content)
+void export_content_freeur(char **export_content)
 {
 	int i;
 
 	i = 0;
-	while ((*export_content)[i] != NULL)
+	while (export_content[i] != NULL)
 	{
-		// printf("freeing num %d\n", i);
-		free((*export_content)[i]);
+		free(export_content[i]);
 		i++;
 	}
-	free((*export_content));
+	free(export_content);
 }
 
 void	test_export_for_main(t_lexer **lexer)
@@ -394,7 +401,7 @@ void	test_export_for_main(t_lexer **lexer)
 	if (is_str_export(lexer[0]->args) == true)
 	{
 		export_content = get_export_var(lexer[0]->args);
-		// puts("testoep");
+		puts("testoep");
 		if (export_content == NULL)
 			printf("error\n");
 		else
@@ -402,7 +409,7 @@ void	test_export_for_main(t_lexer **lexer)
 			i = 0;
 			while (export_content[i] != NULL)
 			{
-				// printf("content i == %i, is (%s)\n", i, export_content[i]);
+				printf("content i == %i, is (%s)\n", i, export_content[i]);
 				i++;
 			}
 		}
@@ -429,7 +436,7 @@ int	counte_num_new_var(t_post_quotes	**content)
 		}
 		i++;
 	}
-	// printf("num of var in quotes is : %i\n", num_of_vars);
+	printf("num of var in quotes is : %i\n", num_of_vars);
 	return (num_of_vars * 2);
 }
 
@@ -508,37 +515,26 @@ bool	check_export_for_quotes(t_post_quotes	***content, t_lexer ***lexer)
 		return (true);
 	}
 	export_content = malloc(sizeof(char *) * ((counte_num_new_var((*content)) * 2) + 1));
-	
-	if (is_str_export((*content)[0]->content))
-		i = 1;
-	else
-	{
-		char *temp;
-		temp = ft_strdup(&((*content)[0]->content[7]));
-		free((*content)[0]->content);
-		(*content)[0]->content = temp;
-		i = 0;
-	}
+	i = 1;
 	i_export_content = 0;
 	while ((*content)[i] != NULL)
 	{
-		// printf("doing content %i, and writing item %d\n", i, i_export_content);
+		printf("doing content %i, and writing item %d\n", i, i_export_content);
 		if ((*content)[i]->is_quotes)
-		{	
+		{
 			export_content[i_export_content] = ft_strdup((*content)[i]->content);
 			i_export_content++;
 		}
 		else
 		{
-			// puts("do no quotes");
 			if (is_all_space((*content)[i]->content) == false)
 			{
 				temp_var_from_no_quotes = get_export_var((*content)[i]->content);
-				// printf("content[i] = %s\n", (*content)[i]->content);
+				printf("content[i] = %s\n", (*content)[i]->content);
 				if (check_if_array_str_is_empty(temp_var_from_no_quotes) == true)
 				{
-					// puts("ALL EMPTY NONE QUOTES");
-					export_content_freeur(&temp_var_from_no_quotes);
+					puts("ALL EMPTY NONE QUOTES");
+					export_content_freeur(temp_var_from_no_quotes);
 					i++;
 					continue ;
 				}
@@ -550,16 +546,10 @@ bool	check_export_for_quotes(t_post_quotes	***content, t_lexer ***lexer)
 					export_content[i_export_content] = ft_strdup("");
 					i_export_content++;
 				}
-				// printf("j == %i\n", j);
+				printf("j == %i\n", j);
 				while (temp_var_from_no_quotes[j] != NULL)
 				{
-
-					if (temp_var_from_no_quotes[j + 1] == NULL && get_last_char((*content)[i]->content) == '=')
-					{
-						free(temp_var_from_no_quotes[j]);
-						break ;
-					}
-					// printf("temp_var is %i == (%s), coping in %i\n", j,temp_var_from_no_quotes[j], i_export_content);
+					printf("temp_var is %i == (%s), coping in %i\n", j,temp_var_from_no_quotes[j], i_export_content);
 					export_content[i_export_content] = temp_var_from_no_quotes[j];
 					j++;
 					i_export_content++;
@@ -568,67 +558,32 @@ bool	check_export_for_quotes(t_post_quotes	***content, t_lexer ***lexer)
 			}
 			else if (i_export_content % 2 == 1)
 			{
-				// puts("contentless nonequotes");
+				puts("contentless nonequotes");
 				export_content[i_export_content] = ft_strdup("");
 				i_export_content++;
 			}
 		}
 		i++;
 	}
-	if (i_export_content % 2 == 1)
-	{
-		export_content[i_export_content] = ft_strdup("");
-		i_export_content++;
-	}
 	// printf("%d is where null is \n", i_export_content);
 	export_content[i_export_content] = NULL;
 	i = 0;
 	while (export_content[i] != NULL)
 	{
-		if (ft_isdigit(export_content[i][0]) == 1)
-		{
-			printf("Minishell: export: `%s", export_content[i]);
-			if (export_content[i + 1][0] != '\0')
-				printf("=%s", export_content[i + 1]);
-			printf("': not a valid identifier\n");
-			while (export_content[i] != NULL)
-			{
-				free(export_content[i]);
-				i++;
-			}
-			free(export_content);
-			lexer_free((*lexer));
-			return (true);
-		}
+		if (i % 2 == 0)
+			printf("(%s)", export_content[i]);
+		else 
+			printf(" = (%s)\n", export_content[i]);
+		i++;
+	}
+	printf("\n");
+	
+	i = 0;
+
+	while (export_content[i] != NULL)
+	{
 		set_env(export_content[i], export_content[i + 1], get_env());
 		i += 2;
 	}
-	free(export_content);
-	free_content(*content);
-	lexer_free((*lexer));
 	return (true);
 }
-
-// bool	check_unset_for_quotes(t_post_quotes	***content, t_lexer ***lexer)
-// {
-// 	char **all_var_rm;
-	
-// 	if (is_str_unset((*lexer)[0]->cmd) == false)
-// 		return (false);
-// 	if ((*lexer)[1] != NULL)
-// 	{
-// 		printf("Can't pipe unset\n");
-// 		lexer_free((*lexer));
-// 		free_content((*content));
-// 		return (true);
-// 	}
-// 	if ((*lexer)[0]->args == NULL)
-// 	{
-// 		// print_export(get_env());
-// 		lexer_free((*lexer));
-// 		free_content((*content));
-// 		return (true);
-// 	}
-
-// 	return (true);
-// }
