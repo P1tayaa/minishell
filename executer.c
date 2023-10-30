@@ -75,7 +75,8 @@ int executer(t_lexer **lexer, t_pipedata *data)
 		}
 	}
 	
-	// !! environment stuff !!
+	//----------------------------- !! environment stuff !! ----------------------------------------
+
 	else if (ft_memcmp(lexer[(*data).lex_count]->cmd, "env", 3) == 0)
 		print_env(get_env());
 	else if (ft_memcmp(lexer[(*data).lex_count]->cmd, "unset", 5) == 0)
@@ -86,9 +87,10 @@ int executer(t_lexer **lexer, t_pipedata *data)
 		print_export(get_env());
 	else if (ft_memcmp(lexer[(*data).lex_count]->cmd, "poop", 4) == 0)
 	{
-		set_env(ft_strdup("x"), ft_strdup("10"), get_env());
+		set_env(ft_strdup("x"), ft_strdup("\0"), get_env());
 	}
 	
+	//--------------------------------------------------------------------------------------------
 	else if (ft_memcmp(lexer[(*data).lex_count]->cmd, "^D", 2) == 0)
     	exit (EXIT_SUCCESS);
 	return (return_val);

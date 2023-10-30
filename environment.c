@@ -58,7 +58,11 @@ void	set_env(char *name, char *value, char ***environment)
 	to_set = (char *) malloc(name_len + value_len + 2);  // +2 for '=' and '\0'
 	if (!to_set)
 		exit(EXIT_FAILURE);
-	to_set = ft_strjoin_with_frees(ft_strjoin_with_frees(name, ft_strdup("=")), value);
+	// if it has a value, add the equal, else do not put the equal (important so we don't print in env)
+	if (name[ft_strlen(name)] == '=')
+		to_set = ft_strjoin_with_frees(ft_strjoin_with_frees(name, ft_strdup("=")), value);
+	else
+		to_set = ft_strdup(name);
 	if ((*environment)[i])
 		(*environment)[i] = to_set;
 	else
@@ -84,7 +88,7 @@ int	unset_env(char *name, char ***environment)
 	i = 0;
 	while ((*environment)[i])
 	{
-		if (strncmp((*environment)[i], name, strlen(name)) == 0 && (*environment)[i][strlen(name)] == '=')
+		if (strncmp((*environment)[i], name, strlen(name)) == 0)
 		{
 			free((*environment)[i]);
 			j = i;
@@ -108,7 +112,7 @@ void	print_export(char ***environment)
 	i = 0;
 	while ((*environment)[i])
 	{
-		printf("%s\n", (*environment)[i]);
+		printf("declare -x %s\n", (*environment)[i]);
 		i++;
 	}
 }
@@ -116,10 +120,8 @@ void	print_export(char ***environment)
 void	print_env(char ***environment)
 {
 	int	i;
-	// int	j;
 
 	i = 0;
-	// j = 0;
 	while ((*environment)[i])
 	{
 		if (ft_strchr((*environment)[i], '=') != 0)
@@ -153,12 +155,6 @@ char	***get_env(void)
 		}
 		environment[i] = NULL;
 	}
-	// i = 0;
-	// while (environment[i] != NULL)
-	// {
-	// 	printf("line %i = %s\n", i, environment[i]);
-	// 	i++;
-	// }
 	copy = &environment;
 	return (copy);
 }

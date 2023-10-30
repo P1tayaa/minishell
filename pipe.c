@@ -250,6 +250,11 @@ int	manage_reads_writes(t_pipedata *data, t_lexer **lexer)
 	return (i);
 }
 
+
+	// if WIFSIGNALED(status)
+	// 	status = WTERMSIG(status);
+	// if WIFSTOPPED(status)
+	// 	status = WSTOPSIG(status);
 int	parent_management(t_pipedata *data, t_lexer **lexer, int pid)
 {
 	int	status;
@@ -263,10 +268,6 @@ int	parent_management(t_pipedata *data, t_lexer **lexer, int pid)
 	waitpid(pid, &status, 0);
 	if WIFEXITED(status)
 		status = WEXITSTATUS(status);
-	if WIFSIGNALED(status)
-		status = WTERMSIG(status);
-	if WIFSTOPPED(status)
-		status = WSTOPSIG(status);
 	return (status);
 }
 
