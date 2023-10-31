@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/29 12:56:41 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/10/30 17:36:18 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/10/31 10:49:48 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,27 +32,38 @@ char	*malloc_and_write_line(char *copy, char *og)
 	return (copy);
 }
 
-
-void	swap(char *str1, char *str2)
+int	custom_strcmp(const char *str1, const char *str2)
 {
-	char temp[1000];
-
-	strcpy(temp, str1);
-	strcpy(str1, str2);
-	strcpy(str2, temp);
+	while (*str1 && (*str1 == *str2))
+	{
+		str1++;
+		str2++;
+	}
+	return (*(unsigned char *)str1 - *(unsigned char *)str2);
 }
+
+
+void	swap(char **str1, char **str2)
+{
+    char *temp;
+
+	temp = *str1;
+    *str1 = *str2;
+    *str2 = temp;
+}
+
 
 void	recursiveBubble(char **environment, int string_count, int loop, int index)
 {
-    if (loop == string_count - 1)
+	if (loop == string_count - 1)
 		return;  // Base condition for outer recursion
-    if (index == string_count - loop - 1)
-        recursiveBubble(environment, string_count, loop + 1, 0);		// // If we've reached the end of the inner loop for this pass, move to the next pass
+	if (index == string_count - loop - 1)
+		recursiveBubble(environment, string_count, loop + 1, 0);		// // If we've reached the end of the inner loop for this pass, move to the next pass
 	else
 	{
-        if (strcmp(environment[index], environment[index + 1]) > 0)
-            swap(environment[index], environment[index + 1]);
-        recursiveBubble(environment, string_count, loop, index + 1);
+		if (custom_strcmp(environment[index], environment[index + 1]) > 0)
+			swap(&environment[index], &environment[index + 1]);
+		recursiveBubble(environment, string_count, loop, index + 1);
     }
 }
 
@@ -69,20 +80,23 @@ void	ascii_sort(char **environment)
 {
 	int		count;
 	char	**sorted_environment;
+	int		i;
 
+	i = 0;
 	count = 0;
 	while (environment[count] != NULL)
 		count++;
-	sorted_environment = (char **)malloc(sizeof(count + 1));
-	count = 0;
-	while (environment[count] != NULL)
+	sorted_environment = (char **)malloc(sizeof(char *) * (count + 1));
+	while (i < count)
 	{
-		sorted_environment[count] = (char *)malloc(sizeof(ft_strlen(environment[count])));
-		sorted_environment[count] = ft_strdup(environment[count]);
-		count++;
+		sorted_environment[i] = (char *)malloc(ft_strlen(environment[i]) + 1);
+		ft_strcpy(sorted_environment[i], environment[i]);
+		i++;
 	}
-	recursiveBubble(sorted_environment, count, 0, 0);
+	sorted_environment[i] = NULL;
+	recursiveBubble(sorted_environment, i, 0, 0);
 	printArray(sorted_environment, count, 0);
+	free(sorted_environment);
 }
 
 // frees name and value
@@ -90,12 +104,10 @@ void	set_env(char *name, char *value, char ***environment)
 {
 	int		i;
 	char	*to_set;
-	// size_t	name_len; 
 	size_t	value_len;
 	char	**new_environment;
 
 	i = 0;
-    // name_len = ft_strlen(name);
     value_len = ft_strlen(value);
 	while ((*environment)[i])
 	{
@@ -123,7 +135,6 @@ void	set_env(char *name, char *value, char ***environment)
 		(*environment) = new_environment;
 		(*environment)[i] = to_set;
 		(*environment)[i + 1] = NULL;
-
 	}
 }
 

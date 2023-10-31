@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/20 15:16:04 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/10/30 16:56:27 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/10/31 11:02:39 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -189,6 +189,11 @@ int	manage_reads_writes(t_pipedata *data, t_lexer **lexer)
 		{
 			puts("im dumb");
 			dup2((*data).fd[1], STDOUT_FILENO);
+		}
+		if (lexer[(*data).lex_count + 1] != NULL)			// !! was needed for grep NAME < Makefile > test.txt scenario !!
+		{
+			if (lexer[(*data).lex_count + 1]->tokenid[0] == '>')
+				dup2((*data).fd[1], STDOUT_FILENO);
 		}
 		if (lexer[(*data).lex_count]->cmd == NULL && lexer[(*data).lex_count + 1]->tokenid[0] != '<')
 			(*data).lex_count++;

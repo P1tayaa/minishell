@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/14 17:01:53 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/10/30 13:41:07 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/10/31 00:23:51 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -482,6 +482,7 @@ char	***get_env(void);
 void	print_export(char ***environment);
 void free_content(t_post_quotes **content);
 void	lexer_free(t_lexer **lexer);
+void	ascii_sort(char **environment);
 
 bool	check_export_for_quotes(t_post_quotes	***content, t_lexer ***lexer)
 {
@@ -503,7 +504,8 @@ bool	check_export_for_quotes(t_post_quotes	***content, t_lexer ***lexer)
 	}
 	if ((*lexer)[0]->args == NULL)
 	{
-		print_export(get_env());
+		printf("printing asciisort\n");
+		ascii_sort(*(get_env)());
 		lexer_free((*lexer));
 		free_content((*content));
 		return (true);
@@ -609,53 +611,53 @@ bool	check_export_for_quotes(t_post_quotes	***content, t_lexer ***lexer)
 	lexer_free((*lexer));
 	return (true);
 }
-char **ft_split_world_at_all_spaces(char *str)
-{
-	int i;
-	int j;
-	int	word_count;
-	bool writing;
-	char **str_split;
+// char **ft_split_world_at_all_spaces(char *str)
+// {
+// 	int i;
+// 	int j;
+// 	int	word_count;
+// 	bool writing;
+// 	char **str_split;
 
-	i = 0;
-	writing = false;
-	word_count = 0;
-	j = 0;
-	while (str[i] != '\0')
-	{
-		if (ft_isspace(str[i]))
-		{
-			if (writing)
-			{
-				str_split[word_count][j] = '\0';
-				word_count++;
-				j = 0;
-				writing = false;
-			}
-		}
-		else
-		{
-			writing = true;
-			str_split[word_count][j] = str[i];
-			j++;
-		}
-		i++;
-	}
-	str_split[word_count] = NULL;
+// 	i = 0;
+// 	writing = false;
+// 	word_count = 0;
+// 	j = 0;
+// 	while (str[i] != '\0')
+// 	{
+// 		if (ft_isspace(str[i]))
+// 		{
+// 			if (writing)
+// 			{
+// 				str_split[word_count][j] = '\0';
+// 				word_count++;
+// 				j = 0;
+// 				writing = false;
+// 			}
+// 		}
+// 		else
+// 		{
+// 			writing = true;
+// 			str_split[word_count][j] = str[i];
+// 			j++;
+// 		}
+// 		i++;
+// 	}
+// 	str_split[word_count] = NULL;
 
-	i = 0;
-	while (str_split[i] != NULL)
-	{
-		printf("str %d is (%s)\n", i, str_split[i]);
-		i++;
-	}
-	pause();
-	return (str_split);
-}
+// 	i = 0;
+// 	while (str_split[i] != NULL)
+// 	{
+// 		printf("str %d is (%s)\n", i, str_split[i]);
+// 		i++;
+// 	}
+// 	pause();
+// 	return (str_split);
+// }
 
 bool	check_unset_for_quotes(t_post_quotes	***content, t_lexer ***lexer)
 {
-	char **all_var_rm;
+	// char **all_var_rm;
 	
 	if (is_str_unset((*lexer)[0]->cmd) == false)
 		return (false);
@@ -673,7 +675,7 @@ bool	check_unset_for_quotes(t_post_quotes	***content, t_lexer ***lexer)
 		free_content((*content));
 		return (true);
 	}
-	ft_split_world_at_all_spaces((*content)[1]->content);
+	// ft_split_world_at_all_spaces((*content)[1]->content);
 	return (true);
 }
 

@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:29:45 by omathot           #+#    #+#             */
-/*   Updated: 2023/10/30 17:11:20 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/10/31 00:24:57 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,6 +95,7 @@ void	set_env(char *name, char *value, char ***environment);
 char	***get_env(void);
 void	print_export(char ***environment);
 void export_content_freeur(char ***export_content);
+void	ascii_sort(char **environment);
 
 bool export_andle_no_quotes(t_lexer ***lexer)
 {
@@ -111,7 +112,7 @@ bool export_andle_no_quotes(t_lexer ***lexer)
 		}
 		if ((*lexer)[0]->args == NULL)
 		{
-			print_export(get_env());
+			ascii_sort(*(get_env)());
 			lexer_free((*lexer));
 			return (true);
 		}
