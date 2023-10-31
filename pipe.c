@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/20 15:16:04 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/10/31 12:21:12 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/10/31 16:50:41 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -249,13 +249,21 @@ int	manage_reads_writes(t_pipedata *data, t_lexer **lexer)
 	}
 	else if ((*data).lex_count != 0 && lexer[(*data).lex_count + 1] != NULL)
 	{
+		puts("first else");
 		dup2((*data).input_fd, STDIN_FILENO);
 		dup2((*data).fd[1], STDOUT_FILENO);
 	}
 	else if ((*data).lex_count != 0 || (*data).input_fd != -1)			// added top condition here, seems to not break anything?
+	{
+		puts("second else");
 		dup2((*data).input_fd, STDIN_FILENO);
+	}
 	else
+	{
+		puts("third else");
+		printf("fd[1] = %i\n", (*data).fd[1]);
 		dup2((*data).fd[1], STDOUT_FILENO);
+	}
 	close((*data).input_fd);
 	close((*data).fd[0]);
 	close((*data).fd[1]);
@@ -325,9 +333,12 @@ int	are_all_commands_thesame(t_lexer **lexer)
 	collapse = 0;
 	while (lexer[i] != NULL)
 		i++;
+	if (i < 10)
+		return (0);
+	printf("i = %i\n", i);
 	while (lexer[collapse] != NULL)
 	{
-		puts("1");
+		printf("collapse = %i\n", collapse);
 		if (lexer[collapse + 1] != NULL)
 		{
 			puts("2");
@@ -335,14 +346,19 @@ int	are_all_commands_thesame(t_lexer **lexer)
 			{
 				if (ft_memcmp(lexer[collapse]->cmd, lexer[collapse + 1]->cmd, ft_strlen(lexer[collapse]->cmd)) == 0)
 					collapse++;
+				else if (collapse != 0)
+					break ;
 			}
 			if (ft_strlen(lexer[collapse]->cmd) >= ft_strlen(lexer[collapse + 1]->cmd))
 			{
 				if (ft_memcmp(lexer[collapse]->cmd, lexer[collapse + 1]->cmd, ft_strlen(lexer[collapse + 1]->cmd)) == 0)
 					collapse++;
+				else if (collapse != 0)
+					break ;
 			}
 			else
 			{
+				printf("should break");
 				break ;
 			}
 			
@@ -350,8 +366,8 @@ int	are_all_commands_thesame(t_lexer **lexer)
 		else
 			break ;
 	}
-	// printf("collapse = %i\ni = %i\n", collapse, i);
-	if (collapse + 1 == i)
+	printf("collapse = %i\ni = %i\n", collapse, i);
+	if (collapse != i + 1)
 		return (1);
 	else
 		return (0);
@@ -425,6 +441,19 @@ void	piping(t_lexer **lexer)
 		while (lexer[data.lex_count] != NULL && lexer[data.lex_count]->execd == false)
 		{
 			puts("hey 2");
+			if (lexer[data.lex_count]->cmd != NULL)
+				if (ft_memcmp(lexer[data.lex_count]->cmd, "cat", 3) == 0)
+				{
+					if (lexer[data.lex_count]->args == NULL)
+					{
+						if (lexer[data.lex_count + 1] != NULL)
+						{
+							readline("\n");
+							data.lex_count++;
+							continue ;
+						}
+					}
+				}
 			lexer[data.lex_count]->args = replace_doll_question_to_number_with_free(lexer[data.lex_count]->args, doll);
 			pipe(data.fd);
 			pid = fork();
@@ -436,6 +465,7 @@ void	piping(t_lexer **lexer)
 			if (pid == 0)
 			{
 				manage_reads_writes(&data, lexer);		// info =
+				puts("finished if");
 				if (lexer[data.lex_count]->cmd)
 				{
 					if (is_built_in(lexer, data.lex_count) == 1)
