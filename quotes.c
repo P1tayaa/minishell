@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   quotes.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
+/*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/12 11:53:41 by omathot           #+#    #+#             */
-/*   Updated: 2023/10/13 15:43:28 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/10/17 15:28:22 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -791,7 +791,6 @@ void	spit_text_args_odd_p2(char	**string_split, char **temp_str, int i)
 		string_split[i] = temp;
 	else if ((*temp_str)[0] == '?' && (*temp_str)[1] == '\0')
 	{
-		printf("goes to $?, and the temp is %s\n", (*temp_str));
 		str_queston[0] = '$';
 		str_queston[1] = '!';
 		str_queston[2] = '\0';
@@ -830,7 +829,6 @@ char	**spit_text_args(char *str, int	*doll_pos)
 	int		total_parts;
 
 	spit_text_args_init(&num_doll, doll_pos, &total_parts, &string_split);
-	printf("%d = dollar num\n", num_doll);
 	i = 0;
 	num_doll = 0;
 	while (i < (total_parts))

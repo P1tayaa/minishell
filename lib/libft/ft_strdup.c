@@ -17,6 +17,8 @@ char	*ft_strdup(const char *s1)
 	int		size;
 	char	*c;
 
+	if (s1 == NULL)
+		return (NULL);
 	i = 0;
 	size = 0;
 	if (s1 == NULL)

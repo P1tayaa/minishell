@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   parser.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
+/*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/13 13:30:47 by sboulain          #+#    #+#             */
 /*   Updated: 2023/10/12 16:14:06 by sboulain         ###   ########.fr       */
@@ -127,7 +127,6 @@ void	move_all_flag_from_arg_to_flags(char **flags, int flags_char_len, int args_
 		i++;
 	}
 	(*flags)[flags_char_len] = '\0';
-	printf("args_char_len == %d, and args is %p\n", args_char_len, (*args));
 	if ((*args) != NULL)
 		(*args)[args_char_len] = '\0';
 }
@@ -189,6 +188,12 @@ void	move_file_name_to_file_and_comand_back(t_lexer *lexer_previous, t_lexer *le
 	int i;
 
 	lexer_previous->file = lexer->cmd;
+	if (lexer->args == NULL)
+	{
+		lexer->cmd = NULL;
+		lexer->args = NULL;
+		return ;
+	}
 	lexer->cmd = ft_strtok(lexer->args, " ");
 	i = 0;
 	if (lexer->args == NULL)
@@ -299,6 +304,7 @@ void	initiate_values_to_zero_NULL(t_lexer **lexer, int i)
 	(*lexer)->file = NULL;
 	(*lexer)->flags = NULL;
 	(*lexer)->tokenid[0] = '\0';
+	(*lexer)->execd = false;
 }
 
 /*

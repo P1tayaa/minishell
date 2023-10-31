@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   executer.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: omathot <omathot@student.42.fr>            +#+  +:+       +#+        */
+/*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/13 13:56:36 by sboulain          #+#    #+#             */
-/*   Updated: 2023/06/17 15:03:09 by omathot          ###   ########.fr       */
+/*   Updated: 2023/10/30 16:57:06 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,65 +16,84 @@ void	echo_handle(char *str, bool has_n);
 void	rtrim(char *str);
 bool	ft_isspace(unsigned char c);
 void	check_quotes(char *str);
+char	***get_env(void);
+void	set_env(char *name, char *value, char ***environment);
+int		unset_env(char *name, char ***environment);
+void	print_env(char ***environment);
+void	print_export(char ***environment);
+void	ascii_sort(char **environment);
 
-char *executer(char *str, bool no_pipe)
+int executer(t_lexer **lexer, t_pipedata *data)
 {
-	extern char	**environ;
-	char		*return_val;
+	int			return_val;
 	char		str2[4096];
-	int			i;
-	int			k;
+	// int			i;
 
-	i = 0;
-	k = 0;
-	while (ft_isspace(str[i]))
-		i++;
-	str = &str[i];
-	return_val = NULL;
-	if (ft_memcmp(str, "clear", 5) == 0)
+	// i = 0;
+	return_val = 0;
+	if (ft_memcmp(lexer[(*data).lex_count]->cmd, "clear", 5) == 0)
 	{
     	write(1, "\033[H\033[2J", 7);
 		clear_history();
 	}
-	else if (ft_memcmp(str, "exit", 4) == 0)
+	else if (ft_memcmp(lexer[(*data).lex_count]->cmd, "exit", 4) == 0)
 	{
-		if (no_pipe)
-		{
 			printf("exit\n");
-			exit(EXIT_SUCCESS);
+		if (lexer[(*data).lex_count]->args != NULL)
+		{
+			ft_putstr_fd("minishell: exit: ", STDERR_FILENO);
+			ft_putstr_fd(lexer[(*data).lex_count]->args, STDERR_FILENO);
+			ft_putstr_fd(": numeric argument required\n", STDERR_FILENO);
+			exit(255);
 		}
+		exit(EXIT_SUCCESS);
 	}
-	else if (ft_memcmp(str, "pwd", 3) == 0)
+	else if (ft_memcmp(lexer[(*data).lex_count]->cmd, "pwd", 3) == 0)
 	{
 		getcwd(str2, 4096);
 		printf("%s\n", str2);
 	}
-	else if (ft_memcmp(str, "echo", 4) == 0)
+	else if (ft_memcmp(lexer[(*data).lex_count]->cmd, "echo", 4) == 0)
 	{
-		if (ft_memcmp(&str[4], " -n ", 4) == 0)
-			echo_handle(&str[8], true);
-		else
-			echo_handle(&str[5], false);
+		if (lexer[(*data).lex_count]->flags != NULL)
+		{
+			if (ft_memcmp(lexer[(*data).lex_count]->flags, "-n", 2) == 0)
+			{
+				echo_handle(lexer[(*data).lex_count]->args, true);
+				return (return_val);
+			}
+		}
+		echo_handle(lexer[(*data).lex_count]->args, false);
 	}
-	else if (ft_memcmp(str, "cd ", 3) == 0)
+	else if (ft_memcmp(lexer[(*data).lex_count]->cmd, "cd", 2) == 0)
 	{
-		rtrim(&str[3]);
-		if (chdir(&str[3]) != 0)
-			perror("chdir() error");
+		if (chdir(lexer[(*data).lex_count]->args) != 0)
+		{
+			ft_putstr_fd("minishell: cd: ", STDERR_FILENO);
+			ft_putstr_fd(lexer[(*data).lex_count]->args, STDERR_FILENO);
+			perror("");
+			return(1);
+		}
 	}
-	else if (ft_memcmp(str, "env", 3) == 0)
-	{
-		while (environ[k])
-			printf("%s\n", environ[k++]);
-	}
-	else if (ft_memcmp(str, "^D", 2) == 0)
+	
+	//----------------------------- !! environment stuff !! ----------------------------------------
+
+	else if (ft_memcmp(lexer[(*data).lex_count]->cmd, "env", 3) == 0)
+		print_env(get_env());
+	// else if (ft_memcmp(lexer[(*data).lex_count]->cmd, "unset", 5) == 0)
+	// 	unset_env(ft_strdup("x"), get_env());
+	// // else if (ft_memcmp(lexer[(*data).lex_count]->cmd, "export x", 8) == 0)
+	// // 	set_env(ft_strdup("x"), ft_strdup("10"), get_env());
+	// else if (ft_memcmp(lexer[(*data).lex_count]->cmd, "export", 6) == 0)
+	// 	ascii_sort((*get_env()));
+	// else if (ft_memcmp(lexer[(*data).lex_count]->cmd, "poop", 4) == 0)
+	// {
+	// 	set_env(ft_strdup("x"), ft_strdup("\0"), get_env());
+	// }
+	
+	//--------------------------------------------------------------------------------------------
+	else if (ft_memcmp(lexer[(*data).lex_count]->cmd, "^D", 2) == 0)
     	exit (EXIT_SUCCESS);
-	else
-	{
-		write(1, "proble la\n", 10);
-		check_quotes(str);
-		// printf("minishell: %s: command not found\n", str);
-	}
 	return (return_val);
 }
 

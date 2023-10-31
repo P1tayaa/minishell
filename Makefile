@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+         #
+#    By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/03/09 01:41:47 by oscarmathot       #+#    #+#              #
-#    Updated: 2023/10/10 14:59:09 by sboulain         ###   ########.fr        #
+#    Updated: 2023/10/29 13:06:29 by oscarmathot      ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,12 +14,12 @@
 #VARIABLES
 
 NAME 	:= minishell
-SRC 	:= main.c quotes.c executer.c parser.c signals.c pipe.c free_help.c utils.c
+SRC 	:= main.c quotes.c executer.c parser.c signals.c pipe.c free_help.c utils.c environment.c
 OBJ 	:= $(SRC:.c=.o)
 LIBFT_A	:= lib/libft/libft.a
 CMP		:= gcc
 # FLAGS 	:= -Werror -Wall -Wextra -g -I lib
-FLAGS 	:= -Werror -Wall -Wextra -g -I lib -fsanitize=address
+FLAGS 	:= -Werror -Wall -Wextra -fsanitize=address -g -I lib # 
 
 #---------------------------------
 #FORMATTING AND FUN
