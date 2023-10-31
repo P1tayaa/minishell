@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/20 15:16:04 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/10/31 11:31:01 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/10/31 12:21:12 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -201,7 +201,10 @@ int	manage_reads_writes(t_pipedata *data, t_lexer **lexer)
 		if (lexer[(*data).lex_count + 1] != NULL)			// !! was needed for grep NAME < Makefile > test.txt scenario !!
 		{
 			if (lexer[(*data).lex_count + 1]->tokenid[0] == '>')
+			{
+				(*data).fd[1] = redirection_handler(lexer[(*data).lex_count + 1]);
 				dup2((*data).fd[1], STDOUT_FILENO);
+			}
 		}
 		if (lexer[(*data).lex_count]->cmd == NULL && lexer[(*data).lex_count + 1]->tokenid[0] != '<')
 			(*data).lex_count++;
@@ -211,12 +214,10 @@ int	manage_reads_writes(t_pipedata *data, t_lexer **lexer)
 		out_files = (*data).lex_count;
 		while (lexer[out_files] != NULL)
 		{
-			puts("loop");
 			if (lexer[out_files + 1] != NULL)
 			{
 				if (lexer[out_files + 1]->tokenid[0] == '>')
 				{
-					puts("found multiple output redirections");
 					temp_fd = open(lexer[out_files]->file, O_WRONLY | O_CREAT | O_APPEND, 0644);
 					close(temp_fd);
 					out_files++;
@@ -225,12 +226,10 @@ int	manage_reads_writes(t_pipedata *data, t_lexer **lexer)
 					break ;
 			}
 		}
-		printf("outfile = %i\n", out_files);
 		if (out_files != 0)
 		{
 			if (lexer[out_files - 1]->tokenid[0] == '>')
 			{
-				puts("here");
 				(*data).fd[1] = open(lexer[out_files]->file, O_WRONLY | O_CREAT | O_APPEND, 0644);
 				dup2((*data).fd[1], STDOUT_FILENO);
 			}
@@ -263,11 +262,11 @@ int	manage_reads_writes(t_pipedata *data, t_lexer **lexer)
 	return (i);
 }
 
-
 	// if WIFSIGNALED(status)
 	// 	status = WTERMSIG(status);
 	// if WIFSTOPPED(status)
 	// 	status = WSTOPSIG(status);
+
 int	parent_management(t_pipedata *data, t_lexer **lexer, int pid)
 {
 	int	status;
@@ -331,6 +330,7 @@ int	are_all_commands_thesame(t_lexer **lexer)
 		puts("1");
 		if (lexer[collapse + 1] != NULL)
 		{
+			puts("2");
 			if (ft_strlen(lexer[collapse]->cmd) < ft_strlen(lexer[collapse + 1]->cmd))
 			{
 				if (ft_memcmp(lexer[collapse]->cmd, lexer[collapse + 1]->cmd, ft_strlen(lexer[collapse]->cmd)) == 0)
@@ -342,7 +342,10 @@ int	are_all_commands_thesame(t_lexer **lexer)
 					collapse++;
 			}
 			else
+			{
 				break ;
+			}
+			
 		}
 		else
 			break ;
@@ -369,7 +372,7 @@ void	piping(t_lexer **lexer)
 		if (lexer[data.lex_count + 1] != NULL)
 		{
 			puts("hey");
-			if (are_all_commands_thesame(lexer) == 1)
+			if (are_all_commands_thesame(lexer) == 1)			// bug is here
 			{
 				puts("here?");
 				lexer[data.lex_count]->args = replace_doll_question_to_number_with_free(lexer[data.lex_count]->args, doll);
@@ -390,6 +393,7 @@ void	piping(t_lexer **lexer)
 			}
 		}
 	}
+	puts("passed first if");
 	if (lexer[data.lex_count]->tokenid[0] != '<' && is_built_in(lexer, data.lex_count) == 1)					// builtin
 	{
 		if (lexer[1] == NULL)
@@ -399,6 +403,7 @@ void	piping(t_lexer **lexer)
 			lexer[data.lex_count]->execd = true;
 		}
 	}
+	puts("passed second if");
 	if (lexer[1] == NULL && lexer[data.lex_count]->execd == false)												// single exec non-built-in
 	{
 		if ((pid = fork()) == 0)
@@ -415,6 +420,7 @@ void	piping(t_lexer **lexer)
 		else if WIFSTOPPED(doll)
 			doll = WSTOPSIG(doll);
 	}
+	puts("passed third if");
 	if (lexer[1] != NULL)																						// piping/redirections
 		while (lexer[data.lex_count] != NULL && lexer[data.lex_count]->execd == false)
 		{
