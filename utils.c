@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/14 17:01:53 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/10/31 00:23:51 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/10/31 16:55:30 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -655,6 +655,8 @@ bool	check_export_for_quotes(t_post_quotes	***content, t_lexer ***lexer)
 // 	return (str_split);
 // }
 
+int	unset_env(char *name, char ***environment);
+
 bool	check_unset_for_quotes(t_post_quotes	***content, t_lexer ***lexer)
 {
 	// char **all_var_rm;
@@ -675,7 +677,9 @@ bool	check_unset_for_quotes(t_post_quotes	***content, t_lexer ***lexer)
 		free_content((*content));
 		return (true);
 	}
+	// else
 	// ft_split_world_at_all_spaces((*content)[1]->content);
+	// 	unset_env((*content)[1]->content, get_env());
 	return (true);
 }
 

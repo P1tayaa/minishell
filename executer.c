@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/13 13:56:36 by sboulain          #+#    #+#             */
-/*   Updated: 2023/10/30 16:57:06 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/10/31 20:06:56 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ int executer(t_lexer **lexer, t_pipedata *data)
 			ft_putstr_fd("minishell: exit: ", STDERR_FILENO);
 			ft_putstr_fd(lexer[(*data).lex_count]->args, STDERR_FILENO);
 			ft_putstr_fd(": numeric argument required\n", STDERR_FILENO);
-			exit(255);
+			exit(2);
 		}
 		exit(EXIT_SUCCESS);
 	}
