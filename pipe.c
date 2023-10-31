@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/20 15:16:04 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/10/31 11:02:39 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/10/31 11:31:01 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,10 +83,18 @@ int redirection_handler(t_lexer *lexer)
 	fd = -1;
 	if (ft_memcmp(lexer->tokenid, "<", 1) == 0 && ft_memcmp(lexer->tokenid, "<<", 2) != 0)
 		fd = open(lexer->file, O_RDONLY);
-	else if (ft_memcmp(lexer->tokenid, ">", 1) == 0)
+	else if (ft_memcmp(lexer->tokenid, ">", 1) == 0 && ft_memcmp(lexer->tokenid, ">>", 2) != 0)				// could it be that this also takes >> checks since it does in fact return 0?
+	{
+		puts("wrong place buddy");
 		fd = open(lexer->file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+	}
 	else if (ft_memcmp(lexer->tokenid, ">>", 2) == 0)
-		fd = open(lexer->file, O_WRONLY | O_CREAT | O_APPEND, 0644);
+	{
+		if (access(lexer->file, F_OK) != -1)
+			fd = open(lexer->file, O_WRONLY | O_APPEND, 0644);
+		else
+			fd = open(lexer->file, O_WRONLY | O_CREAT | O_APPEND, 0644);
+	}
 	else if (ft_memcmp(lexer->tokenid, "<<", 2) == 0)
 		fd = open(lexer->args, O_WRONLY | O_CREAT | O_TRUNC, 0644);			// O_EXCL   nstead, if filename already exists,
 	if (fd == -1)
