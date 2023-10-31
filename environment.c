@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/29 12:56:41 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/10/31 17:00:11 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/10/31 23:07:19 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,7 +72,7 @@ void	printArray(char **environment, int string_count, int idx)
 	if (idx == string_count)
 		return;
 
-	printf("%s\n", environment[idx]);
+	printf("declare -x %s\n", environment[idx]);
 	printArray(environment, string_count, idx + 1);
 }
 
@@ -144,6 +144,7 @@ int	unset_env(char *name, char ***environment)
 	int	j;
 
 	i = 0;
+	puts("unsetting");
 	while ((*environment)[i])
 	{
 		if (strncmp((*environment)[i], name, strlen(name)) == 0)

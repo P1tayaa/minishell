@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/20 15:16:04 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/10/31 20:20:41 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/10/31 23:03:05 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -202,8 +202,19 @@ int	manage_reads_writes(t_pipedata *data, t_lexer **lexer)
 		{
 			if (lexer[(*data).lex_count + 1]->tokenid[0] == '>')
 			{
-				(*data).fd[1] = redirection_handler(lexer[(*data).lex_count + 1]);
-				dup2((*data).fd[1], STDOUT_FILENO);
+				if (lexer[(*data).lex_count + 2] != NULL)
+				{
+					if (lexer[(*data).lex_count + 2]->tokenid[0] != '>')
+					{
+						(*data).fd[1] = redirection_handler(lexer[(*data).lex_count + 1]);
+						dup2((*data).fd[1], STDOUT_FILENO);
+					}
+				}
+				else
+				{
+					(*data).fd[1] = redirection_handler(lexer[(*data).lex_count + 1]);
+					dup2((*data).fd[1], STDOUT_FILENO);
+				}
 			}
 		}
 		if (lexer[(*data).lex_count]->cmd == NULL && lexer[(*data).lex_count + 1]->tokenid[0] != '<')
@@ -211,6 +222,7 @@ int	manage_reads_writes(t_pipedata *data, t_lexer **lexer)
 	}
 	else if (lexer[(*data).lex_count]->tokenid[0] == '>')
 	{
+		puts("walk in here");
 		out_files = (*data).lex_count;
 		while (lexer[out_files] != NULL)
 		{
@@ -218,24 +230,30 @@ int	manage_reads_writes(t_pipedata *data, t_lexer **lexer)
 			{
 				if (lexer[out_files + 1]->tokenid[0] == '>')
 				{
+					printf("out_files = %i\n", out_files);
 					temp_fd = open(lexer[out_files]->file, O_WRONLY | O_CREAT | O_APPEND, 0644);
 					close(temp_fd);
 					out_files++;
 				}
 				else
+				{
 					break ;
+				}
 			}
 		}
 		if (out_files != 0)
 		{
 			if (lexer[out_files - 1]->tokenid[0] == '>')
 			{
-				(*data).fd[1] = open(lexer[out_files]->file, O_WRONLY | O_CREAT | O_APPEND, 0644);
+				printf("out_file = %i\n", out_files);
+				printf("file = %s\n", lexer[out_files]->file);
+				(*data).fd[1] = redirection_handler(lexer[out_files]);
 				dup2((*data).fd[1], STDOUT_FILENO);
 			}
 		}
 		if (lexer[0]->tokenid[0] == '<')		// needed if pipe first then redirect, but breaks for no pipe into redirect: e.g. < Makefile grep NAME > test.txt
 		{
+			puts("pls dont");
 			if (lexer[1] != NULL)
 			{
 				if (ft_memcmp(lexer[1]->tokenid, "|", 1) == 0)

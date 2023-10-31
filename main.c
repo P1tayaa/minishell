@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:29:45 by omathot           #+#    #+#             */
-/*   Updated: 2023/10/31 00:24:57 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/10/31 22:19:42 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,33 +23,7 @@ bool	check_export_for_quotes(t_post_quotes	***content, t_lexer ***lexer);
 
 bool is_str_export(char *str);
 char **get_export_var(char *arg_of_export);
-
-// void	builtins(t_lexer **lexer)
-// {
-// 	int	lex_count;
-
-// 	lex_count = 0;
-// 	while (lexer[lex_count])
-// 	{
-// 		puts ("I am trying to launch executer function");
-// 		if (ft_memcmp(lexer[lex_count]->cmd, "exit", ft_strlen(lexer[lex_count]->cmd)) == 0)
-// 		{
-// 			if (!(ft_memcmp(lexer[lex_count]->tokenid, "|", ft_strlen(lexer[lex_count]->tokenid))))
-// 				executer(lexer, &data);
-// 			else
-// 				executer(lexer[lex_count]->cmd, false);
-// 		}
-// 		else if (ft_memcmp(lexer[lex_count]->cmd, "clear", ft_strlen(lexer[lex_count]->cmd)) == 0)
-// 			executer(lexer[lex_count]->cmd, true);
-// 		else if (ft_memcmp(lexer[lex_count]->cmd, "pwd", ft_strlen(lexer[lex_count]->cmd)) == 0)
-// 			executer(lexer[lex_count]->cmd, true);
-// 		else if (ft_memcmp(lexer[lex_count]->cmd, "cd", ft_strlen(lexer[lex_count]->cmd)) == 0)
-// 			executer(lexer[lex_count]->cmd, true);
-// 		else if (ft_memcmp(lexer[lex_count]->cmd, "echo", ft_strlen(lexer[lex_count]->cmd)) == 0)
-// 			executer(lexer[lex_count]->cmd, true);
-// 		lex_count++;
-// 	}
-// }
+bool	check_unset_for_quotes(t_post_quotes	***content, t_lexer ***lexer);
 
 void	lexer_free(t_lexer **lexer)
 {
@@ -96,6 +70,7 @@ char	***get_env(void);
 void	print_export(char ***environment);
 void export_content_freeur(char ***export_content);
 void	ascii_sort(char **environment);
+bool	check_unset_noquotes(t_lexer ***lexer);
 
 bool export_andle_no_quotes(t_lexer ***lexer)
 {
@@ -195,8 +170,8 @@ int    main(void)
 				lexer = parser_with_quotes(content);
 				if (check_export_for_quotes(&content, &lexer))
 					continue ;
-				// if (check_unset_for_quotes(&content, &lexer))
-				// 	continue ;
+				if (check_unset_for_quotes(&content, &lexer))
+					continue ;
 				// int i;
 				if (is_str_export(lexer[0]->cmd))
 				{
@@ -229,6 +204,8 @@ int    main(void)
 				i++;
 			}
 			if (export_andle_no_quotes(&lexer))
+				continue ;
+			if (check_unset_noquotes(&lexer))
 				continue ;
 			else
 				piping(lexer);
