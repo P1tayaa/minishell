@@ -24,6 +24,7 @@ bool	check_export_for_quotes(t_post_quotes	***content, t_lexer ***lexer);
 bool is_str_export(char *str);
 char **get_export_var(char *arg_of_export);
 bool	check_unset_for_quotes(t_post_quotes	***content, t_lexer ***lexer);
+void	free_double_array(char **list_of_tokenid);
 
 void	lexer_free(t_lexer **lexer)
 {

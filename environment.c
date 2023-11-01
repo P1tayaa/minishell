@@ -13,6 +13,7 @@
 #include "minishell.h"
 
 char	*ft_strjoin_with_frees(char *s1, char *s2);
+void	free_double_array(char **list_of_tokenid);
 
 char	*malloc_and_write_line(char *copy, char *og)
 {
@@ -96,7 +97,7 @@ void	ascii_sort(char **environment)
 	sorted_environment[i] = NULL;
 	recursiveBubble(sorted_environment, i, 0, 0);
 	printArray(sorted_environment, count, 0);
-	free(sorted_environment);
+	free_double_array(sorted_environment);
 }
 
 // frees name and value
@@ -126,7 +127,7 @@ void	set_env(char *name, char *value, char ***environment)
 		i++;
 	}
 	printf("i = %i\n", i);
-	if (environment[i] == NULL)
+	if ((*environment)[i] == NULL)
 	{
 		new_environment = (char **) ft_realloc((*environment), (i + 2) * sizeof(char *));
 		if (value_len == 0)
@@ -136,6 +137,7 @@ void	set_env(char *name, char *value, char ***environment)
 		}
 		else
 			to_set = ft_strjoin_with_frees(ft_strjoin_with_frees(name, ft_strdup("=")), value);
+		free((*environment));
 		(*environment) = new_environment;
 		(*environment)[i] = to_set;
 		(*environment)[i + 1] = NULL;

@@ -22,6 +22,8 @@ int		unset_env(char *name, char ***environment);
 void	print_env(char ***environment);
 void	print_export(char ***environment);
 void	ascii_sort(char **environment);
+void	free_double_array(char **list_of_tokenid);
+char	***get_env(void);
 
 int executer(t_lexer **lexer, t_pipedata *data)
 {
@@ -44,6 +46,7 @@ int executer(t_lexer **lexer, t_pipedata *data)
 			ft_putstr_fd("minishell: exit: ", STDERR_FILENO);
 			ft_putstr_fd(lexer[(*data).lex_count]->args, STDERR_FILENO);
 			ft_putstr_fd(": numeric argument required\n", STDERR_FILENO);
+			free_double_array(*(get_env)());
 			exit(2);
 		}
 		exit(EXIT_SUCCESS);
