@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/14 17:01:53 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/10/31 00:23:51 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/10/31 23:16:53 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -257,6 +257,9 @@ bool is_str_export(char *str)
 
 bool is_str_unset(char *str)
 {
+	if (!str)
+		if (ft_strlen(str) != 5)
+			return (false);
 	if (str[0] == 'u' && str[1] == 'n' && str[2] == 's'
 		&& str[3] == 'e' && str[4] == 't' && str[5] == '\0')
 			return (true);
@@ -611,53 +614,153 @@ bool	check_export_for_quotes(t_post_quotes	***content, t_lexer ***lexer)
 	lexer_free((*lexer));
 	return (true);
 }
-// char **ft_split_world_at_all_spaces(char *str)
-// {
-// 	int i;
-// 	int j;
-// 	int	word_count;
-// 	bool writing;
-// 	char **str_split;
 
-// 	i = 0;
-// 	writing = false;
-// 	word_count = 0;
-// 	j = 0;
-// 	while (str[i] != '\0')
-// 	{
-// 		if (ft_isspace(str[i]))
-// 		{
-// 			if (writing)
-// 			{
-// 				str_split[word_count][j] = '\0';
-// 				word_count++;
-// 				j = 0;
-// 				writing = false;
-// 			}
-// 		}
-// 		else
-// 		{
-// 			writing = true;
-// 			str_split[word_count][j] = str[i];
-// 			j++;
-// 		}
-// 		i++;
-// 	}
-// 	str_split[word_count] = NULL;
+int	count_char_unti_space(char *str)
+{
+	int i;
 
-// 	i = 0;
-// 	while (str_split[i] != NULL)
-// 	{
-// 		printf("str %d is (%s)\n", i, str_split[i]);
-// 		i++;
-// 	}
-// 	pause();
-// 	return (str_split);
-// }
+	i = 0;
+	while (str[i] != '\0')
+	{
+		if (ft_isspace(str[i]))
+			return (i);
+		i++;
+	}
+	return (i);
+}
+
+char **ft_split_world_at_all_spaces(char *str)
+{
+	int i;
+	int j;
+	int	word_count;
+	bool writing;
+	char **str_split;
+	
+	i = 0;
+	word_count = 0;
+	while (str[i] != '\0')
+	{
+		while (ft_isspace((str[i])) && str[i])
+			i++;
+		if (!(ft_isspace(str[i])) && str[i])
+		{
+			word_count++;
+			i++;
+		}
+	}
+	if (!(str_split = (char**)malloc(sizeof(char *) * (word_count + 1))))
+		exit(-1);
+	i = 0;
+	writing = false;
+	word_count = 0;
+	j = 0;
+	while (str[i] != '\0')
+	{
+		if (ft_isspace(str[i]))
+		{
+			if (writing)
+			{
+				str_split[word_count][j] = '\0';
+				word_count++;
+				j = 0;
+				writing = false;
+			}
+			if (str[i + 1] != '\0')
+				if (!ft_isspace(str[i + 1]))
+				{
+					str_split[word_count] = malloc(sizeof(char) * (count_char_unti_space(&str[i + 1]) + 1));
+				}
+		}
+		else
+		{
+			if (i == 0)
+				str_split[word_count] = malloc(sizeof(char) * (count_char_unti_space(&str[i]) + 1));
+			writing = true;
+			str_split[word_count][j] = str[i];
+			j++;
+		}
+		i++;
+	}
+	if (ft_isspace(str[i - 1]) == 0)
+	{
+		str_split[word_count][j] = '\0';
+		word_count++;
+	}
+	str_split[word_count] = NULL;
+
+	i = 0;
+	while (str_split[i] != NULL)
+	{
+		printf("str %d is (%s)\n", i, str_split[i]);
+		i++;
+	}
+	return (str_split);
+}
+
+char **remalloc_and_dup(char **all_var_rm, int all_var_rm_total)
+{
+	char	**all_var_rm_new;
+	int i;
+
+	all_var_rm_new = malloc(sizeof(char *) * (all_var_rm_total));
+	i = 0;
+	while (all_var_rm[i] != NULL)
+	{
+		all_var_rm_new[i] = all_var_rm[i];
+		i++;
+	}
+	free(all_var_rm);
+	return (all_var_rm_new);
+}
+
+int	unset_env(char *name, char ***environment);
+
+bool	check_unset_noquotes(t_lexer ***lexer)
+{
+	char **var_prept;
+	int i;
+
+	i = 0;
+	if (is_str_unset((*lexer)[0]->cmd))
+	{
+		if ((*lexer)[1] != NULL)
+		{
+			printf("Can't pipe unset\n");
+			lexer_free((*lexer));
+			return (true);
+		}
+		if ((*lexer)[0]->args == NULL)
+		{
+			lexer_free((*lexer));
+			return (true);
+		}
+		var_prept = ft_split_world_at_all_spaces((*lexer)[0]->args);
+		i = 0;
+		while (var_prept[i] != NULL)
+		{
+			unset_env(var_prept[i], get_env());
+			i++;
+		}
+		i = 0;
+		while (var_prept[i] != NULL)
+		{
+			free(var_prept[i]);
+			i++;
+		}
+		free(var_prept);
+		lexer_free((*lexer));
+		return (true);
+	}
+	return (false);
+}
 
 bool	check_unset_for_quotes(t_post_quotes	***content, t_lexer ***lexer)
 {
-	// char **all_var_rm;
+	char	**all_var_rm;
+	int		all_var_rm_num;
+	int		all_var_rm_total;
+	int		i;
 	
 	if (is_str_unset((*lexer)[0]->cmd) == false)
 		return (false);
@@ -675,7 +778,94 @@ bool	check_unset_for_quotes(t_post_quotes	***content, t_lexer ***lexer)
 		free_content((*content));
 		return (true);
 	}
-	// ft_split_world_at_all_spaces((*content)[1]->content);
+	if (is_str_unset((*content)[0]->content))
+		i = 1;
+	else
+	{
+		char *temp;
+		temp = ft_strdup(&((*content)[0]->content[5]));
+		free((*content)[0]->content);
+		(*content)[0]->content = temp;
+		i = 0;
+	}
+	while ((*content)[i] != NULL)
+		i++;
+	all_var_rm_total = i * 2 + 1;
+	all_var_rm = malloc(sizeof(char *) * (all_var_rm_total));
+	all_var_rm_num = 0;
+	if (is_str_unset((*content)[0]->content))
+		i = 1;
+	else
+		i = 0;
+	while ((*content)[i])
+	{
+		if ((*content)[i]->is_quotes == true)
+		{
+			all_var_rm[all_var_rm_num] = ft_strdup((*content)[i]->content);
+			i++;
+		}
+		else
+		{
+			char **all_var_rm_temp;
+			int j;
+
+			if (is_all_space((*content)[i]->content))
+			{
+				i++;
+				continue ;
+			}
+			all_var_rm_temp = ft_split_world_at_all_spaces((*content)[i]->content);
+			j = 0;
+			while (all_var_rm_temp[j] != NULL)
+				j++;
+			if (j == 1)
+			{
+				all_var_rm[all_var_rm_num] = all_var_rm_temp[0];
+				free(all_var_rm_temp);
+				all_var_rm_num++;
+				i++;
+				continue ;
+			}
+			all_var_rm[all_var_rm_num] = NULL;
+			all_var_rm_total = all_var_rm_total + j;
+			all_var_rm = remalloc_and_dup(all_var_rm, all_var_rm_total);
+			j = 0;
+			while (all_var_rm_temp[j] != NULL)
+			{
+				all_var_rm[all_var_rm_num] = all_var_rm_temp[j];
+				all_var_rm_num++;
+				j++;
+			}
+			free(all_var_rm_temp);
+			i++;
+			continue ;
+		}
+		all_var_rm_num++;
+	}
+	all_var_rm[all_var_rm_num] = NULL;
+
+	i = 0;
+	while (all_var_rm[i] != NULL)
+	{
+		printf("unset arg[%i] (%s)\n", i, all_var_rm[i]);
+		i++;
+	}
+	
+	i = 0;
+	while (all_var_rm[i] != NULL)
+	{
+		unset_env(all_var_rm[i], get_env());
+		i++;
+	}
+	i = 0;
+	while (all_var_rm[i] != NULL)
+	{
+		free(all_var_rm[i]);
+		i++;
+	}
+	free(all_var_rm);
+	free_content(*content);
+	lexer_free((*lexer));
 	return (true);
 }
 
