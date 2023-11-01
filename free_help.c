@@ -12,29 +12,7 @@
 
 #include "minishell.h"
 
-void	free_lexer(t_lexer **lexer)
-{
-	int	i;
 
-	i = 0;
-	if (!lexer)
-		return ;
-	while (lexer[i] != NULL)
-	{
-		if (lexer[i] != NULL)
-		{
-			if (lexer[i]->args != NULL)
-				free(lexer[i]->args);
-			if (lexer[i]->cmd != NULL)
-				free(lexer[i]->cmd);
-			if (lexer[i]->flags != NULL)
-				free(lexer[i]->flags);
-			free(lexer[i]);
-		}
-		i++;
-	}
-	free(lexer);
-}
 
 
 /*
@@ -64,11 +42,13 @@ char **get_list_of_tokenid(void)
 /*
 	frees the list of tokenid, made with get_list_of_tokenid().
 */
-void	free_list_of_tokenid(char **list_of_tokenid)
+void	free_double_array(char **list_of_tokenid)
 {
 	int	i;
 
 	i = 0;
+	if (list_of_tokenid == NULL)
+		return ;
 	while (list_of_tokenid[i] != NULL)
 	{
 		free(list_of_tokenid[i]);

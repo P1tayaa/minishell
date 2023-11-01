@@ -14,7 +14,7 @@
 
 int		count_pipes(char *str);
 char	**get_list_of_tokenid(void);
-void	free_list_of_tokenid(char **list_of_tokenid);
+void	free_double_array(char **list_of_tokenid);
 int		count_token(char *input);
 // int	copy_input_to_parcer_and_keep_track_of_curser(char *input, t_lexer *current_lex, int curser);
 void	free_parser(t_lexer **lexer);
@@ -704,12 +704,12 @@ bool	is_a_token_id(char *input)
 		}
 		if (list_of_tokenid[i][j] == '\0')
 		{
-			free_list_of_tokenid(list_of_tokenid);
+			free_double_array(list_of_tokenid);
 			return (true);
 		}
 		i++;
 	}
-	free_list_of_tokenid(list_of_tokenid);
+	free_double_array(list_of_tokenid);
 	return (false);
 }
 
@@ -856,14 +856,14 @@ int	count_char_until_next_token(char *input)
 				k++;
 			if (list_of_tokenid[j][k] == '\0')
 			{
-				free_list_of_tokenid(list_of_tokenid);
+				free_double_array(list_of_tokenid);
 				return (i);
 			}
 			j++;
 		}
 		i++;
 	}
-	free_list_of_tokenid(list_of_tokenid);
+	free_double_array(list_of_tokenid);
 	return (i);
 }
 
@@ -903,6 +903,6 @@ int	count_token(char *input)
 		}
 		i++;
 	}
-	free_list_of_tokenid(list_of_tokenid);
+	free_double_array(list_of_tokenid);
 	return (num_of_token);
 }
