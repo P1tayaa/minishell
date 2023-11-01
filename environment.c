@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/29 12:56:41 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/10/31 23:07:19 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/11/01 01:31:32 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,7 +114,10 @@ void	set_env(char *name, char *value, char ***environment)
 		if (ft_memcmp((*environment)[i], name, ft_strlen(name)) == 0)
 		{
 			if (value_len == 0)
+			{
+				puts("should break");
 				break ;
+			}
 			free((*environment)[i]);
 			to_set = ft_strjoin_with_frees(ft_strjoin_with_frees(name, ft_strdup("=")), value);
 			(*environment)[i] = to_set;
@@ -122,6 +125,7 @@ void	set_env(char *name, char *value, char ***environment)
 		}
 		i++;
 	}
+	printf("i = %i\n", i);
 	if (environment[i] == NULL)
 	{
 		new_environment = (char **) ft_realloc((*environment), (i + 2) * sizeof(char *));

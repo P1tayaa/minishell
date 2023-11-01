@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/20 15:16:04 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/10/31 23:03:05 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/10/31 23:16:16 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -236,9 +236,7 @@ int	manage_reads_writes(t_pipedata *data, t_lexer **lexer)
 					out_files++;
 				}
 				else
-				{
 					break ;
-				}
 			}
 		}
 		if (out_files != 0)

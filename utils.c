@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/14 17:01:53 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/10/31 22:23:48 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/10/31 23:16:53 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -757,7 +757,7 @@ bool	check_unset_noquotes(t_lexer ***lexer)
 
 bool	check_unset_for_quotes(t_post_quotes	***content, t_lexer ***lexer)
 {
-	char **all_var_rm;
+	char	**all_var_rm;
 	int		all_var_rm_num;
 	int		all_var_rm_total;
 	int		i;
