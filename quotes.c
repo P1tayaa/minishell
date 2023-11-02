@@ -606,6 +606,7 @@ void	check_quotes(char **str_og, t_post_quotes ***content)
 char	**spit_text_args(char *str, int	*doll_pos);
 char	*ft_strjoin_double_str(char **spit_text);
 void	split_test_freeur(char **spit_text);
+char *get_env_of_valus_str(char *str);
 
 char	*handle_expand_doll(char *str)
 {
@@ -669,7 +670,7 @@ void	split_test_freeur(char **spit_text)
 	i = 0;
 	while (spit_text[i] != NULL)
 	{
-		if (i % 2 == 0)
+		if (i == 0)
 			free(spit_text[i]);
 		i++;
 	}
@@ -783,23 +784,17 @@ void	spit_text_args_odd(char *str, int	*doll_pos, int num_doll, char	**temp_str)
 void	spit_text_args_odd_p2(char	**string_split, char **temp_str, int i)
 {
 	char *temp;
-	static char str_queston[3];
-	static char not_malloc_str[2];
 
-	temp = getenv((*temp_str));
+	temp = get_env_of_valus_str((*temp_str));
 	if (temp != NULL)
 		string_split[i] = temp;
 	else if ((*temp_str)[0] == '?' && (*temp_str)[1] == '\0')
 	{
-		str_queston[0] = '$';
-		str_queston[1] = '!';
-		str_queston[2] = '\0';
-		string_split[i] = str_queston;
+		string_split[i] = ft_strdup("$!");
 	}
 	else
 	{
-		not_malloc_str[0] = '\0';
-		string_split[i] = not_malloc_str;
+		string_split[i] = ft_strdup("");
 	}
 	free((*temp_str));
 }

@@ -223,3 +223,22 @@ char	***get_env(void)
 	copy = &environment;
 	return (copy);
 }
+
+int ft_char_find(char *str, const char *list_of_char);
+
+char *get_env_of_valus_str(char *str)
+{
+	int i;
+	char ***env;
+
+	env = get_env();
+	i = 0;
+	while (((*env)[i] != NULL))
+	{
+		if (ft_memcmp((*env)[i], str, ft_strlen(str)) == 0)
+			return (ft_strdup(&(*env)[i][ft_char_find((*env)[i], "=") + 1]));
+		i++;
+	}
+	return (NULL);
+}
+
