@@ -169,10 +169,15 @@ int    main(void)
 			else
 			{
 				lexer = parser_with_quotes(content);
-				if (check_export_for_quotes(&content, &lexer))
+				if (check_export_for_quotes(&content, &lexer) || check_unset_for_quotes(&content, &lexer))
+				{
+					if (str)
+					{
+						free(str);
+						str = NULL;
+					}
 					continue ;
-				if (check_unset_for_quotes(&content, &lexer))
-					continue ;
+				}
 				// int i;
 				if (is_str_export(lexer[0]->cmd))
 				{

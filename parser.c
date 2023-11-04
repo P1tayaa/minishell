@@ -88,7 +88,7 @@ void	malloc_new_args_and_new_flags(int args_char_len, char **args, char **flags,
 	}
 	else
 		(*args) = NULL;
-	(*flags) = malloc(sizeof(char) * (flags_char_len + 1));
+	(*flags) = malloc(sizeof(char) * (flags_char_len + 2));
 	if (!(*flags))
 		exit (-1);
 }
@@ -476,15 +476,17 @@ char *get_flags_str(char **str)
 	int		num_of_dash;
 
 	// puts("get_flags_str starts");
+	if (str == NULL)
+		return (NULL);
 	i = 0;
 	flags_char_len = 0;
 	num_of_dash = 0;
 	count_num_dash_and_flags_char_len(str, i, &num_of_dash, &flags_char_len);
+	if (flags_char_len == 0)
+		return (NULL);
 	flags = malloc(sizeof(char) * (flags_char_len + 1));
 	if (!flags)
 		exit (1);
-	if (flags_char_len == 0)
-		return (NULL);
 	new_str = init_new_flag_str(flags_char_len, str, num_of_dash);
 
 	// Todo: make this a separate funciton
@@ -521,7 +523,7 @@ char *get_flags_str(char **str)
 	
 	// Todo: make this a separate funciton
 	// null terminate all right string or make them null if they are.
-	if (k == 0 && new_str != NULL)
+	if (k == 0 && new_str[0] != '\0')
 	{
 		free(new_str);
 		new_str = NULL;
