@@ -183,6 +183,26 @@ char	*ft_strjoin_with_frees(char *s1, char *s2)
 	s2 = NULL;
 	return (ptr);
 }
+
+bool find_doll_question(char *str)
+{
+	int i;
+
+	i = 0;
+	while (str[i] != '\0')
+	{
+		if (str[i] == '$')
+		{
+			if (str[i + 1] == '\0')
+				return (false);
+			if (str[i + 1] == '!')
+				return (true);	
+		}
+		i++;
+	}
+	return (false);
+}
+
 /*
 	take STR_OG (usually the arg), and check if there is $?.
 	If it doesn't, it just return STR_OG. 
@@ -217,6 +237,8 @@ char *replace_doll_question_to_number_with_free(char *str_og, int number_replace
 	if (!str_return)
 		exit(1);
 	free(str_og);
+	if (find_doll_question(str_return))
+		str_return = replace_doll_question_to_number_with_free(str_return, number_replace);
 	return (str_return);
 }
 
@@ -352,14 +374,14 @@ char **get_export_var(char *arg_of_export)
 	i_work_split = 0;
 	export_content = malloc(sizeof(char *) * ((get_num_export_con(arg_of_export) * 2) + 3));
 	work_split = get_word_one_by_one(arg_of_export);
-	while (work_split[i_work_split] != NULL)
-	{
-		i_work_split++;
-	}
+	// while (work_split[i_work_split] != NULL)
+	// {
+	// 	i_work_split++;
+	// }
 	i_work_split = 0;
 	while (work_split[i_work_split] != NULL)
 	{
-		// puts(work_split[i_work_split]);
+		puts(work_split[i_work_split]);
 		export_content[i_export_content] = ft_strdup_until_equal(work_split[i_work_split]);
 		i_export_content++;
 		if (ft_strlen(export_content[i_export_content - 1]) == ft_strlen(work_split[i_work_split]))
@@ -372,6 +394,7 @@ char **get_export_var(char *arg_of_export)
 	}
 	// puts("test finito");
 	free(work_split);
+	printf("export content i = (%i)\n", i_export_content);
 	export_content[i_export_content] = NULL;
 	return (export_content);
 }
@@ -383,7 +406,6 @@ void export_content_freeur(char ***export_content)
 	i = 0;
 	while ((*export_content)[i] != NULL)
 	{
-		// printf("freeing num %d\n", i);
 		free((*export_content)[i]);
 		i++;
 	}
@@ -458,7 +480,7 @@ bool	check_if_array_str_is_empty(char **array_str)
 	if (array_str == NULL)
 		return (true);
 	i = 0;
-	while (array_str[i])
+	while (array_str[i] != NULL)
 	{
 		if (array_str[i][0] != '\0')
 			return (false);
@@ -540,17 +562,20 @@ bool	check_export_for_quotes(t_post_quotes	***content, t_lexer ***lexer)
 			if (is_all_space((*content)[i]->content) == false)
 			{
 				temp_var_from_no_quotes = get_export_var((*content)[i]->content);
-				// printf("content[i] = %s\n", (*content)[i]->content);
+				printf("content[i] = %s\n", (*content)[i]->content);
 				if (check_if_array_str_is_empty(temp_var_from_no_quotes) == true)
 				{
-					// puts("ALL EMPTY NONE QUOTES");
+					puts("ALL EMPTY NONE QUOTES");
 					export_content_freeur(&temp_var_from_no_quotes);
 					i++;
 					continue ;
 				}
 				j = 0;
 				if (i_export_content % 2 == 1 && (*content)[i]->content[0] == '=')
+				{
+					free(temp_var_from_no_quotes[j]);
 					j++;
+				}
 				if (i_export_content % 2 == 1 && (*content)[i]->content[0] != '=')
 				{
 					export_content[i_export_content] = ft_strdup("");

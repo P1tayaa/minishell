@@ -134,6 +134,8 @@ void	set_env(char *name, char *value, char ***environment)
 		{
 			puts("should see me");
 			to_set = ft_strdup(name);
+			free(value);
+			free(name);
 		}
 		else
 			to_set = ft_strjoin_with_frees(ft_strjoin_with_frees(name, ft_strdup("=")), value);

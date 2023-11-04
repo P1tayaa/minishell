@@ -670,8 +670,7 @@ void	split_test_freeur(char **spit_text)
 	i = 0;
 	while (spit_text[i] != NULL)
 	{
-		if (i == 0)
-			free(spit_text[i]);
+		free(spit_text[i]);
 		i++;
 	}
 	free(spit_text);
