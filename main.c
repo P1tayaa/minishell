@@ -96,6 +96,7 @@ bool export_andle_no_quotes(t_lexer ***lexer)
 	}
 	if ((*lexer)[0]->args == NULL && (*lexer)[1] != NULL)
 	{
+		puts("hey");
 		pipe_export(lexer);
 		lexer_free((*lexer));
 		return (true);
@@ -213,13 +214,17 @@ int    main(void)
 			// i = 0;
 			// c'est pas idea mais c'est un depart
 
-
 			if (export_andle_no_quotes(&lexer))
+			{
 				continue ;
+			}
 			if (check_unset_noquotes(&lexer))
 				continue ;
 			else
-			piping(lexer);
+			{
+				puts("huh?");
+				piping(lexer);
+			}
 			// pause();
 			// optiona: wait for return value.
 		// }
