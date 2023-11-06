@@ -174,19 +174,6 @@ int    main(void)
 			else
 			{
 				lexer = parser_with_quotes(content);
-				int i;
-				i = 0;
-				while (lexer[i] != NULL)
-				{
-					// printf("arg was before: %s\n", lexer[i]->args);
-					// lexer[i]->args = replace_doll_question_to_number_with_free(lexer[i]->args, 69);
-					printf("\nlexer[%d]\n cmd: (%s)\n", i, lexer[i]->cmd);
-					printf("args: (%s)\n", lexer[i]->args);
-					printf("tokenid: (%s)\n", lexer[i]->tokenid);
-					printf("file: (%s)\n", lexer[i]->file);
-					printf("flags: (%s)\n", lexer[i]->flags);
-					i++;
-				}
 				if (check_export_for_quotes(&content, &lexer) || check_unset_for_quotes(&content, &lexer))
 				{
 					if (str)
@@ -210,6 +197,19 @@ int    main(void)
 				free_content(content);
 			}
 			free(str);
+			int i;
+			i = 0;
+			while (lexer[i] != NULL)
+			{
+				// printf("arg was before: %s\n", lexer[i]->args);
+				// lexer[i]->args = replace_doll_question_to_number_with_free(lexer[i]->args, 69);
+				printf("\nlexer[%d]\n cmd: (%s)\n", i, lexer[i]->cmd);
+				printf("args: (%s)\n", lexer[i]->args);
+				printf("tokenid: (%s)\n", lexer[i]->tokenid);
+				printf("file: (%s)\n", lexer[i]->file);
+				printf("flags: (%s)\n", lexer[i]->flags);
+				i++;
+			}
 			// i = 0;
 			// c'est pas idea mais c'est un depart
 
