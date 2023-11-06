@@ -25,6 +25,7 @@ bool is_str_export(char *str);
 char **get_export_var(char *arg_of_export);
 bool	check_unset_for_quotes(t_post_quotes	***content, t_lexer ***lexer);
 void	free_double_array(char **list_of_tokenid);
+bool	pipe_export(t_lexer ***lexer);
 
 void	lexer_free(t_lexer **lexer)
 {
@@ -78,55 +79,59 @@ bool export_andle_no_quotes(t_lexer ***lexer)
 	char **var_prept;
 	int i;
 
-	if (is_str_export((*lexer)[0]->cmd))
-	{
-		if ((*lexer)[1] != NULL)
-		{
-			printf("Can't pipe export\n");
-			lexer_free((*lexer));
-			return (true);
-		}
-		if ((*lexer)[0]->args == NULL)
-		{
-			ascii_sort(*(get_env)());
-			lexer_free((*lexer));
-			return (true);
-		}
-		var_prept = get_export_var((*lexer)[0]->args);
-		i = 0;
-		while (var_prept[i] != NULL)
-		{
-			if (i % 2 == 0)
-				printf("(%s)", var_prept[i]);
-			else 
-				printf(" = (%s)\n", var_prept[i]);
-			i++;
-		}
-	printf("\n");
-		i = 0;
-		while (var_prept[i] != NULL)
-		{
-			if (ft_isdigit(var_prept[i][0]) == 1)
-			{
-				printf("Minishell: export: `%s", var_prept[i]);
-				if (var_prept[i + 1][0] != '\0')
-					printf("=%s", var_prept[i + 1]);
-				printf("': not a valid identifier\n");
-				while (var_prept[i] != NULL)
-				{
-					free(var_prept[i]);
-					i++;
-				}
-				free(var_prept);
-				lexer_free((*lexer));
-				return (true);
-			}
-			set_env(var_prept[i], var_prept[i + 1], get_env());
-			i += 2;
-		}
-	}
-	else
+	if (is_str_export((*lexer)[0]->cmd) == false)
 		return (false);
+	if ((*lexer)[1] != NULL && (*lexer)[0]->args != NULL)
+	{
+		printf("Can't pipe export when setting a value\n");
+		lexer_free((*lexer));
+		return (true);
+	}
+	if ((*lexer)[0]->args == NULL && (*lexer)[1] == NULL)
+	{
+		// printf("printing asciisort\n");
+		ascii_sort(*(get_env)());
+		lexer_free((*lexer));
+		return (true);
+	}
+	if ((*lexer)[0]->args == NULL && (*lexer)[1] != NULL)
+	{
+		pipe_export(lexer);
+		lexer_free((*lexer));
+		return (true);
+	}
+	var_prept = get_export_var((*lexer)[0]->args);
+	i = 0;
+	while (var_prept[i] != NULL)
+	{
+		if (i % 2 == 0)
+			printf("(%s)", var_prept[i]);
+		else 
+			printf(" = (%s)\n", var_prept[i]);
+		i++;
+	}
+	printf("\n");
+	i = 0;
+	while (var_prept[i] != NULL)
+	{
+		if (ft_isdigit(var_prept[i][0]) == 1)
+		{
+			printf("Minishell: export: `%s", var_prept[i]);
+			if (var_prept[i + 1][0] != '\0')
+				printf("=%s", var_prept[i + 1]);
+			printf("': not a valid identifier\n");
+			while (var_prept[i] != NULL)
+			{
+				free(var_prept[i]);
+				i++;
+			}
+			free(var_prept);
+			lexer_free((*lexer));
+			return (true);
+		}
+		set_env(var_prept[i], var_prept[i + 1], get_env());
+		i += 2;
+	}
 	lexer_free((*lexer));
 	free(var_prept);
 	return (true);
@@ -169,6 +174,19 @@ int    main(void)
 			else
 			{
 				lexer = parser_with_quotes(content);
+				int i;
+				i = 0;
+				while (lexer[i] != NULL)
+				{
+					// printf("arg was before: %s\n", lexer[i]->args);
+					// lexer[i]->args = replace_doll_question_to_number_with_free(lexer[i]->args, 69);
+					printf("\nlexer[%d]\n cmd: (%s)\n", i, lexer[i]->cmd);
+					printf("args: (%s)\n", lexer[i]->args);
+					printf("tokenid: (%s)\n", lexer[i]->tokenid);
+					printf("file: (%s)\n", lexer[i]->file);
+					printf("flags: (%s)\n", lexer[i]->flags);
+					i++;
+				}
 				if (check_export_for_quotes(&content, &lexer) || check_unset_for_quotes(&content, &lexer))
 				{
 					if (str)
@@ -179,16 +197,16 @@ int    main(void)
 					continue ;
 				}
 				// int i;
-				if (is_str_export(lexer[0]->cmd))
-				{
-					if (lexer[1] != NULL)
-						printf("Can't pipe export\n");
-					else
-						get_export_var(lexer[0]->args);
-					lexer_free(lexer);
-					free_content(content);
-					continue ;
-				}
+				// if (is_str_export(lexer[0]->cmd))
+				// {
+				// 	if (lexer[1] != NULL)
+				// 		printf("Can't pipe export\n");
+				// 	else
+				// 		get_export_var(lexer[0]->args);
+				// 	lexer_free(lexer);
+				// 	free_content(content);
+				// 	continue ;
+				// }
 				free_content(content);
 			}
 			free(str);
@@ -196,25 +214,12 @@ int    main(void)
 			// c'est pas idea mais c'est un depart
 
 
-			int i;
-			i = 0;
-			while (lexer[i] != NULL)
-			{
-				// printf("arg was before: %s\n", lexer[i]->args);
-				// lexer[i]->args = replace_doll_question_to_number_with_free(lexer[i]->args, 69);
-				printf("\nlexer[%d]\n cmd: (%s)\n", i, lexer[i]->cmd);
-				printf("args: (%s)\n", lexer[i]->args);
-				printf("tokenid: (%s)\n", lexer[i]->tokenid);
-				printf("file: (%s)\n", lexer[i]->file);
-				printf("flags: (%s)\n", lexer[i]->flags);
-				i++;
-			}
 			if (export_andle_no_quotes(&lexer))
 				continue ;
 			if (check_unset_noquotes(&lexer))
 				continue ;
 			else
-				piping(lexer);
+			piping(lexer);
 			// pause();
 			// optiona: wait for return value.
 		// }

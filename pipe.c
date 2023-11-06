@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/20 15:16:04 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/10/31 23:16:16 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/11/04 17:53:56 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,10 @@
 
 int	are_there_more_cmds(t_lexer **lexer, int current);
 char	*ft_strjoin_with_frees(char *s1, char *s2);
+char	***get_env(void);
+void	ascii_sort(char **environment);
+bool is_str_export(char *str);
+void	lexer_free(t_lexer **lexer);
 
 int	open_file(char *filename, int mode)
 {
@@ -485,13 +489,20 @@ void	piping(t_lexer **lexer)
 			}
 			if (pid == 0)
 			{
+				puts("in child process loop");
 				manage_reads_writes(&data, lexer);		// info =
 				if (lexer[data.lex_count]->cmd)
 				{
 					if (is_built_in(lexer, data.lex_count) == 1)
+					{
+						puts("should not be built in");
 						execute_child_process(&data);
+					}
 					else
+					{
+						puts("entered last else, incorrect");
 						execute_child_process(&data);
+					}
 				}
 			}
 			else  // Parent process
@@ -523,4 +534,91 @@ int	are_there_more_cmds(t_lexer **lexer, int current)
 		current++;
 	}
 	return(0);
+}
+
+bool	pipe_export(t_lexer ***lexer)
+{
+	int			pid;
+	int			status;
+	int			i;
+	char		*cmd_path;
+	char		*args[4];
+	t_pipedata	data;
+
+	i = 0;
+	pid = 0;
+	initialize_pipedata(&data);
+	if ((*lexer)[data.lex_count + 1] != NULL)
+	{
+		args[i++] = (*lexer)[data.lex_count + 1]->cmd;
+		if ((*lexer)[data.lex_count + 1]->flags != NULL)
+			args[i++] = (*lexer)[data.lex_count + 1]->flags;
+		if ((*lexer)[data.lex_count + 1]->args != NULL)
+			args[i++] = (*lexer)[data.lex_count + 1]->args;
+		args[i] = NULL;
+	}
+	if (((*lexer))[1] != NULL && ((*lexer))[0]->args != NULL)
+	{
+		puts("check 1");
+		printf("Can't pipe export when setting value\n");
+		lexer_free(((*lexer)));
+		return (true);
+	}
+	if ((*lexer)[0]->args == NULL)
+	{
+		if (((*lexer))[1] == NULL)
+		{
+			puts("check 2");
+			ascii_sort(*(get_env)());
+			lexer_free(((*lexer)));
+			return (true);
+		}
+		else
+		{
+			i = 0;
+			while ((*lexer)[data.lex_count] != NULL)
+			{
+				pipe(data.fd);
+				pid = fork();
+				if (pid == 0)
+				{
+					if (data.lex_count == 0)
+					{
+						dup2(data.fd[1], STDOUT_FILENO);
+						close(data.fd[1]);
+						close(data.fd[0]);
+						ascii_sort(*(get_env()));
+						exit(EXIT_SUCCESS);
+					}
+					if (data.lex_count == 1)
+					{
+						puts("executing second cmd");
+
+						cmd_path = get_cmd_path((*lexer)[data.lex_count]->cmd, &data);
+						dup2(data.input_fd, STDIN_FILENO);
+						dup2(data.og_out, STDOUT_FILENO);
+						close(data.input_fd);
+						close(data.og_out);
+						close(data.fd[0]);
+						close(data.fd[1]);
+						execve(cmd_path, args, (*(data).environ));
+					}
+				}
+				else
+				{
+					if ((*lexer)[data.lex_count + 1] == NULL)
+						close(data.fd[0]);
+					else
+						data.input_fd = data.fd[0];
+					close(data.fd[1]);
+					waitpid(pid, &status, 0);
+					if WIFEXITED(status)
+						status = WEXITSTATUS(status);
+					data.lex_count++;
+				}
+			}
+		}
+		return (true);
+	}
+	return (false);
 }

@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/14 17:01:53 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/10/31 23:16:53 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/11/04 17:53:56 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -183,26 +183,6 @@ char	*ft_strjoin_with_frees(char *s1, char *s2)
 	s2 = NULL;
 	return (ptr);
 }
-
-bool find_doll_question(char *str)
-{
-	int i;
-
-	i = 0;
-	while (str[i] != '\0')
-	{
-		if (str[i] == '$')
-		{
-			if (str[i + 1] == '\0')
-				return (false);
-			if (str[i + 1] == '!')
-				return (true);	
-		}
-		i++;
-	}
-	return (false);
-}
-
 /*
 	take STR_OG (usually the arg), and check if there is $?.
 	If it doesn't, it just return STR_OG. 
@@ -237,8 +217,6 @@ char *replace_doll_question_to_number_with_free(char *str_og, int number_replace
 	if (!str_return)
 		exit(1);
 	free(str_og);
-	if (find_doll_question(str_return))
-		str_return = replace_doll_question_to_number_with_free(str_return, number_replace);
 	return (str_return);
 }
 
@@ -274,6 +252,7 @@ bool is_str_export(char *str)
 			&& str[3] == 'o' && str[4] == 'r' && str[5] == 't'
 				&& str[6] == '\0')
 				return (true);
+	puts("have checked");
 	return (false);
 }
 
@@ -374,14 +353,14 @@ char **get_export_var(char *arg_of_export)
 	i_work_split = 0;
 	export_content = malloc(sizeof(char *) * ((get_num_export_con(arg_of_export) * 2) + 3));
 	work_split = get_word_one_by_one(arg_of_export);
-	// while (work_split[i_work_split] != NULL)
-	// {
-	// 	i_work_split++;
-	// }
+	while (work_split[i_work_split] != NULL)
+	{
+		i_work_split++;
+	}
 	i_work_split = 0;
 	while (work_split[i_work_split] != NULL)
 	{
-		puts(work_split[i_work_split]);
+		// puts(work_split[i_work_split]);
 		export_content[i_export_content] = ft_strdup_until_equal(work_split[i_work_split]);
 		i_export_content++;
 		if (ft_strlen(export_content[i_export_content - 1]) == ft_strlen(work_split[i_work_split]))
@@ -394,7 +373,6 @@ char **get_export_var(char *arg_of_export)
 	}
 	// puts("test finito");
 	free(work_split);
-	printf("export content i = (%i)\n", i_export_content);
 	export_content[i_export_content] = NULL;
 	return (export_content);
 }
@@ -406,6 +384,7 @@ void export_content_freeur(char ***export_content)
 	i = 0;
 	while ((*export_content)[i] != NULL)
 	{
+		// printf("freeing num %d\n", i);
 		free((*export_content)[i]);
 		i++;
 	}
@@ -480,7 +459,7 @@ bool	check_if_array_str_is_empty(char **array_str)
 	if (array_str == NULL)
 		return (true);
 	i = 0;
-	while (array_str[i] != NULL)
+	while (array_str[i])
 	{
 		if (array_str[i][0] != '\0')
 			return (false);
@@ -508,6 +487,8 @@ void	print_export(char ***environment);
 void free_content(t_post_quotes **content);
 void	lexer_free(t_lexer **lexer);
 void	ascii_sort(char **environment);
+bool	pipe_export(t_lexer ***lexer);
+void	lexer_free(t_lexer **lexer);
 
 bool	check_export_for_quotes(t_post_quotes	***content, t_lexer ***lexer)
 {
@@ -517,20 +498,26 @@ bool	check_export_for_quotes(t_post_quotes	***content, t_lexer ***lexer)
 	char 		**export_content;
 	char		**temp_var_from_no_quotes;
 
-
 	if (is_str_export((*lexer)[0]->cmd) == false)
 		return (false);
-	if ((*lexer)[1] != NULL)
+	if ((*lexer)[1] != NULL && (*lexer)[0]->args != NULL)
 	{
-		printf("Can't pipe export\n");
+		printf("Can't pipe export when setting a value\n");
 		lexer_free((*lexer));
 		free_content((*content));
 		return (true);
 	}
-	if ((*lexer)[0]->args == NULL)
+	if ((*lexer)[0]->args == NULL && (*lexer)[1] == NULL)
 	{
-		printf("printing asciisort\n");
+		// printf("printing asciisort\n");
 		ascii_sort(*(get_env)());
+		lexer_free((*lexer));
+		free_content((*content));
+		return (true);
+	}
+	if ((*lexer)[0]->args == NULL && (*lexer)[1] != NULL)
+	{
+		pipe_export(lexer);
 		lexer_free((*lexer));
 		free_content((*content));
 		return (true);
@@ -562,20 +549,17 @@ bool	check_export_for_quotes(t_post_quotes	***content, t_lexer ***lexer)
 			if (is_all_space((*content)[i]->content) == false)
 			{
 				temp_var_from_no_quotes = get_export_var((*content)[i]->content);
-				printf("content[i] = %s\n", (*content)[i]->content);
+				// printf("content[i] = %s\n", (*content)[i]->content);
 				if (check_if_array_str_is_empty(temp_var_from_no_quotes) == true)
 				{
-					puts("ALL EMPTY NONE QUOTES");
+					// puts("ALL EMPTY NONE QUOTES");
 					export_content_freeur(&temp_var_from_no_quotes);
 					i++;
 					continue ;
 				}
 				j = 0;
 				if (i_export_content % 2 == 1 && (*content)[i]->content[0] == '=')
-				{
-					free(temp_var_from_no_quotes[j]);
 					j++;
-				}
 				if (i_export_content % 2 == 1 && (*content)[i]->content[0] != '=')
 				{
 					export_content[i_export_content] = ft_strdup("");

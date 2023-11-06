@@ -34,8 +34,8 @@ void	signal_catcher(int sig)
 {
 	if (sig == SIGINT)
 	{
-		// printf("I am not stoping f u\n");
-		write(1, "\nminishell_OS_1.0$  ", 21);
+		printf("\n");
+		// write(1, "\nminishell_OS_1.0$  ", 21);
 		// readline("minishell_OS_1.0$ 😀 ");
 		return ;
 	}

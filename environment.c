@@ -117,6 +117,8 @@ void	set_env(char *name, char *value, char ***environment)
 			if (value_len == 0)
 			{
 				puts("should break");
+				free(name);
+				free(value);
 				break ;
 			}
 			free((*environment)[i]);
