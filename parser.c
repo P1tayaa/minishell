@@ -548,6 +548,91 @@ void	parse_with_quotes_quotes_assigning(t_post_quotes **content, bool *function_
 	}
 	(*i_content)++;
 }
+
+// not sure if done right
+void	move_flags_for_quotes(int *j, int i_content, int i, t_lexer ***lexer, t_post_quotes **content)
+{
+	char *temp;
+	char *temp2;
+
+	temp = NULL;
+	(*j) = copy_until_tokenid(*j, content[i_content]->content, &temp);
+	if (temp != NULL)
+	{
+		temp2 = get_flags_str(&temp);
+		printf("temp == (%s)\n", temp);
+		// ! need to protect this malloc with strdup, when puting in a function
+		(*lexer)[i]->args = ft_strjoin_with_frees((*lexer)[i]->args, ft_strjoin_with_frees(temp, ft_strdup(" ")));
+		(*lexer)[i]->flags = ft_strjoin_with_frees((*lexer)[i]->flags, temp2);
+	}
+}
+
+void	parse_with_quotes_none_quotes_assigning(int *i_content, t_post_quotes **content, bool *function_done, t_lexer ***lexer, int i)
+{
+	int j;
+				
+	j = 0;
+	while (content[(*i_content)]->content[j] != '\0')
+	{
+		if ((*function_done) == false && ft_isspace(content[(*i_content)]->content[j]) == false)
+		{
+			j = copy_until_space(j, content[(*i_content)]->content, &(*lexer)[i]->cmd);
+			(*function_done) = true;
+		}
+		if (is_a_token_id(&content[(*i_content)]->content[j]) == true)
+		{
+			//todo make this a funciton
+			write_the_right_token(j, content[(*i_content)]->content, ((*lexer)[i]->tokenid));
+			j = j + ft_strlen((*lexer)[i]->tokenid);
+			(*function_done) = false;
+			if ((*lexer)[i]->flags[1] == '\0')
+			{
+				free((*lexer)[i]->flags);
+				(*lexer)[i]->flags = NULL;
+			}
+			if ((*lexer)[i]->args != NULL)
+			{
+				(*lexer)[i]->args = remove_front_spaces((*lexer)[i]->args);
+				(*lexer)[i]->args = remove_back_spaces((*lexer)[i]->args);
+			}
+			if ((*lexer)[i]->cmd != NULL)
+				(*lexer)[i]->cmd = remove_back_spaces((*lexer)[i]->cmd);
+			i++;
+			if (content[(*i_content)]->content[j] != '\0')
+			{
+				initiate_values_to_zero_NULL(&(*lexer)[i], i);
+				(*lexer)[i]->flags = ft_strdup("-");
+				if (!(*lexer)[i]->flags)
+					exit(1);
+			}
+		}
+		if ((*function_done) && ft_isspace(content[(*i_content)]->content[j]) == false)
+		{
+			move_flags_for_quotes(&j, (*i_content), i, &(*lexer), content);
+		}
+		if (ft_isspace(content[(*i_content)]->content[j]))
+			j++;
+	}
+	(*i_content)++;
+}
+
+// malloc the content
+void	parse_with_quotes_init(int i, t_post_quotes **content, int	*token_num, t_lexer ***lexer)
+{
+	i = 0;
+	(*token_num) = 0;
+	while (content[i] != NULL)
+	{
+		if (content[i]->is_quotes == false)
+			(*token_num) = (*token_num) + count_token(content[i]->content);
+		i++;
+	}
+	lexer = (t_lexer **)malloc(sizeof(t_lexer *) * ((*token_num) + 2));
+	if (!lexer)
+		exit(1);
+
+}
+
 /*
 	Main parser when there are quotes
 	take the content of input, and put the info in the right parts of a lexer.
@@ -558,23 +643,11 @@ t_lexer	**parser_with_quotes(t_post_quotes **content)
 	t_lexer **lexer;
 	int	token_num;
 	int i;
-
-	// TODO: make this in a fucntion
-	// malloc the content
-	i = 0;
-	token_num = 0;
-	while (content[i] != NULL)
-	{
-		if (content[i]->is_quotes == false)
-			token_num = token_num + count_token(content[i]->content);
-		i++;
-	}
-	lexer = (t_lexer **)malloc(sizeof(t_lexer *) * (token_num + 2));
-	if (!lexer)
-		exit(1);
-
 	int i_content;
 	bool function_done;
+
+	// TODO: make this in a fucntion
+	parse_with_quotes_init(i, content, )
 	// fill the content
 	i = 0;
 	i_content = 0;
@@ -596,64 +669,7 @@ t_lexer	**parser_with_quotes(t_post_quotes **content)
 			}
 			else
 			{	
-				int j;
-				
-				j = 0;
-				while (content[i_content]->content[j] != '\0')
-				{
-					if (function_done == false && ft_isspace(content[i_content]->content[j]) == false)
-					{
-						j = copy_until_space(j, content[i_content]->content, &lexer[i]->cmd);
-						function_done = true;
-					}
-					if (is_a_token_id(&content[i_content]->content[j]) == true)
-					{
-						//todo make this a funciton
-						write_the_right_token(j, content[i_content]->content, (lexer[i]->tokenid));
-						j = j + ft_strlen(lexer[i]->tokenid);
-						function_done = false;
-						if (lexer[i]->flags[1] == '\0')
-						{
-							free(lexer[i]->flags);
-							lexer[i]->flags = NULL;
-						}
-						if (lexer[i]->args != NULL)
-						{
-							lexer[i]->args = remove_front_spaces(lexer[i]->args);
-							lexer[i]->args = remove_back_spaces(lexer[i]->args);
-						}
-						if (lexer[i]->cmd != NULL)
-							lexer[i]->cmd = remove_back_spaces(lexer[i]->cmd);
-						i++;
-						if (content[i_content]->content[j] != '\0')
-						{
-							initiate_values_to_zero_NULL(&lexer[i], i);
-							lexer[i]->flags = ft_strdup("-");
-							if (!lexer[i]->flags)
-								exit(1);
-						}
-					}
-					if (function_done && ft_isspace(content[i_content]->content[j]) == false)
-					{
-						// TODO make this a function
-						char *temp;
-						char *temp2;
-
-						temp = NULL;
-						j = copy_until_tokenid(j, content[i_content]->content, &temp);
-						if (temp != NULL)
-						{
-							temp2 = get_flags_str(&temp);
-							printf("temp == (%s)\n", temp);
-							// ! need to protect this malloc with strdup, when puting in a function
-							lexer[i]->args = ft_strjoin_with_frees(lexer[i]->args, ft_strjoin_with_frees(temp, ft_strdup(" ")));
-							lexer[i]->flags = ft_strjoin_with_frees(lexer[i]->flags, temp2);
-						}
-					}
-					if (ft_isspace(content[i_content]->content[j]))
-						j++;
-				}
-				i_content++;
+				parse_with_quotes_none_quotes_assigning(&i_content, content, &function_done, &lexer, i);
 			}
 		}
 		if (lexer[i]->args != NULL)
