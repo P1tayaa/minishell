@@ -464,6 +464,8 @@ void	set_value_of_flag_str(int *k, int *flags_char_len, char **str, char	**flags
 				break ;
 		}
 		(*new_str)[(*k)] = (*str)[i];
+		if ((*str)[i + 1] != '\0')
+			if (((*str)[i + 1]))
 		(*k)++;
 		i++;
 	}
@@ -559,8 +561,8 @@ void	move_flags_for_quotes(int *j, int i_content, int i, t_lexer ***lexer, t_pos
 	(*j) = copy_until_tokenid(*j, content[i_content]->content, &temp);
 	if (temp != NULL)
 	{
-		temp2 = get_flags_str(&temp);
 		printf("temp == (%s)\n", temp);
+		temp2 = get_flags_str(&temp);
 		// ! need to protect this malloc with strdup, when puting in a function
 		(*lexer)[i]->args = ft_strjoin_with_frees((*lexer)[i]->args, ft_strjoin_with_frees(temp, ft_strdup(" ")));
 		(*lexer)[i]->flags = ft_strjoin_with_frees((*lexer)[i]->flags, temp2);
@@ -617,8 +619,10 @@ void	parse_with_quotes_none_quotes_assigning(int *i_content, t_post_quotes **con
 }
 
 // malloc the content
-void	parse_with_quotes_init(int i, t_post_quotes **content, int	*token_num, t_lexer ***lexer)
+void	parse_with_quotes_init(t_post_quotes **content, int	*token_num, t_lexer ***lexer)
 {
+	int i;
+
 	i = 0;
 	(*token_num) = 0;
 	while (content[i] != NULL)
@@ -627,8 +631,8 @@ void	parse_with_quotes_init(int i, t_post_quotes **content, int	*token_num, t_le
 			(*token_num) = (*token_num) + count_token(content[i]->content);
 		i++;
 	}
-	lexer = (t_lexer **)malloc(sizeof(t_lexer *) * ((*token_num) + 2));
-	if (!lexer)
+	(*lexer) = (t_lexer **)malloc(sizeof(t_lexer *) * ((*token_num) + 2));
+	if (!(*lexer))
 		exit(1);
 
 }
@@ -647,7 +651,7 @@ t_lexer	**parser_with_quotes(t_post_quotes **content)
 	bool function_done;
 
 	// TODO: make this in a fucntion
-	parse_with_quotes_init(i, content, )
+	parse_with_quotes_init(content, &token_num, &lexer);
 	// fill the content
 	i = 0;
 	i_content = 0;
