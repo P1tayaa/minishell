@@ -432,15 +432,25 @@ char *init_new_flag_str(int flags_char_len, char **str, int num_of_dash)
 	return (new_str);
 }
 
+void	set_value_of_flag_str_p2(char **new_str, char **str, int *k, int *i)
+{
+	(*new_str)[(*k)] = (*str)[(*i)];
+	if ((*str)[(*i) + 1] != '\0')
+		if (((*str)[(*i) + 1]))
+	(*k)++;
+	(*i)++;
+}
+
 // set the values of string, but doesn't add the '-'
-void	set_value_of_flag_str(int *k, int *flags_char_len, char **str, char	**flags, char **new_str)
+int	set_value_of_flag_str(int *flags_char_len, char **str, char	**flags, char **new_str)
 {
 	int i;
 	int j;
+	int k;
 
 	i = 0;
 	(*flags_char_len) = 0;
-	(*k) = 0;
+	k = 0;
 	while ((*str)[i] != '\0')
 	{
 		if (ft_isspace((*str)[i]) == true || i == 0)
@@ -463,12 +473,9 @@ void	set_value_of_flag_str(int *k, int *flags_char_len, char **str, char	**flags
 			if ((*str)[i] == '\0')
 				break ;
 		}
-		(*new_str)[(*k)] = (*str)[i];
-		if ((*str)[i + 1] != '\0')
-			if (((*str)[i + 1]))
-		(*k)++;
-		i++;
+		set_value_of_flag_str_p2(new_str, str, &k, &i);
 	}
+	return (k);
 }
 
 // null terminate all right string or make them null if they are.
@@ -508,7 +515,7 @@ char *get_flags_str(char **str)
 	if (!flags)
 		exit (1);
 	new_str = init_new_flag_str(flags_char_len, str, num_of_dash);
-	set_value_of_flag_str(&k, &flags_char_len, str, &flags, &new_str);
+	k = set_value_of_flag_str(&flags_char_len, str, &flags, &new_str);
 	null_terminate_flags_str(k, flags_char_len, &new_str, str, &flags);
 	return (flags);
 }
@@ -552,13 +559,13 @@ void	parse_with_quotes_quotes_assigning(t_post_quotes **content, bool *function_
 }
 
 // not sure if done right
-void	move_flags_for_quotes(int *j, int i_content, int i, t_lexer ***lexer, t_post_quotes **content)
+void	move_flags_for_quotes(char **curent_content, int *j, int i, t_lexer ***lexer)
 {
 	char *temp;
 	char *temp2;
 
 	temp = NULL;
-	(*j) = copy_until_tokenid(*j, content[i_content]->content, &temp);
+	(*j) = copy_until_tokenid(*j, (*curent_content), &temp);
 	if (temp != NULL)
 	{
 		printf("temp == (%s)\n", temp);
@@ -569,53 +576,56 @@ void	move_flags_for_quotes(int *j, int i_content, int i, t_lexer ***lexer, t_pos
 	}
 }
 
-void	parse_with_quotes_none_quotes_assigning(int *i_content, t_post_quotes **content, bool *function_done, t_lexer ***lexer, int i)
+void	parse_with_quotes_none_quotes_assigning_if_token(char **curent_content, int *j, t_lexer ***lexer, int *i)
+{
+	write_the_right_token((*j), (*curent_content), ((*lexer)[(*i)]->tokenid));
+	(*j) = (*j) + ft_strlen((*lexer)[(*i)]->tokenid);
+	if ((*lexer)[(*i)]->flags[1] == '\0')
+	{
+		free((*lexer)[(*i)]->flags);
+		(*lexer)[(*i)]->flags = NULL;
+	}
+	if ((*lexer)[(*i)]->args != NULL)
+	{
+		(*lexer)[(*i)]->args = remove_front_spaces((*lexer)[(*i)]->args);
+		(*lexer)[(*i)]->args = remove_back_spaces((*lexer)[(*i)]->args);
+	}
+	if ((*lexer)[(*i)]->cmd != NULL)
+		(*lexer)[(*i)]->cmd = remove_back_spaces((*lexer)[(*i)]->cmd);
+	(*i)++;
+	if ((*curent_content)[(*j)] != '\0')
+	{
+		initiate_values_to_zero_NULL(&(*lexer)[(*i)], (*i));
+		(*lexer)[(*i)]->flags = ft_strdup("-");
+		if (!(*lexer)[(*i)]->flags)
+			exit(1);
+	}
+}
+
+void	parse_with_quotes_none_quotes_assigning(char **curent_content, bool *function_done, t_lexer ***lexer, int *i)
 {
 	int j;
-				
+
 	j = 0;
-	while (content[(*i_content)]->content[j] != '\0')
+	while ((*curent_content)[j] != '\0')
 	{
-		if ((*function_done) == false && ft_isspace(content[(*i_content)]->content[j]) == false)
+		if ((*function_done) == false && ft_isspace((*curent_content)[j]) == false)
 		{
-			j = copy_until_space(j, content[(*i_content)]->content, &(*lexer)[i]->cmd);
+			j = copy_until_space(j, (*curent_content), &(*lexer)[(*i)]->cmd);
 			(*function_done) = true;
 		}
-		if (is_a_token_id(&content[(*i_content)]->content[j]) == true)
+		if (is_a_token_id(&(*curent_content)[j]) == true)
 		{
-			//todo make this a funciton
-			write_the_right_token(j, content[(*i_content)]->content, ((*lexer)[i]->tokenid));
-			j = j + ft_strlen((*lexer)[i]->tokenid);
+			parse_with_quotes_none_quotes_assigning_if_token(curent_content, &j, lexer, i);
 			(*function_done) = false;
-			if ((*lexer)[i]->flags[1] == '\0')
-			{
-				free((*lexer)[i]->flags);
-				(*lexer)[i]->flags = NULL;
-			}
-			if ((*lexer)[i]->args != NULL)
-			{
-				(*lexer)[i]->args = remove_front_spaces((*lexer)[i]->args);
-				(*lexer)[i]->args = remove_back_spaces((*lexer)[i]->args);
-			}
-			if ((*lexer)[i]->cmd != NULL)
-				(*lexer)[i]->cmd = remove_back_spaces((*lexer)[i]->cmd);
-			i++;
-			if (content[(*i_content)]->content[j] != '\0')
-			{
-				initiate_values_to_zero_NULL(&(*lexer)[i], i);
-				(*lexer)[i]->flags = ft_strdup("-");
-				if (!(*lexer)[i]->flags)
-					exit(1);
-			}
 		}
-		if ((*function_done) && ft_isspace(content[(*i_content)]->content[j]) == false)
+		if ((*function_done) && ft_isspace((*curent_content)[j]) == false)
 		{
-			move_flags_for_quotes(&j, (*i_content), i, &(*lexer), content);
+			move_flags_for_quotes(curent_content, &j, (*i), &(*lexer));
 		}
-		if (ft_isspace(content[(*i_content)]->content[j]))
+		if (ft_isspace((*curent_content)[j]))
 			j++;
 	}
-	(*i_content)++;
 }
 
 // malloc the content
@@ -637,6 +647,35 @@ void	parse_with_quotes_init(t_post_quotes **content, int	*token_num, t_lexer ***
 
 }
 
+void	parser_with_quotes_p2(t_post_quotes **content, bool *function_done, t_lexer ***lexer, int *i)
+{
+	int i_content;
+	
+	i_content = 0;
+	while (content[i_content] != NULL)
+	{
+		if (content[i_content]->is_quotes)
+			parse_with_quotes_quotes_assigning(content, function_done, lexer, &i_content, *i);
+		else
+		{	
+			parse_with_quotes_none_quotes_assigning(&content[i_content]->content, function_done, lexer, i);
+			i_content++;
+		}
+	}
+	if ((*lexer)[(*i)]->args != NULL)
+	{
+		(*lexer)[(*i)]->args = remove_front_spaces((*lexer)[(*i)]->args);
+		(*lexer)[(*i)]->args = remove_back_spaces((*lexer)[(*i)]->args);
+	}
+	if ((*lexer)[(*i)]->cmd != NULL)
+		(*lexer)[(*i)]->cmd = remove_back_spaces((*lexer)[(*i)]->cmd);
+	if ((*lexer)[(*i)]->flags[1] == '\0')
+	{
+		free((*lexer)[(*i)]->flags);
+		(*lexer)[(*i)]->flags = NULL;
+	}
+}
+
 /*
 	Main parser when there are quotes
 	take the content of input, and put the info in the right parts of a lexer.
@@ -647,53 +686,22 @@ t_lexer	**parser_with_quotes(t_post_quotes **content)
 	t_lexer **lexer;
 	int	token_num;
 	int i;
-	int i_content;
 	bool function_done;
 
-	// TODO: make this in a fucntion
 	parse_with_quotes_init(content, &token_num, &lexer);
-	// fill the content
 	i = 0;
-	i_content = 0;
 	function_done = false;
-	while (token_num >= i)
+	if (function_done == false)
 	{
-		if (function_done == false)
-		{
-			initiate_values_to_zero_NULL(&lexer[i], i);
-			lexer[i]->flags = ft_strdup("-");
-			if (!lexer[i]->flags)
-				exit(1);
-		}
-		while (content[i_content] != NULL)
-		{
-			if (content[i_content]->is_quotes)
-			{
-				parse_with_quotes_quotes_assigning(content, &function_done, &lexer, &i_content, i);
-			}
-			else
-			{	
-				parse_with_quotes_none_quotes_assigning(&i_content, content, &function_done, &lexer, i);
-			}
-		}
-		if (lexer[i]->args != NULL)
-		{
-			lexer[i]->args = remove_front_spaces(lexer[i]->args);
-			lexer[i]->args = remove_back_spaces(lexer[i]->args);
-		}
-		if (lexer[i]->cmd != NULL)
-			lexer[i]->cmd = remove_back_spaces(lexer[i]->cmd);
-		if (lexer[i]->flags[1] == '\0')
-		{
-			free(lexer[i]->flags);
-			lexer[i]->flags = NULL;
-		}
-		i++;
+		initiate_values_to_zero_NULL(&lexer[i], i);
+		lexer[i]->flags = ft_strdup("-");
+		if (!lexer[i]->flags)
+			exit(1);
 	}
+	parser_with_quotes_p2(content, &function_done, &lexer, &i);
+	i++;
 	lexer[i] = NULL;
-	
-	i = 0;
-	return lexer;
+	return (lexer);
 }
 
 int	count_char_until_next_token(char *input);
@@ -738,11 +746,10 @@ int	copy_until_space(int i, char *input_after_curser, char **destination)
 	int	j;
 
 	j = 0;
-	while (input_after_curser[i + j] != '\0')
+	while (input_after_curser[i + j] != '\0'
+			&& (!ft_isspace(input_after_curser[i + j])
+				&& !is_a_token_id(&input_after_curser[i + j])))
 	{
-		if ((ft_isspace(input_after_curser[i + j])
-				|| is_a_token_id(&input_after_curser[i + j])))
-			break ;
 		j++;
 	}
 	if (j == 0)
@@ -878,8 +885,17 @@ int	count_char_until_next_token(char *input)
 		}
 		i++;
 	}
-	free_double_array(list_of_tokenid);
-	return (i);
+	return (free_double_array(list_of_tokenid), i);
+}
+
+int set_k_for_count_token(char *input, int i, char	**list_of_tokenid, int j)
+{
+	int		k;
+
+	k = 0;
+	while (input[i + k] != '\0' && list_of_tokenid[j][k] == input[i + k])
+		k++;
+	return (k);
 }
 
 /*
@@ -898,16 +914,13 @@ int	count_token(char *input)
 
 	list_of_tokenid = get_list_of_tokenid();
 	num_of_token = 0;
-	i = 0;
-	// puts(input);
-	while (input[i] != '\0')
+	i = -1;
+	while (input[++i] != '\0')
 	{
 		j = 0;
 		while (list_of_tokenid[j] != NULL)
 		{
-			k = 0;
-			while (input[i + k] != '\0' &&list_of_tokenid[j][k] == input[i + k])
-				k++;
+			k = set_k_for_count_token(input, i, list_of_tokenid, j);
 			if (list_of_tokenid[j][k] == '\0')
 			{
 				i = i + k;
@@ -916,8 +929,6 @@ int	count_token(char *input)
 			}
 			j++;
 		}
-		i++;
 	}
-	free_double_array(list_of_tokenid);
-	return (num_of_token);
+	return (free_double_array(list_of_tokenid), num_of_token);
 }
