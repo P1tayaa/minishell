@@ -27,6 +27,8 @@ bool	check_unset_for_quotes(t_post_quotes	***content, t_lexer ***lexer);
 void	free_double_array(char **list_of_tokenid);
 bool	pipe_export(t_lexer ***lexer);
 
+volatile sig_atomic_t the_signal_flag = 0;
+
 void	lexer_free(t_lexer **lexer)
 {
 	int i;
@@ -138,45 +140,52 @@ bool export_andle_no_quotes(t_lexer ***lexer)
 	return (true);
 }
 
+void restore_default_sigint_handling() {
+    struct sigaction sa;
+
+    // Set up the structure to specify the new action.
+    sa.sa_handler = SIG_DFL; // Default handler
+    sa.sa_flags = 0;
+    sigemptyset(&sa.sa_mask);
+
+    if (sigaction(SIGINT, &sa, NULL) == -1) {
+        perror("Error restoring default SIGINT action");
+    }
+}
+
 int    main(void)
 {
     char			*str;
     t_lexer			**lexer;
     bool			quotes_test;
 	t_post_quotes	**content;
-	// int	i;e
 
-	manage_signals();
+	the_signal_flag = 0;
 	quotes_test = true;
+	manage_signals();
 	while (1)
 	{
-		// intial prompt print
-		// read user input
 		content = NULL;
-
 		str = ft_strdup(read_user_input(quotes_test));
-		if (is_prompt_empty(str) == 0)
-			continue ;
-		// if (str == NULL)
+		// if (the_signal_flag == 1 && str == NULL)
+		// {
+		// 	write(0, "\n😎 minishell_OS_1.0$", 22);
+		// 	free(str);
 		// 	continue ;
+		// }
 		if (quotes_test)
-		{
 			check_quotes(&str, &content);
-		}
-		// parse user input
 		// if (!quotes_test)
 		// {
-			// pause();
-			// puts("");
-			// puts(str);
-
 			if (content == NULL)
 				lexer = main_parser(str);
 			else
 			{
 				lexer = parser_with_quotes(content);
+				the_signal_flag = 1;
 				if (check_export_for_quotes(&content, &lexer) || check_unset_for_quotes(&content, &lexer))
 				{
+					the_signal_flag = 0;
 					if (str)
 					{
 						free(str);
@@ -184,17 +193,7 @@ int    main(void)
 					}
 					continue ;
 				}
-				// int i;
-				// if (is_str_export(lexer[0]->cmd))
-				// {
-				// 	if (lexer[1] != NULL)
-				// 		printf("Can't pipe export\n");
-				// 	else
-				// 		get_export_var(lexer[0]->args);
-				// 	lexer_free(lexer);
-				// 	free_content(content);
-				// 	continue ;
-				// }
+				the_signal_flag = 0;
 				free_content(content);
 			}
 			free(str);
@@ -211,25 +210,18 @@ int    main(void)
 				printf("flags: (%s)\n", lexer[i]->flags);
 				i++;
 			}
-			// i = 0;
-			// c'est pas idea mais c'est un depart
-
+			the_signal_flag = 1;
+			// restore_default_sigint_handling();
 			if (export_andle_no_quotes(&lexer))
-			{
 				continue ;
-			}
 			if (check_unset_noquotes(&lexer))
 				continue ;
 			else
-			{
-				puts("huh?");
 				piping(lexer);
-			}
-			// pause();
 			// optiona: wait for return value.
 		// }
 		lexer_free(lexer);
-			// break ;
+		the_signal_flag = 0;
 	}
 	return (0);
 }
@@ -237,15 +229,27 @@ int    main(void)
 char	*read_user_input(bool quotes_test)
 {
 	char	*str;
+	// rl_catch_signals = 0;
 
-	str = readline("😎 minishell_OS_1.0$ ");
-	if (!quotes_test)
-		add_history(str);
-	// if (EOF)
-	// {
-	// 	write(1, "exit\n", 5);
-	// 	exit(EXIT_SUCCESS);
-	// }
+	puts("hey");
+	while (1)
+	{
+		// the_signal_flag = 0;
+		rl_replace_line("", 0);
+		str = readline("minishell_OS_1.0$ ");
+		printf("signal = %i\n", the_signal_flag);
+		// if (the_signal_flag)
+		// {
+		// 	the_signal_flag = 0;
+		// 	write(STDOUT_FILENO, "😎 minishell_OS_1.0$ ", 20);
+		// 	continue ;
+		// }
+		if (str == NULL)
+			return (NULL);
+		if (!quotes_test && str && *str)
+			add_history(str);
+		break ;
+	}
 	return (str);
 }
 

@@ -235,11 +235,18 @@ char *here_doc_starter(char *wordlocking_for)
     
     str_return = NULL;
     read_line_str = readline(" > ");
-    while (ft_strncmp(wordlocking_for, read_line_str, return_biggest_int(ft_strlen(wordlocking_for), ft_strlen(read_line_str)) )!= 0)
+    while (ft_strncmp(wordlocking_for, read_line_str, return_biggest_int(ft_strlen(wordlocking_for), ft_strlen(read_line_str)))!= 0 && the_signal_flag != 3)
     {
         str_return = ft_strjoin_with_frees(str_return, ft_strjoin("\n", read_line_str));
         read_line_str = readline(" > ");
     }
+	if (the_signal_flag == 3)
+	{
+		printf("signal at heredoc = %i\n", the_signal_flag);
+		the_signal_flag = 0;
+		free(str_return);
+		return (NULL);
+	}
 	str_return = ft_strjoin_with_frees(str_return, ft_strdup("\n"));
     return (str_return);
 }
@@ -252,7 +259,6 @@ bool is_str_export(char *str)
 			&& str[3] == 'o' && str[4] == 'r' && str[5] == 't'
 				&& str[6] == '\0')
 				return (true);
-	puts("have checked");
 	return (false);
 }
 

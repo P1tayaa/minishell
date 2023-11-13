@@ -26,6 +26,8 @@
 # include <fcntl.h>
 #include <sys/wait.h>
 
+volatile sig_atomic_t the_signal_flag;
+
 typedef struct s_post_quotes
 {
 	char	*content;

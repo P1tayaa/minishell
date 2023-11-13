@@ -179,6 +179,8 @@ int	manage_reads_writes(t_pipedata *data, t_lexer **lexer)
 		{
 			// write(redirection_handler(*lexer), str, ft_strlen(str));
 			str = here_doc_starter(lexer[(*data).lex_count]->args);						// eeeeeh it couldn't be that easy
+			if (!str)
+				return (-1);
 			lexer[(*data).lex_count]->file = ft_strjoin_with_frees(lexer[(*data).lex_count]->file, ft_strdup("heredoc"));
 			(*data).fd[1] = redirection_handler(lexer[(*data).lex_count]);
 			write((*data).fd[1], str, ft_strlen(str));
@@ -490,7 +492,8 @@ void	piping(t_lexer **lexer)
 			if (pid == 0)
 			{
 				puts("in child process loop");
-				manage_reads_writes(&data, lexer);		// info =
+				if (manage_reads_writes(&data, lexer) == -1)
+					return ;
 				if (lexer[data.lex_count]->cmd)
 				{
 					if (is_built_in(lexer, data.lex_count) == 1)

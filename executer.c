@@ -33,6 +33,8 @@ int executer(t_lexer **lexer, t_pipedata *data)
 
 	// i = 0;
 	return_val = 0;
+	if (lexer[(*data).lex_count]->cmd == NULL)
+		return(0);
 	if (ft_memcmp(lexer[(*data).lex_count]->cmd, "clear", 5) == 0)
 	{
     	write(1, "\033[H\033[2J", 7);
