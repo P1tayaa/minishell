@@ -101,65 +101,50 @@ void	ascii_sort(char **environment)
 	free_double_array(sorted_environment);
 }
 
-// char	*check_exisisting_env(char ***environment, char *name, char *value, int *i)
-// {
-// 	int		value_len;
-// 	char	*to_set;
+char	*check_exisisting_env(char ***environment, char *name, char **value, int *i_og)
+{
+	size_t	value_len;
+	char	*to_set;
+	int i;
 
-// 	value_len = ft_strlen(value);
-// 	to_set = NULL;
-// 	while ((*environment)[(*i)])
-// 	{
-// 		if (ft_memcmp((*environment)[(*i)], name, ft_strlen(name)) == 0)
-// 		{
-// 			if (value_len == 0)
-// 			{
-// 				free(name);
-// 				free(value);
-// 				break ;
-// 			}
-// 			free((*environment)[(*i)]);
-// 			to_set = ft_strjoin_with_frees(ft_strjoin_with_frees(name, ft_strdup("=")), value);
-// 			(*environment)[(*i)] = to_set;
-// 			return (to_set);
-// 		}
-// 		i++;
-// 	}
-// 	return (to_set);
-// }
+	i = -1;
+    value_len = ft_strlen((*value));
+	to_set = NULL;
+	while ((*environment)[++i] != NULL)
+	{
+		if (ft_memcmp((*environment)[i], name, ft_strlen(name)) == 0)
+		{
+			if (value_len == 0)
+			{
+				(*i_og) = i;
+				return (free(name), free((*value)), to_set);
+			}
+			free((*environment)[i]);
+			to_set = ft_strjoin_with_frees(ft_strjoin_with_frees(name, ft_strdup("=")), (*value));
+			(*environment)[i] = to_set;
+			(*i_og) = i;
+			return (NULL);
+		}
+	}
+	(*i_og) = i;
+	return (to_set);
+}
 
 // frees name and value
 void	set_env(char *name, char *value, char ***environment)
 {
 	int		i;
 	char	*to_set;
-	size_t	value_len;
 	char	**new_environment;
 
 	i = 0;
-    value_len = ft_strlen(value);
-	// to_set = check_exisisting_env(environment, name, value, &i);
-	while ((*environment)[i])
-	{
-		if (ft_memcmp((*environment)[i], name, ft_strlen(name)) == 0)
-		{
-			if (value_len == 0)
-			{
-				free(name);
-				free(value);
-				break ;
-			}
-			free((*environment)[i]);
-			to_set = ft_strjoin_with_frees(ft_strjoin_with_frees(name, ft_strdup("=")), value);
-			(*environment)[i] = to_set;
-			return ;
-		}
-		i++;
-	}
+	to_set = check_exisisting_env(environment, name, &value, &i);
+	if (to_set == NULL && (*environment)[i] != NULL)
+		return ;
 	if ((*environment)[i] == NULL)
 	{
 		new_environment = (char **) ft_realloc((*environment), (i + 2) * sizeof(char *));
-		if (value_len == 0)
+		if (ft_strlen(value) == 0)
 		{
 			to_set = ft_strdup(name);
 			free(value);

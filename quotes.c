@@ -20,9 +20,6 @@ Handle " (double quote) which should prevent the shell from interpreting the met
 int		*get_doll_position(char *str);
 char	*handle_expand_doll(char *str);
 
-/*
-
-*/
 int	get_number_of_real_double_quotes(int **position_double_quotes,  int	*fake_double_quotes)
 {
 	int	i;
@@ -47,19 +44,12 @@ int	get_number_of_real_double_quotes(int **position_double_quotes,  int	*fake_do
 	return (num_of_real_quotes);
 }
 
-void	remove_fake_double_quotes(int **position_double_quotes, int	*fake_double_quotes)
+void	remove_fake_double_quotes_p2(int **position_double_quotes, int	*fake_double_quotes, int *num_of_real_quotes, int	**real_quotes)
 {
-	int	i;
-	int	j;
-	int	num_of_real_quotes;
-	int	*real_quotes;
+	int j;
+	int i;
 
-	num_of_real_quotes = get_number_of_real_double_quotes(position_double_quotes, fake_double_quotes);
-	real_quotes = (int *)malloc(sizeof(int) * (num_of_real_quotes + 1));
-	if (!real_quotes)
-		exit(1);
 	i = 0;
-	num_of_real_quotes = 0;
 	while ((*position_double_quotes)[i] != -1)
 	{
 		j = 0;
@@ -71,12 +61,26 @@ void	remove_fake_double_quotes(int **position_double_quotes, int	*fake_double_qu
 		}
 		if ((*position_double_quotes)[i] != fake_double_quotes[j])
 		{
-			real_quotes[num_of_real_quotes] = (*position_double_quotes)[i];
-			num_of_real_quotes++;
+			(*real_quotes)[(*num_of_real_quotes)] = (*position_double_quotes)[i];
+			(*num_of_real_quotes)++;
 		}
 		i++;
 	}
-	real_quotes[num_of_real_quotes] = -1;
+	(*real_quotes)[(*num_of_real_quotes)] = -1;
+}
+
+void	remove_fake_double_quotes(int **position_double_quotes, int	*fake_double_quotes)
+{
+	// int	i;
+	// int	j;
+	int	num_of_real_quotes;
+	int	*real_quotes;
+
+	num_of_real_quotes = get_number_of_real_double_quotes(position_double_quotes, fake_double_quotes);
+	real_quotes = (int *)malloc(sizeof(int) * (num_of_real_quotes + 1));
+	if (!real_quotes)
+		exit(1);
+	remove_fake_double_quotes_p2(position_double_quotes, fake_double_quotes, &num_of_real_quotes, &real_quotes);
 	free((*position_double_quotes));
 	(*position_double_quotes) = real_quotes;
 }
@@ -144,8 +148,7 @@ void	find_fake_quotes(t_list_of_quotes **list_of_quotes, char **str, int	**fake_
 			if ((*list_of_quotes)->double_quotes[i] == -1)
 				break ;
 		}
-		j++;
-		j++;
+		j = j + 2;
 	}
 	(*fake_double_quotes)[index_fake_double_quotes] = -1;
 }
@@ -177,14 +180,60 @@ void	chekc_quotes_and_remove_fake_quotes(t_list_of_quotes **list_of_quotes, char
 	while ((*list_of_quotes)->double_quotes[i] != -1)
 	{
 			if ((*list_of_quotes)->double_quotes[i + 1] == -1)
-			{
 				relocate_quotes(list_of_quotes, str, &fake_double_quotes);
-				continue ;
-			}
-			i++;
-			i++;
+			else
+				i = i + 2;
 	}
 	free(fake_double_quotes);
+}
+
+// count how many " and ' there are
+void	count_and_locate_quotes_init(int *num_single_quotes, int *num_double_quotes, char *str)
+{
+	int i;
+
+	i = 0;
+	(*num_single_quotes) = 0;
+	while (str[i] != '\0')
+	{
+		if (str[i] == '\'')
+			(*num_single_quotes)++;
+		i++;
+	}
+	i = 0;
+	(*num_double_quotes) = 0;
+	while (str[i] != '\0')
+	{
+		if (str[i] == '\"')
+			(*num_double_quotes)++;
+		i++;
+	}
+}
+
+// put the index location in each list of quotes
+void	set_index_of_list_of_quotes(t_list_of_quotes **list_of_quotes, char *str)
+{
+	int i;
+	int num_single_quotes;
+	int num_double_quotes;
+	
+	i = 0;
+	num_double_quotes = 0;
+	num_single_quotes = 0;
+	while (str[i] != '\0')
+	{
+		if (str[i] == '\'')
+		{
+			(*list_of_quotes)->single_quotes[num_single_quotes] = i;
+			num_single_quotes++;
+		}
+		if (str[i] == '\"')
+		{
+			(*list_of_quotes)->double_quotes[num_double_quotes] = i;
+			num_double_quotes++;
+		}
+		i++;
+	}
 }
 
 /*
@@ -197,26 +246,8 @@ t_list_of_quotes *count_and_locate_quotes(char *str)
 	t_list_of_quotes *list_of_quotes;
 	int num_single_quotes;
 	int num_double_quotes;
-	int i;
-	
-	// count how many " and ' there are
-	i = 0;
-	num_single_quotes = 0;
-	while (str[i] != '\0')
-	{
-		if (str[i] == '\'')
-			num_single_quotes++;
-		i++;
-	}
-	i = 0;
-	num_double_quotes = 0;
-	while (str[i] != '\0')
-	{
-		if (str[i] == '\"')
-			num_double_quotes++;
-		i++;
-	}
 
+	count_and_locate_quotes_init(&num_single_quotes, &num_double_quotes, str);
 	// Todo: make this a separate funciton
 	// malloc the list of position of both type of quotes
 	list_of_quotes = malloc(sizeof(t_list_of_quotes));
@@ -226,26 +257,7 @@ t_list_of_quotes *count_and_locate_quotes(char *str)
 	list_of_quotes->single_quotes = (int *)malloc(sizeof(int) * (num_single_quotes + 1));
 	if (!list_of_quotes->double_quotes || !list_of_quotes->single_quotes)
 		exit (-1);
-	
-	// put the index location in each list of quotes
-	i = 0;
-	num_double_quotes = 0;
-	num_single_quotes = 0;
-	while (str[i] != '\0')
-	{
-		if (str[i] == '\'')
-		{
-			list_of_quotes->single_quotes[num_single_quotes] = i;
-			num_single_quotes++;
-		}
-		if (str[i] == '\"')
-		{
-			list_of_quotes->double_quotes[num_double_quotes] = i;
-			num_double_quotes++;
-		}
-		i++;
-	}
-
+	set_index_of_list_of_quotes(&list_of_quotes, str);
 	list_of_quotes->single_quotes[num_single_quotes] = -1;
 	list_of_quotes->double_quotes[num_double_quotes] = -1;
 	return (list_of_quotes);
@@ -547,18 +559,7 @@ t_post_quotes	**make_post_quotes_content(char *str, t_list_of_quotes *list_of_qu
 		index_current_char = return_index_until_new(list_of_quotes, index_current_char, NULL, NULL);
 		content_i++;
 	}
-	// content_i++;
 	content[content_i] = NULL;
-
-
-	// int i;
-	// i = 0;
-	// while (content[i]!= NULL)
-	// {
-	// 	printf("content %d, is (%s), %d is quotes, %d have to expand\n", i, content[i]->content, content[i]->is_quotes, content[i]->have_to_expand);
-	// 	i++;
-	// }
-	
 	return (content);
 }
 
@@ -580,25 +581,20 @@ void	check_quotes(char **str_og, t_post_quotes ***content)
 	str = (*str_og);
 
 	list_of_quotes = count_and_locate_quotes(str);
-	
 	if (list_of_quotes->single_quotes[0] == -1 && list_of_quotes->double_quotes[0] == -1)
 	{
 		add_history(str);
 		str = handle_expand_doll((*str_og));
-		free(list_of_quotes->double_quotes);
-		free(list_of_quotes->single_quotes);
-		free(list_of_quotes);
 		free((*str_og));
 		(*str_og) = str;
-		return ;
 	}
 	else
 	{
 		chekc_quotes_and_remove_fake_quotes(&list_of_quotes, &str);
+		(*str_og) = str;
+		add_history(str);
+		(*content) = make_post_quotes_content(str, list_of_quotes);
 	}
-	(*str_og) = str;
-	add_history(str);
-	(*content) = make_post_quotes_content(str, list_of_quotes);
 	free(list_of_quotes->double_quotes);
 	free(list_of_quotes->single_quotes);
 	free(list_of_quotes);
@@ -628,6 +624,27 @@ char	*handle_expand_doll(char *str)
 	free(doll_pos);
 	// puts(final_str);
 	return (final_str);
+}
+
+void	ft_strjoin_double_str_copy_to(char **spit_text, char **str)
+{
+	int i;
+	int j;
+	int	size_str;
+
+	i = 0;
+	size_str = 0;
+	while (spit_text[i] != NULL)
+	{
+		j = 0;
+		while (spit_text[i][j] != '\0')
+		{
+			(*str)[size_str] = spit_text[i][j];
+			size_str++;
+			j++;
+		}
+		i++;
+	}
 }
 
 char	*ft_strjoin_double_str(char **spit_text)

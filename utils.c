@@ -15,6 +15,12 @@
 int ft_char_find(char *str, const char *list_of_char);
 bool	ft_isspace(unsigned char c);
 
+int	ft_strtok_line_help(char **str_reminder, int *index_unter_delim, int *curser)
+{
+	(*index_unter_delim) = ft_strlen(&(*str_reminder)[(*curser)]);
+	return (1);
+}
+
 char	*ft_strtok(char *str, const char *delim)
 {
 	int			i;
@@ -32,18 +38,13 @@ char	*ft_strtok(char *str, const char *delim)
 		return (NULL);
 	index_unter_delim = ft_char_find(&str_reminder[curser], delim);
 	if (index_unter_delim == -1)
-	{
-		if (str_reminder[curser] == '\0')
+		if (str_reminder[curser] == '\0' 
+			&& ft_strtok_line_help(&str_reminder, &index_unter_delim, &curser) == 1)
 			return (NULL);
-		index_unter_delim = ft_strlen(&str_reminder[curser]);
-	}
 	return_char = malloc(sizeof(char) * (index_unter_delim + 1));
-	i = 0;
-	while (i < index_unter_delim)
-	{
+	i = -1;
+	while (++i < index_unter_delim)
 		return_char[i] = str_reminder[curser + i];
-		i++;
-	}
 	curser = curser + 1;
 	return_char[i] = '\0';
 	return (return_char);
@@ -183,6 +184,26 @@ char	*ft_strjoin_with_frees(char *s1, char *s2)
 	s2 = NULL;
 	return (ptr);
 }
+
+bool find_doll_question(char *str)
+{
+	int i;
+
+	i = 0;
+	while (str[i] != '\0')
+	{
+		if (str[i] == '$')
+		{
+			if (str[i + 1] == '\0')
+				return (false);
+			if (str[i + 1] == '!')
+				return (true);	
+		}
+		i++;
+	}
+	return (false);
+}
+
 /*
 	take STR_OG (usually the arg), and check if there is $?.
 	If it doesn't, it just return STR_OG. 
@@ -197,10 +218,9 @@ char *replace_doll_question_to_number_with_free(char *str_og, int number_replace
 
 	if (str_og == NULL)
 		return NULL;
-	i = 0;
+	i = -1;
 	location_of_doll = -1;
-	while (str_og[i] != '\0')
-	{
+	while (str_og[++i] != '\0')
 		if (str_og[i] == '$')
 		{
 			if (str_og[i + 1] == '\0')
@@ -209,15 +229,14 @@ char *replace_doll_question_to_number_with_free(char *str_og, int number_replace
 				if (ft_isspace(str_og[i + 2]) || str_og[i + 2] == '\0')
 					location_of_doll = i;
 		}
-		i++;
-	}
 	if (location_of_doll == -1)
 		return (str_og);
 	str_return = ft_strjoin_with_frees(str_dup_until_index(str_og, location_of_doll), ft_strjoin_with_frees(ft_itoa(number_replace), ft_strdup(&str_og[location_of_doll + 2])));
 	if (!str_return)
 		exit(1);
-	free(str_og);
-	return (str_return);
+	if (find_doll_question(str_return))
+		str_return = replace_doll_question_to_number_with_free(str_return, number_replace);
+	return (free(str_og), str_return);
 }
 
 int return_biggest_int(int a, int b)
@@ -360,13 +379,10 @@ char **get_export_var(char *arg_of_export)
 	export_content = malloc(sizeof(char *) * ((get_num_export_con(arg_of_export) * 2) + 3));
 	work_split = get_word_one_by_one(arg_of_export);
 	while (work_split[i_work_split] != NULL)
-	{
 		i_work_split++;
-	}
 	i_work_split = 0;
 	while (work_split[i_work_split] != NULL)
 	{
-		// puts(work_split[i_work_split]);
 		export_content[i_export_content] = ft_strdup_until_equal(work_split[i_work_split]);
 		i_export_content++;
 		if (ft_strlen(export_content[i_export_content - 1]) == ft_strlen(work_split[i_work_split]))
@@ -377,10 +393,8 @@ char **get_export_var(char *arg_of_export)
 		free(work_split[i_work_split]);
 		i_work_split++;
 	}
-	// puts("test finito");
-	free(work_split);
 	export_content[i_export_content] = NULL;
-	return (export_content);
+	return (free(work_split), export_content);
 }
 
 void export_content_freeur(char ***export_content)
@@ -551,11 +565,9 @@ bool	check_export_for_quotes(t_post_quotes	***content, t_lexer ***lexer)
 		}
 		else
 		{
-			// puts("do no quotes");
 			if (is_all_space((*content)[i]->content) == false)
 			{
 				temp_var_from_no_quotes = get_export_var((*content)[i]->content);
-				// printf("content[i] = %s\n", (*content)[i]->content);
 				if (check_if_array_str_is_empty(temp_var_from_no_quotes) == true)
 				{
 					// puts("ALL EMPTY NONE QUOTES");
@@ -565,13 +577,15 @@ bool	check_export_for_quotes(t_post_quotes	***content, t_lexer ***lexer)
 				}
 				j = 0;
 				if (i_export_content % 2 == 1 && (*content)[i]->content[0] == '=')
+				{
+					free(temp_var_from_no_quotes[j]);
 					j++;
+				}
 				if (i_export_content % 2 == 1 && (*content)[i]->content[0] != '=')
 				{
 					export_content[i_export_content] = ft_strdup("");
 					i_export_content++;
 				}
-				// printf("j == %i\n", j);
 				while (temp_var_from_no_quotes[j] != NULL)
 				{
 
