@@ -42,7 +42,6 @@ int executer(t_lexer **lexer, t_pipedata *data)
 	}
 	else if (ft_memcmp(lexer[(*data).lex_count]->cmd, "exit", 4) == 0)
 	{
-			printf("exit\n");
 		if (lexer[(*data).lex_count]->args != NULL)
 		{
 			ft_putstr_fd("minishell: exit: ", STDERR_FILENO);
