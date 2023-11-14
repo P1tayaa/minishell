@@ -68,8 +68,9 @@ void	slash_catch(int sig)
 {
 	if (sig == SIGQUIT && the_signal_flag == 0)
 	{
-		write(STDERR_FILENO, "\b\b  ", 4);
-		// readline("minishell_OS_1.0$ 😀 ");
+		// write(STDERR_FILENO, "\b\b  ", 4);
+		write(STDERR_FILENO, "\033[2D\033[K", 8);
+		rl_redisplay();
 	}
 }
 

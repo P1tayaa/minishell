@@ -235,9 +235,8 @@ char	*read_user_input(bool quotes_test)
 	while (1)
 	{
 		// the_signal_flag = 0;
-		rl_replace_line("", 0);
+		// rl_replace_line("", 0);
 		str = readline("minishell_OS_1.0$ ");
-		printf("signal = %i\n", the_signal_flag);
 		// if (the_signal_flag)
 		// {
 		// 	the_signal_flag = 0;
@@ -245,7 +244,11 @@ char	*read_user_input(bool quotes_test)
 		// 	continue ;
 		// }
 		if (str == NULL)
-			return (NULL);
+		{
+			printf("\n");
+			break ;
+
+		}
 		if (!quotes_test && str && *str)
 			add_history(str);
 		break ;
