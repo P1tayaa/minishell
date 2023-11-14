@@ -311,25 +311,32 @@ int	manage_reads_writes(t_pipedata *data, t_lexer **lexer)
 	return (i);
 }
 
-	// if WIFSIGNALED(status)
-	// 	status = WTERMSIG(status);
-	// if WIFSTOPPED(status)
-	// 	status = WSTOPSIG(status);
-
 int	parent_management(t_pipedata *data, t_lexer **lexer, int pid)
 {
 	int	status;
 
 	status = 0;
-	if (are_there_more_cmds(lexer, (*data).lex_count) == 0 && lexer[(*data).lex_count]->tokenid[0] == '<' && lexer[(*data).lex_count]->tokenid[0] == '>')
+	if (are_there_more_cmds(lexer, (*data).lex_count) == 0 &&
+		lexer[(*data).lex_count]->tokenid[0] == '<' && lexer[(*data).lex_count]->tokenid[0] == '>')
 		close((*data).fd[0]);
 	else
 		(*data).input_fd = (*data).fd[0];
-	close((*data).fd[1]); // Close writing end as we are reading from the pipe
+	close((*data).fd[1]);
 	waitpid(pid, &status, 0);
 	if WIFEXITED(status)
 		status = WEXITSTATUS(status);
 	return (status);
+}
+
+void	initialize_builtins(const char **builtins)
+{
+	builtins[0] = "pwd";
+	builtins[1] = "echo";
+	builtins[2] = "exit";
+	builtins[3] = "clear";
+	builtins[4] = "cd";
+	builtins[5] = "env";
+	builtins[6] = NULL;
 }
 
 int	is_built_in(t_lexer **lexer, int lex_count)
@@ -337,18 +344,10 @@ int	is_built_in(t_lexer **lexer, int lex_count)
 	int			i;
 	int			cmd_len;
 	int			builtin_len;
-	const char* builtins[] = {
-        "pwd",
-        "echo",
-        "exit",
-		"clear",
-		"cd",
-		"env",
-		"^D",
-        NULL
-    };
+	const char	*builtins[7];
 
 	i = 0;
+	initialize_builtins(builtins);
 	while (builtins[i])
 	{
 		cmd_len = ft_strlen(lexer[lex_count]->cmd);
@@ -365,6 +364,31 @@ int	is_built_in(t_lexer **lexer, int lex_count)
 	return (0);
 }
 
+int	collapse_lexer(t_lexer **lexer)
+{
+	int	collapse;
+	int	len_collapse;
+	int	len_next;
+
+	collapse = 0;
+	while (lexer[collapse] != NULL)
+	{
+		if (lexer[collapse + 1] != NULL)
+		{
+			len_collapse = ft_strlen(lexer[collapse]->cmd);
+			len_next = ft_strlen(lexer[collapse + 1]->cmd);
+			if ((len_collapse < len_next && ft_memcmp(lexer[collapse]->cmd, lexer[collapse + 1]->cmd, len_collapse) == 0) ||
+				(len_collapse >= len_next && ft_memcmp(lexer[collapse]->cmd, lexer[collapse + 1]->cmd, len_next) == 0))
+				collapse++;
+			else
+				break;
+		}
+		else
+			break;
+	}
+	return (collapse);
+}
+
 int	are_all_commands_thesame(t_lexer **lexer)
 {
 	int	collapse;
@@ -376,38 +400,7 @@ int	are_all_commands_thesame(t_lexer **lexer)
 		i++;
 	if (i < 10)
 		return (0);
-	printf("i = %i\n", i);
-	while (lexer[collapse] != NULL)
-	{
-		printf("collapse = %i\n", collapse);
-		if (lexer[collapse + 1] != NULL)
-		{
-			puts("2");
-			if (ft_strlen(lexer[collapse]->cmd) < ft_strlen(lexer[collapse + 1]->cmd))
-			{
-				if (ft_memcmp(lexer[collapse]->cmd, lexer[collapse + 1]->cmd, ft_strlen(lexer[collapse]->cmd)) == 0)
-					collapse++;
-				else if (collapse != 0)
-					break ;
-			}
-			if (ft_strlen(lexer[collapse]->cmd) >= ft_strlen(lexer[collapse + 1]->cmd))
-			{
-				if (ft_memcmp(lexer[collapse]->cmd, lexer[collapse + 1]->cmd, ft_strlen(lexer[collapse + 1]->cmd)) == 0)
-					collapse++;
-				else if (collapse != 0)
-					break ;
-			}
-			else
-			{
-				printf("should break");
-				break ;
-			}
-			
-		}
-		else
-			break ;
-	}
-	printf("collapse = %i\ni = %i\n", collapse, i);
+	collapse = collapse_lexer(lexer);
 	if (collapse != i + 1)
 		return (1);
 	else
@@ -566,11 +559,9 @@ bool	pipe_export(t_lexer ***lexer)
 	initialize_pipedata(&data);
 	while ((*lexer)[count] != NULL)
 		count++;
-	printf("count = %i\n", count);
 	if (((*lexer))[1] != NULL && ((*lexer))[0]->args != NULL)
 	{
-		puts("check 1");
-		printf("Can't pipe export when setting value\n");
+		write(2, "Can't pipe export when setting value\n", 37);
 		lexer_free(((*lexer)));
 		return (true);
 	}
@@ -578,7 +569,6 @@ bool	pipe_export(t_lexer ***lexer)
 	{
 		if (((*lexer))[1] == NULL)
 		{
-			puts("check 2");
 			ascii_sort(*(get_env)());
 			lexer_free(((*lexer)));
 			return (true);
@@ -599,7 +589,6 @@ bool	pipe_export(t_lexer ***lexer)
 					args[i] = NULL;
 				}
 				i = 0;
-				puts("args done");
 				pipe(data.fd);
 				pid = fork();
 				if (pid == 0)
@@ -610,7 +599,6 @@ bool	pipe_export(t_lexer ***lexer)
 						close(data.fd[1]);
 						close(data.fd[0]);
 						ascii_sort(*(get_env()));
-						write(2, "ascii done\n", 11);
 						exit(EXIT_SUCCESS);
 					}
 					if ((*lexer)[data.lex_count]->tokenid[0] == '>')
@@ -627,24 +615,18 @@ bool	pipe_export(t_lexer ***lexer)
 					}
 					else if (data.lex_count < count - 1 && data.lex_count != 0)
 					{
-						puts("executing middle cmds");
-						printf("i = %i\n", i);
 						cmd_path = get_cmd_path((*lexer)[data.lex_count]->cmd, &data);
-						printf("cmd_path = %s\n", cmd_path);
 						dup2(data.input_fd, STDIN_FILENO);
 						dup2(data.fd[1], STDOUT_FILENO);
 						close(data.input_fd);
 						close(data.fd[0]);
 						close(data.fd[1]);
 						execve(cmd_path, args, (*(data).environ));
-						write(2, "executed second\n", 17);
 						exit(EXIT_SUCCESS);
 					}
 					else if ((data.lex_count == count - 1) && (*lexer)[data.lex_count]->tokenid[0] != '>')
 					{
-						puts("in last lexer");
 						cmd_path = get_cmd_path((*lexer)[data.lex_count]->cmd, &data);
-						printf("cmd_path = %s\n", cmd_path);
 						dup2(data.input_fd, STDIN_FILENO);
 						close(data.input_fd);
 						close(data.fd[0]);
@@ -657,10 +639,7 @@ bool	pipe_export(t_lexer ***lexer)
 					if (are_there_more_cmds((*lexer), data.lex_count) == 0 && (*lexer)[data.lex_count + 1] == NULL)
 						close(data.fd[0]);
 					else
-					{
 						data.input_fd = data.fd[0];
-						printf("input_fd = %i\n", data.input_fd);
-					}
 					close(data.fd[1]);
 					waitpid(pid, &status, 0);
 					if WIFEXITED(status)

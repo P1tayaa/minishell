@@ -30,15 +30,6 @@ when terminal window is started and empty, D will exit terminal application.
 ctrl d can also be used to logout somehow just keep that in mind.
 */
 
-// void	signal_catcher(int sig)
-// {
-// 	if (sig == SIGINT)
-// 	{
-// 		the_signal_flag = 1;
-// 		// return ;
-// 	}
-// }
-
 void	signal_catcher(int sig)
 {
 	if (sig == SIGINT && the_signal_flag == 0)
@@ -73,17 +64,6 @@ void	slash_catch(int sig)
 		rl_redisplay();
 	}
 }
-
-// void	manage_signals(void)
-// {
-// 	struct sigaction	sa;
-	
-// 	sa.sa_handler = signal_catcher;
-// 	sa.sa_flags = SA_RESTART ; // or SA_RESTART to have interrupted reads restart
-// 	sigemptyset(&sa.sa_mask);
-// 	sigaction(SIGINT, &sa, NULL);
-// }
-
 
 void	manage_signals(void)
 {

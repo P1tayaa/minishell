@@ -247,7 +247,6 @@ char	*read_user_input(bool quotes_test)
 		{
 			printf("\n");
 			break ;
-
 		}
 		if (!quotes_test && str && *str)
 			add_history(str);
