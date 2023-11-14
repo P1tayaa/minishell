@@ -577,6 +577,7 @@ void	check_quotes(char **str_og, t_post_quotes ***content)
 {
 	t_list_of_quotes *list_of_quotes;
 	char *str;
+	
 	str = (*str_og);
 
 	list_of_quotes = count_and_locate_quotes(str);

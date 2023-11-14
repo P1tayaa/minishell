@@ -33,6 +33,8 @@ int executer(t_lexer **lexer, t_pipedata *data)
 
 	// i = 0;
 	return_val = 0;
+	if (lexer[(*data).lex_count]->cmd == NULL)
+		return(0);
 	if (ft_memcmp(lexer[(*data).lex_count]->cmd, "clear", 5) == 0)
 	{
     	write(1, "\033[H\033[2J", 7);
@@ -53,8 +55,10 @@ int executer(t_lexer **lexer, t_pipedata *data)
 	}
 	else if (ft_memcmp(lexer[(*data).lex_count]->cmd, "pwd", 3) == 0)
 	{
-		getcwd(str2, 4096);
-		printf("%s\n", str2);
+		if (getcwd(str2, 4096) == NULL)
+			write(2, "invalid directory\n", 18);
+		else
+			printf("%s\n", str2);
 	}
 	else if (ft_memcmp(lexer[(*data).lex_count]->cmd, "echo", 4) == 0)
 	{
