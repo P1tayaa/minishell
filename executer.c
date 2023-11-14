@@ -55,8 +55,10 @@ int executer(t_lexer **lexer, t_pipedata *data)
 	}
 	else if (ft_memcmp(lexer[(*data).lex_count]->cmd, "pwd", 3) == 0)
 	{
-		getcwd(str2, 4096);
-		printf("%s\n", str2);
+		if (getcwd(str2, 4096) == NULL)
+			write(2, "invalid directory\n", 18);
+		else
+			printf("%s\n", str2);
 	}
 	else if (ft_memcmp(lexer[(*data).lex_count]->cmd, "echo", 4) == 0)
 	{
