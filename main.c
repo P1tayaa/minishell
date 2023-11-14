@@ -173,6 +173,8 @@ int    main(void)
 		// 	free(str);
 		// 	continue ;
 		// }
+		if (str == NULL)
+			break ;
 		if (quotes_test)
 			check_quotes(&str, &content);
 		// if (!quotes_test)

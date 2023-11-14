@@ -188,8 +188,7 @@ int	manage_reads_writes(t_pipedata *data, t_lexer **lexer)
 	{
 		if (lexer[(*data).lex_count]->tokenid[1] == '<')
 		{
-			// write(redirection_handler(*lexer), str, ft_strlen(str));
-			str = here_doc_starter(lexer[(*data).lex_count]->args);						// eeeeeh it couldn't be that easy
+			str = here_doc_starter(lexer[(*data).lex_count]->args);
 			if (!str)
 				return (-1);
 			lexer[(*data).lex_count]->file = ft_strjoin_with_frees(lexer[(*data).lex_count]->file, ft_strdup("heredoc"));
