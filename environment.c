@@ -14,10 +14,11 @@
 
 char	*ft_strjoin_with_frees(char *s1, char *s2);
 void	free_double_array(char **list_of_tokenid);
+int 	ft_char_find(char *str, const char *list_of_char);
 
 char	*malloc_and_write_line(char *copy, char *og)
 {
-	int		i;
+	int	i;
 
 	i = 0;
 	while (og[i])
@@ -46,11 +47,11 @@ int	custom_strcmp(const char *str1, const char *str2)
 
 void	swap(char **str1, char **str2)
 {
-    char *temp;
+	char *temp;
 
 	temp = *str1;
-    *str1 = *str2;
-    *str2 = temp;
+	*str1 = *str2;
+	*str2 = temp;
 }
 
 
@@ -100,6 +101,33 @@ void	ascii_sort(char **environment)
 	free_double_array(sorted_environment);
 }
 
+// char	*check_exisisting_env(char ***environment, char *name, char *value, int *i)
+// {
+// 	int		value_len;
+// 	char	*to_set;
+
+// 	value_len = ft_strlen(value);
+// 	to_set = NULL;
+// 	while ((*environment)[(*i)])
+// 	{
+// 		if (ft_memcmp((*environment)[(*i)], name, ft_strlen(name)) == 0)
+// 		{
+// 			if (value_len == 0)
+// 			{
+// 				free(name);
+// 				free(value);
+// 				break ;
+// 			}
+// 			free((*environment)[(*i)]);
+// 			to_set = ft_strjoin_with_frees(ft_strjoin_with_frees(name, ft_strdup("=")), value);
+// 			(*environment)[(*i)] = to_set;
+// 			return (to_set);
+// 		}
+// 		i++;
+// 	}
+// 	return (to_set);
+// }
+
 // frees name and value
 void	set_env(char *name, char *value, char ***environment)
 {
@@ -110,13 +138,13 @@ void	set_env(char *name, char *value, char ***environment)
 
 	i = 0;
     value_len = ft_strlen(value);
+	// to_set = check_exisisting_env(environment, name, value, &i);
 	while ((*environment)[i])
 	{
 		if (ft_memcmp((*environment)[i], name, ft_strlen(name)) == 0)
 		{
 			if (value_len == 0)
 			{
-				puts("should break");
 				free(name);
 				free(value);
 				break ;
@@ -128,13 +156,11 @@ void	set_env(char *name, char *value, char ***environment)
 		}
 		i++;
 	}
-	printf("i = %i\n", i);
 	if ((*environment)[i] == NULL)
 	{
 		new_environment = (char **) ft_realloc((*environment), (i + 2) * sizeof(char *));
 		if (value_len == 0)
 		{
-			puts("should see me");
 			to_set = ft_strdup(name);
 			free(value);
 			free(name);
@@ -154,7 +180,6 @@ int	unset_env(char *name, char ***environment)
 	int	j;
 
 	i = 0;
-	puts("unsetting");
 	while ((*environment)[i])
 	{
 		if (strncmp((*environment)[i], name, strlen(name)) == 0)
@@ -172,18 +197,6 @@ int	unset_env(char *name, char ***environment)
 		i++;
 	}
 	return (-1);
-}
-
-void	print_export(char ***environment)
-{
-	int	i;
-
-	i = 0;
-	while ((*environment)[i] != NULL)
-	{
-		printf("declare -x %s\n", (*environment)[i]);
-		i++;
-	}
 }
 
 void	print_env(char ***environment)
@@ -205,7 +218,7 @@ char	***get_env(void)
 	int			i;
 	int			count;
 	extern char **environ;
-	static char	**environment = NULL;
+	static char	**environment;
 	char 		***copy;
 
 	count = 0;
@@ -227,8 +240,6 @@ char	***get_env(void)
 	copy = &environment;
 	return (copy);
 }
-
-int ft_char_find(char *str, const char *list_of_char);
 
 char *get_env_of_valus_str(char *str)
 {

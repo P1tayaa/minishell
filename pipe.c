@@ -12,11 +12,11 @@
 
 #include "minishell.h"
 
-int	are_there_more_cmds(t_lexer **lexer, int current);
+int		are_there_more_cmds(t_lexer **lexer, int current);
 char	*ft_strjoin_with_frees(char *s1, char *s2);
 char	***get_env(void);
 void	ascii_sort(char **environment);
-bool is_str_export(char *str);
+bool	is_str_export(char *str);
 void	lexer_free(t_lexer **lexer);
 
 int	open_file(char *filename, int mode)
@@ -37,22 +37,19 @@ int	open_file(char *filename, int mode)
 	}
 }
 
-char	*get_cmd_path(const char *cmd, t_pipedata *data)
+char	*check_path(t_pipedata *data)
 {
-	char	*path;
-	char	*tmp_path;
-	char	*token;
-	char	full_path[1024];
-	int		i;
+	char *path;
+	int i;
 
 	path = NULL;
 	i = 0;
-	while ((*(*data).environ)[i] != NULL)
+	while ((*data->environ)[i] != NULL)
 	{
-		if (strncmp((*(*data).environ)[i], "PATH=", 5) == 0)
+		if (ft_memcmp((*data->environ)[i], "PATH=", 5) == 0)
 		{
-			path = (*(*data).environ)[i] + 5;
-			break ;
+			path = (*data->environ)[i] + 5;
+			break;
 		}
 		i++;
 	}
@@ -61,10 +58,23 @@ char	*get_cmd_path(const char *cmd, t_pipedata *data)
 		write(2, "PATH not found in environment\n", 30);
 		return (NULL);
 	}
+	return (ft_strdup(path));
+}
+
+char	*get_cmd_path(const char *cmd, t_pipedata *data)
+{
+	char	*path;
+	char	*tmp_path;
+	char	*token;
+	char	full_path[1024];
+	// int		i;
+
+	path = check_path(data);
 	tmp_path = strdup(path);
 	token = ft_strtok(tmp_path, ":");
 	while (token)
 	{
+		// build_path(full_path, token, cmd, tmp)
 		concat_path(full_path, token, cmd);
 		if (access(full_path, X_OK) == 0)
 		{
@@ -76,6 +86,7 @@ char	*get_cmd_path(const char *cmd, t_pipedata *data)
 	}
 	free(token);
 	free(tmp_path);
+	free(path);
 	return (NULL);
 }
 
@@ -87,7 +98,7 @@ int redirection_handler(t_lexer *lexer)
 	fd = -1;
 	if (ft_memcmp(lexer->tokenid, "<", 1) == 0 && ft_memcmp(lexer->tokenid, "<<", 2) != 0)
 		fd = open(lexer->file, O_RDONLY);
-	else if (ft_memcmp(lexer->tokenid, ">", 1) == 0 && ft_memcmp(lexer->tokenid, ">>", 2) != 0)				// could it be that this also takes >> checks since it does in fact return 0?
+	else if (ft_memcmp(lexer->tokenid, ">", 1) == 0 && ft_memcmp(lexer->tokenid, ">>", 2) != 0)
 	{
 		puts("single > redirect");
 		fd = open(lexer->file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
@@ -100,7 +111,7 @@ int redirection_handler(t_lexer *lexer)
 			fd = open(lexer->file, O_WRONLY | O_CREAT | O_APPEND, 0644);
 	}
 	else if (ft_memcmp(lexer->tokenid, "<<", 2) == 0)
-		fd = open(lexer->args, O_WRONLY | O_CREAT | O_TRUNC, 0644);			// O_EXCL   nstead, if filename already exists,
+		fd = open(lexer->args, O_WRONLY | O_CREAT | O_TRUNC, 0644);
 	if (fd == -1)
 	{
 		perror("minishell: ");
