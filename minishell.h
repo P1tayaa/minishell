@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
+/*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:30:26 by omathot           #+#    #+#             */
-/*   Updated: 2023/10/18 21:46:34 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/11/17 12:04:34 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,10 @@
 # include <fcntl.h>
 #include <sys/wait.h>
 
-volatile sig_atomic_t the_signal_flag;
+
+extern volatile sig_atomic_t the_signal_flag;
+
+// volatile sig_atomic_t the_signal_flag;
 
 typedef struct s_post_quotes
 {
