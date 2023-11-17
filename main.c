@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
+/*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:29:45 by omathot           #+#    #+#             */
-/*   Updated: 2023/10/31 22:19:42 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/11/17 15:25:50 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -166,62 +166,46 @@ int    main(void)
 	while (1)
 	{
 		content = NULL;
-		str = ft_strdup(read_user_input(quotes_test));
-		// if (the_signal_flag == 1 && str == NULL)
-		// {
-		// 	write(0, "\n😎 minishell_OS_1.0$", 22);
-		// 	free(str);
-		// 	continue ;
-		// }
+		str = read_user_input(quotes_test);
 		if (str == NULL)
 			break ;
 		if (quotes_test)
 			check_quotes(&str, &content);
-		// if (!quotes_test)
-		// {
-			if (content == NULL)
-				lexer = main_parser(str);
-			else
-			{
-				lexer = parser_with_quotes(content);
-				the_signal_flag = 1;
-				if (check_export_for_quotes(&content, &lexer) || check_unset_for_quotes(&content, &lexer))
-				{
-					the_signal_flag = 0;
-					if (str)
-					{
-						free(str);
-						str = NULL;
-					}
-					continue ;
-				}
-				the_signal_flag = 0;
-				free_content(content);
-			}
-			free(str);
-			int i;
-			i = 0;
-			while (lexer[i] != NULL)
-			{
-				// printf("arg was before: %s\n", lexer[i]->args);
-				// lexer[i]->args = replace_doll_question_to_number_with_free(lexer[i]->args, 69);
-				printf("\nlexer[%d]\n cmd: (%s)\n", i, lexer[i]->cmd);
-				printf("args: (%s)\n", lexer[i]->args);
-				printf("tokenid: (%s)\n", lexer[i]->tokenid);
-				printf("file: (%s)\n", lexer[i]->file);
-				printf("flags: (%s)\n", lexer[i]->flags);
-				i++;
-			}
+		if (content == NULL)
+			lexer = main_parser(str);
+		else
+		{
+			lexer = parser_with_quotes(content);
 			the_signal_flag = 1;
-			// restore_default_sigint_handling();
-			if (export_andle_no_quotes(&lexer))
+			if (check_export_for_quotes(&content, &lexer) || check_unset_for_quotes(&content, &lexer))
+			{
+				the_signal_flag = 0;
+				if (str)
+					free(str);
 				continue ;
-			if (check_unset_noquotes(&lexer))
-				continue ;
-			else
-				piping(lexer);
-			// optiona: wait for return value.
-		// }
+			}
+			the_signal_flag = 0;
+			free_content(content);
+		}
+		free(str);
+		int i;
+		i = 0;
+		while (lexer[i] != NULL)
+		{
+			printf("\nlexer[%d]\n cmd: (%s)\n", i, lexer[i]->cmd);
+			printf("args: (%s)\n", lexer[i]->args);
+			printf("tokenid: (%s)\n", lexer[i]->tokenid);
+			printf("file: (%s)\n", lexer[i]->file);
+			printf("flags: (%s)\n", lexer[i]->flags);
+			i++;
+		}
+		the_signal_flag = 1;
+		if (export_andle_no_quotes(&lexer))
+			continue ;
+		if (check_unset_noquotes(&lexer))
+			continue ;
+		else
+			piping(lexer);
 		lexer_free(lexer);
 		the_signal_flag = 0;
 	}
@@ -231,7 +215,8 @@ int    main(void)
 char	*read_user_input(bool quotes_test)
 {
 	char	*str;
-	// rl_catch_signals = 0;
+	char	*str_return;
+	rl_catch_signals = 0;
 
 	puts("hey");
 	while (1)
@@ -254,7 +239,10 @@ char	*read_user_input(bool quotes_test)
 			add_history(str);
 		break ;
 	}
-	return (str);
+	str_return = ft_strdup(str);
+	if (str)
+		free(str);
+	return (str_return);
 }
 
 
