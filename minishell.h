@@ -26,7 +26,7 @@
 # include <fcntl.h>
 #include <sys/wait.h>
 
-volatile sig_atomic_t the_signal_flag;
+extern volatile sig_atomic_t g_exit_status;
 
 typedef struct s_post_quotes
 {

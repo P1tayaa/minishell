@@ -195,6 +195,9 @@ char *replace_doll_question_to_number_with_free(char *str_og, int number_replace
 	int	location_of_doll;
 	char *str_return;
 
+	if (g_exit_status != 0)
+		number_replace = g_exit_status;
+	g_exit_status = 0;
 	if (str_og == NULL)
 		return NULL;
 	i = 0;
@@ -235,18 +238,11 @@ char *here_doc_starter(char *wordlocking_for)
     
     str_return = NULL;
     read_line_str = readline(" > ");
-    while (ft_strncmp(wordlocking_for, read_line_str, return_biggest_int(ft_strlen(wordlocking_for), ft_strlen(read_line_str)))!= 0 && the_signal_flag != 3)
+    while (ft_strncmp(wordlocking_for, read_line_str, return_biggest_int(ft_strlen(wordlocking_for), ft_strlen(read_line_str)))!= 0)
     {
         str_return = ft_strjoin_with_frees(str_return, ft_strjoin("\n", read_line_str));
         read_line_str = readline(" > ");
     }
-	if (the_signal_flag == 3)
-	{
-		printf("signal at heredoc = %i\n", the_signal_flag);
-		the_signal_flag = 0;
-		free(str_return);
-		return (NULL);
-	}
 	str_return = ft_strjoin_with_frees(str_return, ft_strdup("\n"));
     return (str_return);
 }
