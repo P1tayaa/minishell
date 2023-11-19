@@ -432,67 +432,24 @@ char *init_new_flag_str(int flags_char_len, char **str, int num_of_dash)
 	return (new_str);
 }
 
+void	set_value_of_flag_str_p2(char **new_str, char **str, int *k, int *i)
+{
+	(*new_str)[(*k)] = (*str)[(*i)];
+	if ((*str)[(*i) + 1] != '\0')
+		if (((*str)[(*i) + 1]))
+	(*k)++;
+	(*i)++;
+}
+
 // set the values of string, but doesn't add the '-'
-void	set_value_of_flag_str(int *k, int *flags_char_len, char **str, char	*flags, char *new_str)
+int	set_value_of_flag_str(int *flags_char_len, char **str, char	**flags, char **new_str)
 {
 	int i;
 	int j;
+	int k;
 
 	i = 0;
 	(*flags_char_len) = 0;
-	(*k) = 0;
-	while ((*str)[i] != '\0')
-	{
-		if (ft_isspace((*str)[i]) == true || i == 0)
-		{
-			if (ft_isspace((*str)[i]))
-				i++;
-			if ((*str)[i] == '-')
-			{
-				j = 0;
-				i++;
-				while ((*str)[i + j] != '\0' && ft_isspace((*str)[i + j]) == false)
-					flags[(*flags_char_len)++] = (*str)[i + j++];
-				i = i + j;
-				continue ;
-			}
-			if ((*str)[i] == '\0')
-				break ;
-		}
-		new_str[(*k)] = (*str)[i];
-		(*k)++;
-		i++;
-	}
-}
-
-char *get_flags_str(char **str)
-{
-	char	*flags;
-	char	*new_str;
-	int		flags_char_len;
-	int		i;
-	int		j;
-	int		k;
-	int		num_of_dash;
-
-	// puts("get_flags_str starts");
-	if (str == NULL)
-		return (NULL);
-	i = 0;
-	flags_char_len = 0;
-	num_of_dash = 0;
-	count_num_dash_and_flags_char_len(str, i, &num_of_dash, &flags_char_len);
-	if (flags_char_len == 0)
-		return (NULL);
-	flags = malloc(sizeof(char) * (flags_char_len + 1));
-	if (!flags)
-		exit (1);
-	new_str = init_new_flag_str(flags_char_len, str, num_of_dash);
-
-	// Todo: make this a separate funciton
-	// set the values of string, but doesn't add the '-'
-	i = 0;
-	flags_char_len = 0;
 	k = 0;
 	while ((*str)[i] != '\0')
 	{
@@ -506,9 +463,9 @@ char *get_flags_str(char **str)
 				i++;
 				while ((*str)[i + j] != '\0' && ft_isspace((*str)[i + j]) == false)
 				{
-					flags[flags_char_len] = (*str)[i + j];
+					(*flags)[(*flags_char_len)] = (*str)[i + j];
 					j++;
-					flags_char_len++;
+					(*flags_char_len)++;
 				}
 				i = i + j;
 				continue ;
@@ -516,25 +473,53 @@ char *get_flags_str(char **str)
 			if ((*str)[i] == '\0')
 				break ;
 		}
-		new_str[k] = (*str)[i];
-		k++;
-		i++;
+		set_value_of_flag_str_p2(new_str, str, &k, &i);
 	}
-	
-	// Todo: make this a separate funciton
-	// null terminate all right string or make them null if they are.
-	if (k == 0 && new_str[0] != '\0')
+	return (k);
+}
+
+// null terminate all right string or make them null if they are.
+void	null_terminate_flags_str(int k, int flags_char_len, char **new_str, char **str, char **flags)
+{
+	if (k == 0)
 	{
-		free(new_str);
-		new_str = NULL;
+		free((*new_str));
+		(*new_str) = NULL;
 	}
-	if (new_str != NULL)
-		new_str[k] = '\0';
+	if ((*new_str) != NULL)
+		(*new_str)[k] = '\0';
 	free((*str));
-	(*str) = new_str;
-	flags[flags_char_len] = '\0';
+	(*str) = (*new_str);
+	(*flags)[flags_char_len] = '\0';
+}
+
+char *get_flags_str(char **str)
+{
+	char	*flags;
+	char	*new_str;
+	int		flags_char_len;
+	int		i;
+	int		k;
+	int		num_of_dash;
+
+	if (str == NULL)
+		return (NULL);
+	i = 0;
+	flags_char_len = 0;
+	num_of_dash = 0;
+	new_str = NULL;
+	count_num_dash_and_flags_char_len(str, i, &num_of_dash, &flags_char_len);
+	if (flags_char_len == 0)
+		return (NULL);
+	flags = malloc(sizeof(char) * (flags_char_len + 1));
+	if (!flags)
+		exit (1);
+	new_str = init_new_flag_str(flags_char_len, str, num_of_dash);
+	k = set_value_of_flag_str(&flags_char_len, str, &flags, &new_str);
+	null_terminate_flags_str(k, flags_char_len, &new_str, str, &flags);
 	return (flags);
 }
+// ! this is for lexer_quotes
 
 char	*ft_strjoin_with_frees(char const *s1, char const *s2);
 char	*handle_expand_doll(char *str);
@@ -543,6 +528,153 @@ bool	is_a_token_id(char *input);
 int		copy_until_tokenid(int i, char *input_after_curser, char **destination);
 int		copy_until_space(int i, char *input_after_curser, char **destination);
 int		write_the_right_token(int i, char *input_after_curser,char tokenid[3]);
+
+// depending on the current situation place the content of the quotes in the right place
+void	parse_with_quotes_quotes_assigning(t_post_quotes **content, bool *function_done, t_lexer ***lexer, int *i_content, int i)
+{
+	if ((*function_done) == false)
+	{
+		if (content[(*i_content)]->have_to_expand)
+			(*lexer)[i]->cmd = handle_expand_doll(content[(*i_content)]->content);
+		else
+			(*lexer)[i]->cmd = ft_strdup(content[(*i_content)]->content);
+		(*function_done) = true;
+	}
+	else
+	{
+		if (content[(*i_content)]->content[0] == '-')
+			if (content[(*i_content)]->have_to_expand)
+				(*lexer)[i]->flags = ft_strjoin_with_frees((*lexer)[i]->flags, handle_expand_doll(&content[(*i_content)]->content[1]));
+			// ! need to protect this malloc with strdup, when puting in a function
+			else
+				(*lexer)[i]->flags = ft_strjoin_with_frees((*lexer)[i]->flags, ft_strdup(&content[(*i_content)]->content[1]));
+		else
+			if (content[(*i_content)]->have_to_expand)
+				(*lexer)[i]->args = ft_strjoin_with_frees((*lexer)[i]->args, ft_strjoin_with_frees(handle_expand_doll(content[(*i_content)]->content), ft_strdup(" ")));
+			// ! need to protect this malloc with strdup, when puting in a function
+			else
+				(*lexer)[i]->args = ft_strjoin_with_frees((*lexer)[i]->args, ft_strjoin_with_frees(ft_strdup(content[(*i_content)]->content), ft_strdup(" ")));
+	}
+	(*i_content)++;
+}
+
+// not sure if done right
+void	move_flags_for_quotes(char **curent_content, int *j, int i, t_lexer ***lexer)
+{
+	char *temp;
+	char *temp2;
+
+	temp = NULL;
+	(*j) = copy_until_tokenid(*j, (*curent_content), &temp);
+	if (temp != NULL)
+	{
+		printf("temp == (%s)\n", temp);
+		temp2 = get_flags_str(&temp);
+		// ! need to protect this malloc with strdup, when puting in a function
+		(*lexer)[i]->args = ft_strjoin_with_frees((*lexer)[i]->args, ft_strjoin_with_frees(temp, ft_strdup(" ")));
+		(*lexer)[i]->flags = ft_strjoin_with_frees((*lexer)[i]->flags, temp2);
+	}
+}
+
+void	parse_with_quotes_none_quotes_assigning_if_token(char **curent_content, int *j, t_lexer ***lexer, int *i)
+{
+	write_the_right_token((*j), (*curent_content), ((*lexer)[(*i)]->tokenid));
+	(*j) = (*j) + ft_strlen((*lexer)[(*i)]->tokenid);
+	if ((*lexer)[(*i)]->flags[1] == '\0')
+	{
+		free((*lexer)[(*i)]->flags);
+		(*lexer)[(*i)]->flags = NULL;
+	}
+	if ((*lexer)[(*i)]->args != NULL)
+	{
+		(*lexer)[(*i)]->args = remove_front_spaces((*lexer)[(*i)]->args);
+		(*lexer)[(*i)]->args = remove_back_spaces((*lexer)[(*i)]->args);
+	}
+	if ((*lexer)[(*i)]->cmd != NULL)
+		(*lexer)[(*i)]->cmd = remove_back_spaces((*lexer)[(*i)]->cmd);
+	(*i)++;
+	if ((*curent_content)[(*j)] != '\0')
+	{
+		initiate_values_to_zero_NULL(&(*lexer)[(*i)], (*i));
+		(*lexer)[(*i)]->flags = ft_strdup("-");
+		if (!(*lexer)[(*i)]->flags)
+			exit(1);
+	}
+}
+
+void	parse_with_quotes_none_quotes_assigning(char **curent_content, bool *function_done, t_lexer ***lexer, int *i)
+{
+	int j;
+
+	j = 0;
+	while ((*curent_content)[j] != '\0')
+	{
+		if ((*function_done) == false && ft_isspace((*curent_content)[j]) == false)
+		{
+			j = copy_until_space(j, (*curent_content), &(*lexer)[(*i)]->cmd);
+			(*function_done) = true;
+		}
+		if (is_a_token_id(&(*curent_content)[j]) == true)
+		{
+			parse_with_quotes_none_quotes_assigning_if_token(curent_content, &j, lexer, i);
+			(*function_done) = false;
+		}
+		if ((*function_done) && ft_isspace((*curent_content)[j]) == false)
+		{
+			move_flags_for_quotes(curent_content, &j, (*i), &(*lexer));
+		}
+		if (ft_isspace((*curent_content)[j]))
+			j++;
+	}
+}
+
+// malloc the content
+void	parse_with_quotes_init(t_post_quotes **content, int	*token_num, t_lexer ***lexer)
+{
+	int i;
+
+	i = 0;
+	(*token_num) = 0;
+	while (content[i] != NULL)
+	{
+		if (content[i]->is_quotes == false)
+			(*token_num) = (*token_num) + count_token(content[i]->content);
+		i++;
+	}
+	(*lexer) = (t_lexer **)malloc(sizeof(t_lexer *) * ((*token_num) + 2));
+	if (!(*lexer))
+		exit(1);
+
+}
+
+void	parser_with_quotes_p2(t_post_quotes **content, bool *function_done, t_lexer ***lexer, int *i)
+{
+	int i_content;
+	
+	i_content = 0;
+	while (content[i_content] != NULL)
+	{
+		if (content[i_content]->is_quotes)
+			parse_with_quotes_quotes_assigning(content, function_done, lexer, &i_content, *i);
+		else
+		{	
+			parse_with_quotes_none_quotes_assigning(&content[i_content]->content, function_done, lexer, i);
+			i_content++;
+		}
+	}
+	if ((*lexer)[(*i)]->args != NULL)
+	{
+		(*lexer)[(*i)]->args = remove_front_spaces((*lexer)[(*i)]->args);
+		(*lexer)[(*i)]->args = remove_back_spaces((*lexer)[(*i)]->args);
+	}
+	if ((*lexer)[(*i)]->cmd != NULL)
+		(*lexer)[(*i)]->cmd = remove_back_spaces((*lexer)[(*i)]->cmd);
+	if ((*lexer)[(*i)]->flags[1] == '\0')
+	{
+		free((*lexer)[(*i)]->flags);
+		(*lexer)[(*i)]->flags = NULL;
+	}
+}
 
 /*
 	Main parser when there are quotes
@@ -554,133 +686,22 @@ t_lexer	**parser_with_quotes(t_post_quotes **content)
 	t_lexer **lexer;
 	int	token_num;
 	int i;
-
-	// TODO: make this in a fucntion
-	// malloc the content
-	i = 0;
-	token_num = 0;
-	while (content[i] != NULL)
-	{
-		if (content[i]->is_quotes == false)
-			token_num = token_num + count_token(content[i]->content);
-		i++;
-	}
-	lexer = (t_lexer **)malloc(sizeof(t_lexer *) * (token_num + 2));
-	if (!lexer)
-		exit(1);
-
-	int i_content;
 	bool function_done;
-	// fill the content
-	i = 0;
-	i_content = 0;
-	function_done = false;
-	while (token_num >= i)
-	{
-		if (function_done == false)
-		{
-			initiate_values_to_zero_NULL(&lexer[i], i);
-			lexer[i]->flags = ft_strdup("-");
-			if (!lexer[i]->flags)
-				exit(1);
-		}
-		while (content[i_content] != NULL)
-		{
-			if (content[i_content]->is_quotes)
-			{
-				// TODO make this a function
-				// depending on the current situation place the content of the quotes in the right place
-				if (function_done == false)
-				{
-					if (content[i_content]->have_to_expand)
-						lexer[i]->cmd = handle_expand_doll(content[i_content]->content);
-					else
-						lexer[i]->cmd = ft_strdup(content[i_content]->content);
-					function_done = true;
-				}
-				else
-				{
-					if (content[i_content]->content[0] == '-')
-						if (content[i_content]->have_to_expand)
-							lexer[i]->flags = ft_strjoin_with_frees(lexer[i]->flags, handle_expand_doll(&content[i_content]->content[1]));
-						// ! need to protect this malloc with strdup, when puting in a function
-						else
-							lexer[i]->flags = ft_strjoin_with_frees(lexer[i]->flags, ft_strdup(&content[i_content]->content[1]));
-					else
-						if (content[i_content]->have_to_expand)
-							lexer[i]->args = ft_strjoin_with_frees(lexer[i]->args, ft_strjoin_with_frees(handle_expand_doll(content[i_content]->content), ft_strdup(" ")));
-						// ! need to protect this malloc with strdup, when puting in a function
-						else
-							lexer[i]->args = ft_strjoin_with_frees(lexer[i]->args, ft_strjoin_with_frees(ft_strdup(content[i_content]->content), ft_strdup(" ")));
-				}
-				i_content++;
-			}
-			else
-			{	
-				int j;
-				
-				j = 0;
-				while (content[i_content]->content[j] != '\0')
-				{
-					if (function_done == false && ft_isspace(content[i_content]->content[j]) == false)
-					{
-						j = copy_until_space(j, content[i_content]->content, &lexer[i]->cmd);
-						function_done = true;
-					}
-					if (is_a_token_id(&content[i_content]->content[j]) == true)
-					{
-						//todo make this a funciton
-						write_the_right_token(j, content[i_content]->content, (lexer[i]->tokenid));
-						j = j + ft_strlen(lexer[i]->tokenid);
-						function_done = false;
-						if (lexer[i]->flags[1] == '\0')
-						{
-							free(lexer[i]->flags);
-							lexer[i]->flags = NULL;
-						}
-						i++;
-						if (content[i_content]->content[j] != '\0')
-						{
-							initiate_values_to_zero_NULL(&lexer[i], i);
-							lexer[i]->flags = ft_strdup("-");
-							if (!lexer[i]->flags)
-								exit(1);
-						}
-					}
-					if (function_done && ft_isspace(content[i_content]->content[j]) == false)
-					{
-						// TODO make this a function
-						char *temp;
-						char *temp2;
 
-						j = copy_until_tokenid(j, content[i_content]->content, &temp);
-						temp2 = get_flags_str(&temp);
-						if (temp != NULL)
-						{
-							// ! need to protect this malloc with strdup, when puting in a function
-							lexer[i]->args = ft_strjoin_with_frees(lexer[i]->args, ft_strjoin_with_frees(temp, ft_strdup(" ")));
-						}
-						lexer[i]->flags = ft_strjoin_with_frees(lexer[i]->flags, temp2);
-					}
-					if (ft_isspace(content[i_content]->content[j]))
-						j++;
-				}
-				i_content++;
-			}
-		}
-		if (lexer[i]->args != NULL)
-			lexer[i]->args = remove_back_spaces(lexer[i]->args);
-		if (lexer[i]->flags[1] == '\0')
-		{
-			free(lexer[i]->flags);
-			lexer[i]->flags = NULL;
-		}
-		i++;
-	}
-	lexer[i] = NULL;
-	
+	parse_with_quotes_init(content, &token_num, &lexer);
 	i = 0;
-	return lexer;
+	function_done = false;
+	if (function_done == false)
+	{
+		initiate_values_to_zero_NULL(&lexer[i], i);
+		lexer[i]->flags = ft_strdup("-");
+		if (!lexer[i]->flags)
+			exit(1);
+	}
+	parser_with_quotes_p2(content, &function_done, &lexer, &i);
+	i++;
+	lexer[i] = NULL;
+	return (lexer);
 }
 
 int	count_char_until_next_token(char *input);
@@ -725,11 +746,10 @@ int	copy_until_space(int i, char *input_after_curser, char **destination)
 	int	j;
 
 	j = 0;
-	while (input_after_curser[i + j] != '\0')
+	while (input_after_curser[i + j] != '\0'
+			&& (!ft_isspace(input_after_curser[i + j])
+				&& !is_a_token_id(&input_after_curser[i + j])))
 	{
-		if ((ft_isspace(input_after_curser[i + j])
-				|| is_a_token_id(&input_after_curser[i + j])))
-			break ;
 		j++;
 	}
 	if (j == 0)
@@ -865,8 +885,17 @@ int	count_char_until_next_token(char *input)
 		}
 		i++;
 	}
-	free_double_array(list_of_tokenid);
-	return (i);
+	return (free_double_array(list_of_tokenid), i);
+}
+
+int set_k_for_count_token(char *input, int i, char	**list_of_tokenid, int j)
+{
+	int		k;
+
+	k = 0;
+	while (input[i + k] != '\0' && list_of_tokenid[j][k] == input[i + k])
+		k++;
+	return (k);
 }
 
 /*
@@ -885,16 +914,13 @@ int	count_token(char *input)
 
 	list_of_tokenid = get_list_of_tokenid();
 	num_of_token = 0;
-	i = 0;
-	// puts(input);
-	while (input[i] != '\0')
+	i = -1;
+	while (input[++i] != '\0')
 	{
 		j = 0;
 		while (list_of_tokenid[j] != NULL)
 		{
-			k = 0;
-			while (input[i + k] != '\0' &&list_of_tokenid[j][k] == input[i + k])
-				k++;
+			k = set_k_for_count_token(input, i, list_of_tokenid, j);
 			if (list_of_tokenid[j][k] == '\0')
 			{
 				i = i + k;
@@ -903,8 +929,6 @@ int	count_token(char *input)
 			}
 			j++;
 		}
-		i++;
 	}
-	free_double_array(list_of_tokenid);
-	return (num_of_token);
+	return (free_double_array(list_of_tokenid), num_of_token);
 }

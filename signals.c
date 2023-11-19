@@ -3,17 +3,18 @@
 /*                                                        :::      ::::::::   */
 /*   signals.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: omathot <omathot@student.42.fr>            +#+  +:+       +#+        */
+/*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/17 11:31:43 by omathot           #+#    #+#             */
-/*   Updated: 2023/06/17 14:45:05 by omathot          ###   ########.fr       */
+/*   Updated: 2023/11/17 15:29:04 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
 /*
-need exectuable to run to have a behaviour. When waiting for prompt, does nothing.
+need exectuable to run to have a behaviour. 
+When waiting for prompt, does nothing.
 ctrl + \ = ^\Quit: 3
 ctrl + C = stop executable
 ctrl + D = does not stop exec and prints ^D
@@ -65,15 +66,10 @@ void	signal_catcher(int sig)
 
 void	slash_catch(int sig)
 {
-	// void(sig);
 	if (sig == SIGQUIT)
 	{
-		// printf("\b\b  ");
-		// write(STDERR_FILENO, "\b", 1);
-		// write(STDERR_FILENO, "\033[2D\033[K", 8);
 		rl_redisplay();
 		g_exit_status = 131;
-		// rl_on_new_line();
 	}
 }
 
@@ -81,7 +77,6 @@ void	manage_signals(void)
 {
 	struct sigaction	s1;
 	struct sigaction	s2;
-	// struct sigaction	s3;
 
 	s1.sa_handler = &signal_catcher;
 	sigemptyset(&(s1.sa_mask));
