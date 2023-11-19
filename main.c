@@ -27,7 +27,7 @@ bool	check_unset_for_quotes(t_post_quotes	***content, t_lexer ***lexer);
 void	free_double_array(char **list_of_tokenid);
 bool	pipe_export(t_lexer ***lexer);
 
-volatile sig_atomic_t the_signal_flag = 0;
+volatile sig_atomic_t g_exit_status = 0;
 
 void	lexer_free(t_lexer **lexer)
 {
@@ -140,7 +140,8 @@ bool export_andle_no_quotes(t_lexer ***lexer)
 	return (true);
 }
 
-void restore_default_sigint_handling() {
+void restore_default_sigint_handling()
+{
     struct sigaction sa;
 
     // Set up the structure to specify the new action.
@@ -148,9 +149,7 @@ void restore_default_sigint_handling() {
     sa.sa_flags = 0;
     sigemptyset(&sa.sa_mask);
 
-    if (sigaction(SIGINT, &sa, NULL) == -1) {
-        perror("Error restoring default SIGINT action");
-    }
+    sigaction(SIGINT, &sa, NULL);
 }
 
 int    main(void)
@@ -160,54 +159,60 @@ int    main(void)
     bool			quotes_test;
 	t_post_quotes	**content;
 
-	the_signal_flag = 0;
 	quotes_test = true;
-	manage_signals();
 	while (1)
 	{
+		manage_signals();
 		content = NULL;
 		str = read_user_input(quotes_test);
 		if (str == NULL)
 			break ;
 		if (quotes_test)
 			check_quotes(&str, &content);
-		if (content == NULL)
-			lexer = main_parser(str);
-		else
-		{
-			lexer = parser_with_quotes(content);
-			the_signal_flag = 1;
-			if (check_export_for_quotes(&content, &lexer) || check_unset_for_quotes(&content, &lexer))
+		// if (!quotes_test)
+		// {
+			if (content == NULL)
+				lexer = main_parser(str);
+			else
 			{
-				the_signal_flag = 0;
-				if (str)
-					free(str);
-				continue ;
+				lexer = parser_with_quotes(content);
+				if (check_export_for_quotes(&content, &lexer) || check_unset_for_quotes(&content, &lexer))
+				{
+					if (str)
+					{
+						free(str);
+						str = NULL;
+					}
+					continue ;
+				}
+				free_content(content);
 			}
-			the_signal_flag = 0;
-			free_content(content);
-		}
-		free(str);
-		int i;
-		i = 0;
-		while (lexer[i] != NULL)
-		{
-			printf("\nlexer[%d]\n cmd: (%s)\n", i, lexer[i]->cmd);
-			printf("args: (%s)\n", lexer[i]->args);
-			printf("tokenid: (%s)\n", lexer[i]->tokenid);
-			printf("file: (%s)\n", lexer[i]->file);
-			printf("flags: (%s)\n", lexer[i]->flags);
-			i++;
-		}
-		the_signal_flag = 1;
-		if (export_andle_no_quotes(&lexer))
-			continue ;
-		if (check_unset_noquotes(&lexer))
-			continue ;
-		else
-			piping(lexer);
+			free(str);
+			int i;
+			i = 0;
+			while (lexer[i] != NULL)
+			{
+				// printf("arg was before: %s\n", lexer[i]->args);
+				// lexer[i]->args = replace_doll_question_to_number_with_free(lexer[i]->args, 69);
+				printf("\nlexer[%d]\n cmd: (%s)\n", i, lexer[i]->cmd);
+				printf("args: (%s)\n", lexer[i]->args);
+				printf("tokenid: (%s)\n", lexer[i]->tokenid);
+				printf("file: (%s)\n", lexer[i]->file);
+				printf("flags: (%s)\n", lexer[i]->flags);
+				i++;
+			}
+			// restore_default_sigint_handling();
+			if (export_andle_no_quotes(&lexer))
+				continue ;
+			if (check_unset_noquotes(&lexer))
+				continue ;
+			else
+				piping(lexer);
+			// optiona: wait for return value.
+		if (ft_strlen(lexer[0]->cmd) == 3)
+			if ((ft_memcmp(lexer[0]->cmd, "cat", 3) == 0) && lexer[1] == NULL && lexer[0]->args == NULL)
+				write(2, "\033[18D\033[K", 8);
 		lexer_free(lexer);
-		the_signal_flag = 0;
 	}
 	return (0);
 }
@@ -218,18 +223,9 @@ char	*read_user_input(bool quotes_test)
 	char	*str_return;
 	rl_catch_signals = 0;
 
-	puts("hey");
 	while (1)
 	{
-		// the_signal_flag = 0;
-		// rl_replace_line("", 0);
 		str = readline("minishell_OS_1.0$ ");
-		// if (the_signal_flag)
-		// {
-		// 	the_signal_flag = 0;
-		// 	write(STDOUT_FILENO, "😎 minishell_OS_1.0$ ", 20);
-		// 	continue ;
-		// }
 		if (str == NULL)
 		{
 			printf("\n");

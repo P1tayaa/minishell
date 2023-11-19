@@ -31,31 +31,45 @@ when terminal window is started and empty, D will exit terminal application.
 ctrl d can also be used to logout somehow just keep that in mind.
 */
 
+
+/*
+this doesn't work on linux scohol terminal, evne thouhg it clearly should. Works everywhere else, more portable and what should be used instead aside from evaluations.
+	write(STDERR_FILENO, "\b\b  ", 4);
+	write(STDERR_FILENO, "\n", 1);
+	rl_on_new_line();
+	rl_replace_line("", 0);
+	rl_redisplay();
+*/
+
 void	signal_catcher(int sig)
 {
-	if (sig == SIGINT && the_signal_flag == 0)
+	if (sig == SIGINT)
 	{
-		write(STDERR_FILENO, "\b\b  ", 4);
+		// write(STDERR_FILENO, "\b\b  ", 4);
 		write(STDERR_FILENO, "\n", 1);
-		rl_on_new_line();
 		rl_on_new_line();
 		rl_replace_line("", 0);
 		rl_redisplay();
+		g_exit_status = 130;
 	}
-	if (sig == SIGINT && the_signal_flag == 1)
-	{
-		the_signal_flag = 3;
-		rl_replace_line("\n", 1);
-		rl_redisplay();
-		rl_on_new_line();
-	}
+	// if (sig == SIGINT && the_signal_flag == 1)
+	// {
+	// 	the_signal_flag = 3;
+	// 	// rl_line_buffer = NULL;
+	// 	rl_replace_line("\n", 1);
+	// 	rl_redisplay();
+	// 	rl_on_new_line();
+	// 	// exit (130);
+	// }
+	(void) sig;
 }
 
 void	slash_catch(int sig)
 {
-	if (sig == SIGQUIT && the_signal_flag == 0)
+	if (sig == SIGQUIT)
 	{
 		rl_redisplay();
+		g_exit_status = 131;
 	}
 }
 

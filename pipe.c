@@ -18,6 +18,7 @@ char	***get_env(void);
 void	ascii_sort(char **environment);
 bool	is_str_export(char *str);
 void	lexer_free(t_lexer **lexer);
+void restore_default_sigint_handling();
 
 int	open_file(char *filename, int mode)
 {
@@ -120,28 +121,69 @@ int redirection_handler(t_lexer *lexer)
 	return (fd);
 }
 
+char    **ft_split_world_at_all_spaces(char *str);
+void    export_content_freeur(char ***export_content);
+
+char **mk_args_for_proc(t_pipedata *data)
+{
+    char    **args;
+    char    **args_temp;
+    int        i;
+    int        j;
+
+    i = 0;
+    if (data->lexer[data->lex_count]->args != NULL)
+    {
+        args_temp = ft_split_world_at_all_spaces(data->lexer[data->lex_count]->args);
+        while (args_temp[i] != NULL)
+            i++;
+    }
+    args = malloc(sizeof(char *) * (i + 3));
+    i = 0;
+    args[i++] = data->lexer[data->lex_count]->cmd;
+    if (data->lexer[data->lex_count]->flags != NULL)
+        args[i++] = data->lexer[data->lex_count]->flags;
+    j = 0;
+    if (data->lexer[data->lex_count]->args != NULL)
+        while (args_temp[j] != NULL)
+            args[i++] = args_temp[j++];
+    args[i] = NULL;
+    if (data->lexer[data->lex_count]->args != NULL)
+        free(args_temp);
+    return (args);
+}
+
 bool	execute_child_process(t_pipedata *data)
 {
 	char	*cmd_path;
-	char	*args[4];
-	int		i = 0;
+	char	**args;
 
-	cmd_path = get_cmd_path(data->lexer[data->lex_count]->cmd, data);
-	args[i++] = data->lexer[data->lex_count]->cmd;
-	if (data->lexer[data->lex_count]->flags != NULL)
-		args[i++] = data->lexer[data->lex_count]->flags;
-	if (data->lexer[data->lex_count]->args != NULL)
-		args[i++] = data->lexer[data->lex_count]->args;
-	args[i] = NULL;
+	cmd_path = NULL;
+	if (data->lexer[data->lex_count]->cmd[0] != '.')
+		cmd_path = get_cmd_path(data->lexer[data->lex_count]->cmd, data);
+	if (cmd_path == NULL)
+	{
+		puts("I WANT TO EXIT 127");
+		if (access(data->lexer[data->lex_count]->cmd, X_OK) != 0)
+		{
+			cmd_path = data->lexer[data->lex_count]->cmd;
+			ft_putstr_fd("minishell: ", STDERR_FILENO);
+			ft_putstr_fd((*data).lexer[(*data).lex_count]->cmd, STDERR_FILENO);
+			ft_putstr_fd(": command not found\n", STDERR_FILENO);
+			exit(127);
+		}
+	}
+	args = mk_args_for_proc(data);
 	if (execve(cmd_path, args, (*(*data).environ)) == -1)
 	{
-		ft_putstr_fd("minishell: ", STDERR_FILENO);
-		ft_putstr_fd((*data).lexer[(*data).lex_count]->cmd, STDERR_FILENO);
-		ft_putstr_fd(": command not found\n", STDERR_FILENO);
-		free(cmd_path);
-		exit (127);
+		if (cmd_path)
+			free(cmd_path);
+		puts("I WANT TO EXIT 126");
+		export_content_freeur(&args);
+		exit (126);
 	}
 	free(cmd_path);
+	export_content_freeur(&args);
 	return (1);
 }
 
@@ -324,6 +366,10 @@ int	parent_management(t_pipedata *data, t_lexer **lexer, int pid)
 	waitpid(pid, &status, 0);
 	if WIFEXITED(status)
 		status = WEXITSTATUS(status);
+	if WIFSIGNALED(status)
+		status = WEXITSTATUS(status);
+	if WIFSTOPPED(status)
+		status = WEXITSTATUS(status);
 	return (status);
 }
 
@@ -406,6 +452,30 @@ int	are_all_commands_thesame(t_lexer **lexer)
 		return (0);
 }
 
+void	weird_signals(int sig)
+{
+	if (sig == SIGINT)
+	{
+		puts("HIIIII");
+		// rl_on_new_line();
+		rl_replace_line("", 0);
+		// rl_redisplay();
+	}
+}
+
+void	empty_cmd_args_signals()
+{
+	struct sigaction	s1;
+
+	puts("oioiooi");
+	s1.sa_handler = &weird_signals;
+	sigemptyset(&(s1.sa_mask));
+	sigaddset(&s1.sa_mask, SIGINT);
+	s1.sa_flags = 0;
+	sigaction(SIGINT, &s1, NULL);
+	return ;
+}
+
 void	piping(t_lexer **lexer)
 {
 	t_pipedata			data;
@@ -420,14 +490,13 @@ void	piping(t_lexer **lexer)
 	{
 		if (lexer[data.lex_count + 1] != NULL)
 		{
-			puts("hey");
 			if (are_all_commands_thesame(lexer) == 1)			// bug is here
 			{
-				puts("here?");
 				lexer[data.lex_count]->args = replace_doll_question_to_number_with_free(lexer[data.lex_count]->args, doll);
 				pid = fork();
 				if (pid == 0)
 				{
+					restore_default_sigint_handling();
 					execute_child_process(&data);
 					exit(EXIT_SUCCESS);
 				}
@@ -435,10 +504,6 @@ void	piping(t_lexer **lexer)
 				waitpid(pid, &doll, 0);
 				if WIFEXITED(doll)
 					doll = WEXITSTATUS(doll);
-				else if WIFSIGNALED(doll)
-					doll = WTERMSIG(doll);
-				else if WIFSTOPPED(doll)
-					doll = WSTOPSIG(doll);
 			}
 		}
 	}
@@ -455,6 +520,7 @@ void	piping(t_lexer **lexer)
 	{
 		if ((pid = fork()) == 0)
 		{
+			// empty_cmd_args_signals();
 			lexer[data.lex_count]->args = replace_doll_question_to_number_with_free(lexer[data.lex_count]->args, doll);
 			execute_child_process(&data);
 			exit(EXIT_SUCCESS);
@@ -470,7 +536,6 @@ void	piping(t_lexer **lexer)
 	if (lexer[1] != NULL)																						// piping/redirections
 		while (lexer[data.lex_count] != NULL && lexer[data.lex_count]->execd == false)
 		{
-			puts("hey 2");
 			if (lexer[data.lex_count]->cmd != NULL)
 				if (ft_memcmp(lexer[data.lex_count]->cmd, "cat", 3) == 0)
 				{
@@ -495,20 +560,15 @@ void	piping(t_lexer **lexer)
 			if (pid == 0)
 			{
 				puts("in child process loop");
+				restore_default_sigint_handling();
 				if (manage_reads_writes(&data, lexer) == -1)
 					return ;
 				if (lexer[data.lex_count]->cmd)
 				{
 					if (is_built_in(lexer, data.lex_count) == 1)
-					{
-						puts("should not be built in");
 						execute_child_process(&data);
-					}
 					else
-					{
-						puts("entered last else, incorrect");
 						execute_child_process(&data);
-					}
 				}
 			}
 			else  // Parent process
@@ -592,6 +652,7 @@ bool	pipe_export(t_lexer ***lexer)
 				pid = fork();
 				if (pid == 0)
 				{
+					restore_default_sigint_handling();
 					if (data.lex_count == 0)
 					{
 						dup2(data.fd[1], STDOUT_FILENO);

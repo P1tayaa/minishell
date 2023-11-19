@@ -216,6 +216,9 @@ char	*replace_doll_question_to_number_with_free(
 	int		location_of_doll;
 	char	*str_return;
 
+	if (g_exit_status != 0)
+		number_replace = g_exit_status;
+	g_exit_status = 0;
 	if (str_og == NULL)
 		return (NULL);
 	i = -1;
@@ -247,23 +250,16 @@ int	return_biggest_int(int a, int b)
 
 char *here_doc_starter(char *wordlocking_for)
 {
-	char	*str_return;
-	char	*read_line_str;
-
-	str_return = NULL;
-	read_line_str = readline(" > ");
-	while (ft_strncmp(wordlocking_for, read_line_str,
-			return_biggest_int(ft_strlen(wordlocking_for),
-				ft_strlen(read_line_str))) != 0 && the_signal_flag != 3)
-	{
-		str_return = ft_strjoin_with_frees(str_return,
-				ft_strjoin("\n", read_line_str));
-		if (read_line_str)
-			free(read_line_str);
-		read_line_str = readline(" > ");
-	}
-	if (read_line_str)
-		free(read_line_str);
+    char *str_return;
+    char *read_line_str;
+    
+    str_return = NULL;
+    read_line_str = readline(" > ");
+    while (ft_strncmp(wordlocking_for, read_line_str, return_biggest_int(ft_strlen(wordlocking_for), ft_strlen(read_line_str)))!= 0)
+    {
+        str_return = ft_strjoin_with_frees(str_return, ft_strjoin("\n", read_line_str));
+        read_line_str = readline(" > ");
+    }
 	str_return = ft_strjoin_with_frees(str_return, ft_strdup("\n"));
 	return (str_return);
 }
@@ -679,80 +675,8 @@ int count_len_split_world(char *str)
 	return (word_count);
 }
 
-// // split_end_of_word(&writing, &j, str[i + 1], &str_split[word_count]);
-
-// bool	split_end_of_word(bool *writing, int *j, char *current_str, char **current_split)
-// {
-// 	if (writing)
-// 	{
-// 		(*current_split)[(*j)] = '\0';
-		
-// 		j = 0;
-// 		writing = false;
-// 	}
-// 	if (current_str[0] != '\0')
-// 		if (!ft_isspace(current_str[0]))
-// 		{
-// 			(*current_split) = malloc(sizeof(char) * (count_char_unti_space(current_str) + 1));
-// 		}
-// 	return (true);
-// }
-
-// char	**ft_split_world_at_all_spaces(char *str)
-// {
-// 	int		i;
-// 	int		j;
-// 	int		word_count;
-// 	bool	writing;
-// 	char	**str_split;
-
-// 	str_split = (char **)malloc(sizeof(char *)
-// 			* (count_len_split_world(str) + 1));
-// 	if (!(str_split))
-// 		exit(-1);
-// 	i = 0;
-// 	writing = false;
-// 	word_count = 0;
-// 	j = 0;
-// 	while (str[i] != '\0')
-// 	{
-// 		if (ft_isspace(str[i]))
-// 		{
-// 			if (writing)
-// 			{
-// 				str_split[word_count][j] = '\0';
-// 				word_count++;
-// 				j = 0;
-// 				writing = false;
-// 			}
-// 			if (str[i + 1] != '\0')
-// 				if (!ft_isspace(str[i + 1]))
-// 				{
-// 					str_split[word_count] = malloc(sizeof(char) * (count_char_unti_space(&str[i + 1]) + 1));
-// 				}
-// 		}
-// 		else
-// 		{
-// 			printf("word_count = %d\n", word_count);
-// 			if (i == 0)
-// 				str_split[word_count] = malloc(sizeof(char) * (count_char_unti_space(&str[i]) + 1));
-// 			writing = true;
-// 			str_split[word_count][j] = str[i];
-// 			j++;
-// 		}
-// 		i++;
-// 	}
-// 	if (ft_isspace(str[i - 1]) == 0)
-// 	{
-// 		str_split[word_count][j] = '\0';
-// 		word_count++;
-// 	}
-// 	str_split[word_count] = NULL;
-// 	return (str_split);
-// }
 int	count_len_split_world(char *str);
 int	count_char_unti_space(char *str);
-// bool ft_isspace(char c);
 
 char	**initialize_str_split(char *str)
 {
@@ -802,14 +726,17 @@ void	split_logic(char *str, char **str_split, int *word_count, bool *writing)
 	}
 }
 
-char	**finalize_str_split(char *str, char **str_split, int word_count)
+char *remove_front_spaces(char *str);
+
+char	**finalize_str_split(char **str, char **str_split, int word_count)
 {
 	int	j;
 
 	j = 0;
-	while (str[j] && !ft_isspace(str[j]))
+	(*str) = remove_front_spaces((*str));
+	while ((*str)[j] && !ft_isspace((*str)[j]))
 		j++;
-	if (!ft_isspace(str[j - 1]))
+	if (!ft_isspace((*str)[j - 1]))
 		str_split[word_count][j] = '\0';
 	str_split[++word_count] = NULL;
 	return (str_split);
@@ -820,12 +747,17 @@ char	**ft_split_world_at_all_spaces(char *str)
 	int		word_count;
 	bool	writing;
 	char	**str_split;
+	char	**str_return;
 
+	str = ft_strdup(str);
 	word_count = 0;
 	writing = false;
 	str_split = initialize_str_split(str);
 	split_logic(str, str_split, &word_count, &writing);
-	return (finalize_str_split(str, str_split, word_count));
+	str_return = finalize_str_split(&str, str_split, word_count);
+	if (str != NULL)
+		free(str);
+	return (str_return);
 }
 
 char	**remalloc_and_dup(char **all_var_rm, int all_var_rm_total)
@@ -893,7 +825,6 @@ bool	check_unset_for_quotes(t_post_quotes	***content, t_lexer ***lexer)
 	}
 	if ((*lexer)[0]->args == NULL)
 	{
-		// print_export(get_env());
 		lexer_free((*lexer));
 		free_content((*content));
 		return (true);
@@ -963,18 +894,11 @@ bool	check_unset_for_quotes(t_post_quotes	***content, t_lexer ***lexer)
 		all_var_rm_num++;
 	}
 	all_var_rm[all_var_rm_num] = NULL;
-
-	i = 0;
-	while (all_var_rm[i] != NULL)
-	{
-		printf("unset arg[%i] (%s)\n", i, all_var_rm[i]);
-		i++;
-	}
-	
 	i = 0;
 	while (all_var_rm[i] != NULL)
 	{
 		unset_env(all_var_rm[i], get_env());
+		// free(all_var_rm[i]);
 		i++;
 	}
 	i = 0;
