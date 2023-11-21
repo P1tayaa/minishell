@@ -6,11 +6,11 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/08 11:27:19 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/02/08 11:33:27 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/11/20 14:54:40 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include  "libft.h"
+#include "libft.h"
 
 char	*ft_strcpy(char *s1, char *s2)
 {

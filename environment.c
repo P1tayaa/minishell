@@ -6,15 +6,15 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/29 12:56:41 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/11/01 01:31:32 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/11/20 14:54:08 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-char	*ft_strjoin_with_frees(char *s1, char *s2);
+char	*sjoin_fr(char *s1, char *s2);
 void	free_double_array(char **list_of_tokenid);
-int 	ft_char_find(char *str, const char *list_of_char);
+int		ft_char_find(char *str, const char *list_of_char);
 
 char	*malloc_and_write_line(char *copy, char *og)
 {
@@ -44,38 +44,36 @@ int	custom_strcmp(const char *str1, const char *str2)
 	return (*(unsigned char *)str1 - *(unsigned char *)str2);
 }
 
-
 void	swap(char **str1, char **str2)
 {
-	char *temp;
+	char	*temp;
 
 	temp = *str1;
 	*str1 = *str2;
 	*str2 = temp;
 }
 
-
-void	recursiveBubble(char **environment, int string_count, int loop, int index)
+void	recursive_bubble(char **environment, int string_count,
+		int loop, int index)
 {
 	if (loop == string_count - 1)
-		return;  // Base condition for outer recursion
+		return ;
 	if (index == string_count - loop - 1)
-		recursiveBubble(environment, string_count, loop + 1, 0);		// // If we've reached the end of the inner loop for this pass, move to the next pass
+		recursive_bubble(environment, string_count, loop + 1, 0);
 	else
 	{
 		if (custom_strcmp(environment[index], environment[index + 1]) > 0)
 			swap(&environment[index], &environment[index + 1]);
-		recursiveBubble(environment, string_count, loop, index + 1);
-    }
+		recursive_bubble(environment, string_count, loop, index + 1);
+	}
 }
 
-void	printArray(char **environment, int string_count, int idx)
+void	print_array(char **environment, int string_count, int idx)
 {
 	if (idx == string_count)
-		return;
-
+		return ;
 	printf("declare -x %s\n", environment[idx]);
-	printArray(environment, string_count, idx + 1);
+	print_array(environment, string_count, idx + 1);
 }
 
 void	ascii_sort(char **environment)
@@ -96,19 +94,20 @@ void	ascii_sort(char **environment)
 		i++;
 	}
 	sorted_environment[i] = NULL;
-	recursiveBubble(sorted_environment, i, 0, 0);
-	printArray(sorted_environment, count, 0);
+	recursive_bubble(sorted_environment, i, 0, 0);
+	print_array(sorted_environment, count, 0);
 	free_double_array(sorted_environment);
 }
 
-char	*check_exisisting_env(char ***environment, char *name, char **value, int *i_og)
+char	*check_exisisting_env(char ***environment, char *name,
+		char **value, int *i_og)
 {
 	size_t	value_len;
 	char	*to_set;
-	int i;
+	int		i;
 
 	i = -1;
-    value_len = ft_strlen((*value));
+	value_len = ft_strlen((*value));
 	to_set = NULL;
 	while ((*environment)[++i] != NULL)
 	{
@@ -120,7 +119,7 @@ char	*check_exisisting_env(char ***environment, char *name, char **value, int *i
 				return (free(name), free((*value)), to_set);
 			}
 			free((*environment)[i]);
-			to_set = ft_strjoin_with_frees(ft_strjoin_with_frees(name, ft_strdup("=")), (*value));
+			to_set = sjoin_fr(sjoin_fr(name, ft_strdup("=")), (*value));
 			(*environment)[i] = to_set;
 			(*i_og) = i;
 			return (NULL);
@@ -143,7 +142,8 @@ void	set_env(char *name, char *value, char ***environment)
 		return ;
 	if ((*environment)[i] == NULL)
 	{
-		new_environment = (char **) ft_realloc((*environment), (i + 2) * sizeof(char *));
+		new_environment = (char **) ft_realloc((*environment),
+				(i + 2) * sizeof(char *));
 		if (ft_strlen(value) == 0)
 		{
 			to_set = ft_strdup(name);
@@ -151,7 +151,7 @@ void	set_env(char *name, char *value, char ***environment)
 			free(name);
 		}
 		else
-			to_set = ft_strjoin_with_frees(ft_strjoin_with_frees(name, ft_strdup("=")), value);
+			to_set = sjoin_fr(sjoin_fr(name, ft_strdup("=")), value);
 		free((*environment));
 		(*environment) = new_environment;
 		(*environment)[i] = to_set;
@@ -171,9 +171,9 @@ int	unset_env(char *name, char ***environment)
 		{
 			free((*environment)[i]);
 			j = i;
-			while ((*environment)[j+1])
+			while ((*environment)[j + 1])
 			{
-				(*environment)[j] = (*environment)[j+1];
+				(*environment)[j] = (*environment)[j + 1];
 				j++;
 			}
 			(*environment)[j] = NULL;
@@ -202,9 +202,9 @@ char	***get_env(void)
 {
 	int			i;
 	int			count;
-	extern char **environ;
+	extern char	**environ;
 	static char	**environment;
-	char 		***copy;
+	char		***copy;
 
 	count = 0;
 	i = 0;
@@ -226,10 +226,10 @@ char	***get_env(void)
 	return (copy);
 }
 
-char *get_env_of_valus_str(char *str)
+char	*get_env_of_valus_str(char *str)
 {
-	int i;
-	char ***env;
+	int		i;
+	char	***env;
 
 	env = get_env();
 	i = 0;
@@ -241,4 +241,3 @@ char *get_env_of_valus_str(char *str)
 	}
 	return (NULL);
 }
-

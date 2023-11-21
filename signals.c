@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   signals.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
+/*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/17 11:31:43 by omathot           #+#    #+#             */
-/*   Updated: 2023/11/17 15:29:04 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/11/20 14:35:21 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,9 +31,9 @@ when terminal window is started and empty, D will exit terminal application.
 ctrl d can also be used to logout somehow just keep that in mind.
 */
 
-
 /*
-this doesn't work on linux scohol terminal, evne thouhg it clearly should. Works everywhere else, more portable and what should be used instead aside from evaluations.
+this doesn't work on linux scohol terminal, evne thouhg it clearly should.
+Works everywhere else, more portable and should be used instead.
 	write(STDERR_FILENO, "\b\b  ", 4);
 	write(STDERR_FILENO, "\n", 1);
 	rl_on_new_line();
@@ -45,22 +45,12 @@ void	signal_catcher(int sig)
 {
 	if (sig == SIGINT)
 	{
-		// write(STDERR_FILENO, "\b\b  ", 4);
 		write(STDERR_FILENO, "\n", 1);
 		rl_on_new_line();
 		rl_replace_line("", 0);
 		rl_redisplay();
 		g_exit_status = 130;
 	}
-	// if (sig == SIGINT && the_signal_flag == 1)
-	// {
-	// 	the_signal_flag = 3;
-	// 	// rl_line_buffer = NULL;
-	// 	rl_replace_line("\n", 1);
-	// 	rl_redisplay();
-	// 	rl_on_new_line();
-	// 	// exit (130);
-	// }
 	(void) sig;
 }
 

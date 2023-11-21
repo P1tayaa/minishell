@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
+/*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/14 17:01:53 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/11/17 18:18:28 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/11/20 22:04:43 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,9 +135,10 @@ void	concat_path(char *buffer, const char *dir, const char *cmd)
 }
 
 /*
+	ft_strjoin_with_frees
 	Joins the S1 and S2 and return it (malloced), and free S1 and S2.
 */
-char	*ft_strjoin_with_frees(char *s1, char *s2)
+char	*sjoin_fr(char *s1, char *s2)
 {
 	size_t	len;
 	char	*ptr;
@@ -191,8 +192,8 @@ char	*mk_doll_ques_into_num(char **str_og,
 {
 	char	*str_return;
 
-	str_return = ft_strjoin_with_frees(str_dup_until_index((*str_og),
-				location_of_doll), ft_strjoin_with_frees(
+	str_return = sjoin_fr(str_dup_until_index((*str_og),
+				location_of_doll), sjoin_fr(
 				ft_itoa(number_replace),
 				ft_strdup(&(*str_og)[location_of_doll + 2])));
 	if (!str_return)
@@ -257,10 +258,10 @@ char *here_doc_starter(char *wordlocking_for)
     read_line_str = readline(" > ");
     while (ft_strncmp(wordlocking_for, read_line_str, return_biggest_int(ft_strlen(wordlocking_for), ft_strlen(read_line_str)))!= 0)
     {
-        str_return = ft_strjoin_with_frees(str_return, ft_strjoin("\n", read_line_str));
+        str_return = sjoin_fr(str_return, ft_strjoin("\n", read_line_str));
         read_line_str = readline(" > ");
     }
-	str_return = ft_strjoin_with_frees(str_return, ft_strdup("\n"));
+	str_return = sjoin_fr(str_return, ft_strdup("\n"));
 	return (str_return);
 }
 
@@ -702,9 +703,9 @@ void	split_logic(char *str, char **str_split, int *word_count, bool *writing)
 	int	i;
 	int	j;
 
-	i = 0;
+	i = -1;
 	j = 0;
-	while (str[i] != '\0')
+	while (str[++i] != '\0')
 	{
 		if (ft_isspace(str[i]))
 		{
@@ -712,18 +713,18 @@ void	split_logic(char *str, char **str_split, int *word_count, bool *writing)
 				finish_writing(&j, word_count, str_split, writing);
 			if (str[i + 1] != '\0' && !ft_isspace(str[i + 1]))
 				str_split[*word_count] = (char *)malloc
-					(sizeof(char) * (count_char_unti_space(&str[i + 1]) + 1));
+					(sizeof(char) * (count_char_unti_space(&str[i + 1]) + 3));
 		}
 		else
 		{
 			if (i == 0)
-				str_split[*word_count] = (char *)
-					malloc(sizeof(char) * (count_char_unti_space(&str[i]) + 1));
+				str_split[*word_count] = malloc(count_char_unti_space(&str[i]) + 3);
 			*writing = true;
 			str_split[*word_count][j++] = str[i];
 		}
-		i++;
 	}
+	if (ft_isspace(str[i - 1]))
+		(*word_count)--;
 }
 
 char *remove_front_spaces(char *str);

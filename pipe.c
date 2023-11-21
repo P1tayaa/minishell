@@ -6,14 +6,14 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/20 15:16:04 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/11/04 17:53:56 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/11/20 22:06:56 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
 int		are_there_more_cmds(t_lexer **lexer, int current);
-char	*ft_strjoin_with_frees(char *s1, char *s2);
+char	*sjoin_fr(char *s1, char *s2);
 char	***get_env(void);
 void	ascii_sort(char **environment);
 bool	is_str_export(char *str);
@@ -126,10 +126,10 @@ void    export_content_freeur(char ***export_content);
 
 char **mk_args_for_proc(t_pipedata *data)
 {
-    char    **args;
-    char    **args_temp;
-    int        i;
-    int        j;
+    char	**args;
+    char	**args_temp;
+    int		i;
+	int		j;
 
     i = 0;
     if (data->lexer[data->lex_count]->args != NULL)
@@ -233,7 +233,7 @@ int	manage_reads_writes(t_pipedata *data, t_lexer **lexer)
 			str = here_doc_starter(lexer[(*data).lex_count]->args);
 			if (!str)
 				return (-1);
-			lexer[(*data).lex_count]->file = ft_strjoin_with_frees(lexer[(*data).lex_count]->file, ft_strdup("heredoc"));
+			lexer[(*data).lex_count]->file = sjoin_fr(lexer[(*data).lex_count]->file, ft_strdup("heredoc"));
 			(*data).fd[1] = redirection_handler(lexer[(*data).lex_count]);
 			write((*data).fd[1], str, ft_strlen(str));
 			if (lexer[(*data).lex_count + 1]->cmd != NULL)
