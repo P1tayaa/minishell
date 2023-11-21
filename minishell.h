@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
+/*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:30:26 by omathot           #+#    #+#             */
-/*   Updated: 2023/11/17 12:04:34 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/11/21 21:30:28 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,9 +24,9 @@
 # include <signal.h>
 # include "./lib/libft/libft.h"
 # include <fcntl.h>
-#include <sys/wait.h>
+# include <sys/wait.h>
 
-extern volatile sig_atomic_t g_exit_status;
+extern volatile sig_atomic_t	g_exit_status;
 
 typedef struct s_post_quotes
 {
@@ -47,7 +47,7 @@ typedef struct s_lexer
 	bool	execd;
 }	t_lexer;
 
-typedef	struct s_list_of_quotes
+typedef struct s_list_of_quotes
 {
 	int	*single_quotes;
 	int	*double_quotes;
@@ -55,7 +55,7 @@ typedef	struct s_list_of_quotes
 
 typedef struct s_pipedata
 {
-	char	***environ; 
+	char	***environ;
 	int		og_in;
 	int		og_out;
 	int		input_fd;
@@ -69,10 +69,10 @@ void	exec(t_lexer *lexer);
 void	piping(t_lexer **lexer);
 char	*ft_strtok(char *str, const char *delim);
 void	concat_path(char *buffer, const char *dir, const char *cmd);
-char *str_dup_until_index(char *str, int index);
-int executer(t_lexer **lexer, t_pipedata *data);
-int	is_built_in(t_lexer **lexer, int lex_count);
-char *replace_doll_question_to_number_with_free(char *str_og, int number_replace);
-char *here_doc_starter(char *wordlocking_for);
+char	*str_dup_until_index(char *str, int index);
+int		executer(t_lexer **lexer, t_pipedata *data);
+int		is_built_in(t_lexer **lexer, int lex_count);
+char	*doll_to_num(char *str_og, int number_replace);
+char	*here_doc_starter(char *wordlocking_for);
 
 #endif

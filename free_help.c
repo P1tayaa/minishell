@@ -3,25 +3,23 @@
 /*                                                        :::      ::::::::   */
 /*   free_help.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
+/*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/25 12:36:35 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/09/18 15:31:17 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/11/21 21:11:16 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-
-
-
 /*
-	makes (malloced) a array of strings that contains all tokenid and ends with NULL.
+	makes (malloced) a array of strings
+	that contains all tokenid and ends with NULL.
 	tokenid: ||, |, <<, <, >>, >
 */
-char **get_list_of_tokenid(void)
+char	**get_list_of_tokenid(void)
 {
-	char **list_of_tokenid;
+	char	**list_of_tokenid;
 
 	list_of_tokenid = (char **)malloc(sizeof(char *) * 7);
 	if (!list_of_tokenid)
