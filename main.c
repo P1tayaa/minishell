@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
+/*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:29:45 by omathot           #+#    #+#             */
-/*   Updated: 2023/11/17 15:25:50 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/11/21 14:57:56 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,17 +15,17 @@
 int		main(void);
 char	*read_user_input(bool quotes_test);
 char	is_prompt_empty(char *str);
-int executer(t_lexer **lexer, t_pipedata *data);
+int 	executer(t_lexer **lexer, t_pipedata *data);
 t_lexer	**main_parser(char *str);
 void	check_quotes(char **str_og, t_post_quotes ***content);
 t_lexer	**parser_with_quotes(t_post_quotes **content);
 bool	check_export_for_quotes(t_post_quotes	***content, t_lexer ***lexer);
 
-bool is_str_export(char *str);
-char **get_export_var(char *arg_of_export);
+bool 	is_str_export(char *str);
+char 	**get_export_var(char *arg_of_export);
 bool	check_unset_for_quotes(t_post_quotes	***content, t_lexer ***lexer);
 void	free_double_array(char **list_of_tokenid);
-bool	pipe_export(t_lexer ***lexer);
+void	pipe_export(t_lexer ***lexer);
 
 volatile sig_atomic_t g_exit_status = 0;
 
@@ -140,15 +140,13 @@ bool export_andle_no_quotes(t_lexer ***lexer)
 	return (true);
 }
 
-void restore_default_sigint_handling()
+void	restore_default_sigint_handling(void)
 {
     struct sigaction sa;
 
-    // Set up the structure to specify the new action.
-    sa.sa_handler = SIG_DFL; // Default handler
+    sa.sa_handler = SIG_DFL;
     sa.sa_flags = 0;
     sigemptyset(&sa.sa_mask);
-
     sigaction(SIGINT, &sa, NULL);
 }
 
@@ -169,8 +167,6 @@ int    main(void)
 			break ;
 		if (quotes_test)
 			check_quotes(&str, &content);
-		// if (!quotes_test)
-		// {
 			if (content == NULL)
 				lexer = main_parser(str);
 			else
@@ -192,8 +188,6 @@ int    main(void)
 			i = 0;
 			while (lexer[i] != NULL)
 			{
-				// printf("arg was before: %s\n", lexer[i]->args);
-				// lexer[i]->args = replace_doll_question_to_number_with_free(lexer[i]->args, 69);
 				printf("\nlexer[%d]\n cmd: (%s)\n", i, lexer[i]->cmd);
 				printf("args: (%s)\n", lexer[i]->args);
 				printf("tokenid: (%s)\n", lexer[i]->tokenid);
@@ -201,14 +195,12 @@ int    main(void)
 				printf("flags: (%s)\n", lexer[i]->flags);
 				i++;
 			}
-			// restore_default_sigint_handling();
 			if (export_andle_no_quotes(&lexer))
 				continue ;
 			if (check_unset_noquotes(&lexer))
 				continue ;
 			else
 				piping(lexer);
-			// optiona: wait for return value.
 		if (ft_strlen(lexer[0]->cmd) == 3)
 			if ((ft_memcmp(lexer[0]->cmd, "cat", 3) == 0) && lexer[1] == NULL && lexer[0]->args == NULL)
 				write(2, "\033[18D\033[K", 8);
