@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/13 13:30:47 by sboulain          #+#    #+#             */
-/*   Updated: 2023/10/12 16:14:06 by sboulain         ###   ########.fr       */
+/*   Updated: 2023/11/20 16:29:16 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,19 +16,11 @@ int		count_pipes(char *str);
 char	**get_list_of_tokenid(void);
 void	free_double_array(char **list_of_tokenid);
 int		count_token(char *input);
-// int	copy_input_to_parcer_and_keep_track_of_curser(char *input, t_lexer *current_lex, int curser);
 void	free_parser(t_lexer **lexer);
 void	free_lexer(t_lexer **lexer);
-int 	parse_until_token_id(char *input, int current_lex, t_lexer **lexer, int curser);
-
-
-// figure out where ls -la | grep "." | cat > out -e > out2
-// the -e should be
-/*
-	so it take the user input (string) and parse it into out lexer struct​
-*/
-
-int ft_char_find(char *str, const char *list_of_char);
+int		parse_until_token_id(char *input, int current_lex,
+			t_lexer **lexer, int curser);
+int		ft_char_find(char *str, const char *list_of_char);
 bool	ft_isspace(unsigned char c);
 
 void	count_flags_char_len(int *i, int *flags_char_len, t_lexer *lexer)
@@ -45,10 +37,10 @@ void	count_flags_char_len(int *i, int *flags_char_len, t_lexer *lexer)
 	Return the number of charaters that are going to be moved from arg to flags,
 	And keeps track of how many are going to be left in arg with ARGS_CHAR_LEN
 */
-int count_number_flags_char(int *args_char_len, t_lexer *lexer)
+int	count_number_flags_char(int *args_char_len, t_lexer *lexer)
 {
-	int flags_char_len;
-	int i;
+	int	flags_char_len;
+	int	i;
 
 	flags_char_len = 0;
 	*args_char_len = 0;
@@ -56,15 +48,15 @@ int count_number_flags_char(int *args_char_len, t_lexer *lexer)
 	while (lexer->args[i] != '\0')
 	{
 		if (i != 0)
+		{
 			if (ft_isspace(lexer->args[i - 1]) && lexer->args[i] == '-')
 			{
 				count_flags_char_len(&i, &flags_char_len, lexer);
 				continue ;
 			}
-		if (i == 0 && lexer->args[i] == '-')
-		{
-			count_flags_char_len(&i, &flags_char_len, lexer);
 		}
+		if (i == 0 && lexer->args[i] == '-')
+			count_flags_char_len(&i, &flags_char_len, lexer);
 		else
 		{
 			(*args_char_len)++;
@@ -75,11 +67,12 @@ int count_number_flags_char(int *args_char_len, t_lexer *lexer)
 }
 
 /*
-	Malloc in new args and flags with the pointer to the address given in ARGS and FLAGS
+	Malloc in new args and flags with the pointer
+	to the address given in ARGS and FLAGS
 */
-void	malloc_new_args_and_new_flags(int args_char_len, char **args, char **flags, int flags_char_len)
+void	malloc_new_args_and_new_flags(int args_char_len, char **args,
+		char **flags, int flags_char_len)
 {
-	// printf("args_char_len == %d\n", args_char_len);
 	if (args_char_len != 0)
 	{
 		(*args) = malloc(sizeof(char) * (args_char_len + 1));
@@ -93,7 +86,8 @@ void	malloc_new_args_and_new_flags(int args_char_len, char **args, char **flags,
 		exit (-1);
 }
 
-void	move_flag_from_arg_to_flags(int *i, int *flags_char_len, t_lexer *lexer, char **flags)
+void	move_flag_from_arg_to_flags(int *i, int *flags_char_len,
+		t_lexer *lexer, char **flags)
 {
 	(*i)++;
 	while (!ft_isspace(lexer->args[(*i)]) && lexer->args[(*i)] != '\0')
@@ -104,27 +98,30 @@ void	move_flag_from_arg_to_flags(int *i, int *flags_char_len, t_lexer *lexer, ch
 	}
 }
 
-void	move_all_flag_from_arg_to_flags(char **flags, int flags_char_len, int args_char_len, char **args, t_lexer *lexer)
+void	move_all_flag_from_arg_to_flags(char **flags,
+		int args_char_len, char **args, t_lexer *lexer)
 {
 	int	i;
+	int	flags_char_len;
 
 	i = 0;
+	flags_char_len = 1;
 	while (lexer->args[i] != '\0')
 	{
 		if (i != 0)
+		{
 			if (ft_isspace(lexer->args[i - 1]) && lexer->args[i] == '-')
 			{
 				move_flag_from_arg_to_flags(&i, &flags_char_len, lexer, flags);
 				continue ;
 			}
+		}
 		if (i == 0 && lexer->args[i] == '-')
 		{
 			move_flag_from_arg_to_flags(&i, &flags_char_len, lexer, flags);
 			continue ;
 		}
-		(*args)[args_char_len] = lexer->args[i];
-		args_char_len++;
-		i++;
+		(*args)[args_char_len++] = lexer->args[i++];
 	}
 	(*flags)[flags_char_len] = '\0';
 	if ((*args) != NULL)
@@ -132,21 +129,22 @@ void	move_all_flag_from_arg_to_flags(char **flags, int flags_char_len, int args_
 }
 
 /*
-	Move the flags from args to there respective par of the lexer by reconising where the '-'
+	Move the flags from args to there respective
+	par of the lexer by reconising where the '-'
 	
 */
 void	move_flags_from_args_to_flags(t_lexer *lexer)
 {
-	char *args;
-	char *flags;
-	int flags_char_len;
-	int args_char_len;
-	char *temp;
+	char	*args;
+	char	*flags;
+	int		flags_char_len;
+	int		args_char_len;
+	char	*temp;
 
 	flags_char_len = count_number_flags_char(&args_char_len, lexer);
 	malloc_new_args_and_new_flags(args_char_len, &args, &flags, flags_char_len);
 	flags[0] = '-';
-	move_all_flag_from_arg_to_flags(&flags, 1, 0, &args, lexer);
+	move_all_flag_from_arg_to_flags(&flags, 0, &args, lexer);
 	free(lexer->args);
 	lexer->args = args;
 	if (lexer->flags != NULL)
@@ -162,8 +160,8 @@ void	move_flags_from_args_to_flags(t_lexer *lexer)
 
 void	move_file_name_to_file_and_comand_back_p2(t_lexer *lexer, int i)
 {
-	char *temp;
-	int	j;
+	char	*temp;
+	int		j;
 
 	temp = malloc(ft_strlen(lexer->args) - i + 1);
 	if (!temp)
@@ -181,11 +179,13 @@ void	move_file_name_to_file_and_comand_back_p2(t_lexer *lexer, int i)
 
 /*
 	Put the cmd from current lexer into file of the previus lexer.
-	Than moves the first word from agrs back to cmd, in case cmd was actually a file.
+	Than moves the first word from agrs back to cmd,
+	in case cmd was actually a file.
 */
-void	move_file_name_to_file_and_comand_back(t_lexer *lexer_previous, t_lexer *lexer)
+void	move_file_name_to_file_and_comand_back(t_lexer *lexer_previous,
+		t_lexer *lexer)
 {
-	int i;
+	int	i;
 
 	lexer_previous->file = lexer->cmd;
 	if (lexer->args == NULL)
@@ -213,13 +213,13 @@ void	move_file_name_to_file_and_comand_back(t_lexer *lexer_previous, t_lexer *le
 	Return a string with all the characters at the fronts that is a space.
 	It frees the origial STR variable
 */
-char *remove_front_spaces(char *str)
+char	*remove_front_spaces(char *str)
 {
-	int i;
-	char *str_temp;
+	int		i;
+	char	*str_temp;
 
 	if (str == NULL)
-		return NULL;
+		return (NULL);
 	i = 0;
 	while (ft_isspace(str[i]) && str[i] != '\0')
 	{
@@ -239,8 +239,8 @@ char *remove_front_spaces(char *str)
 
 char	*remove_back_spaces_p2(char *str, int i, int how_many_char)
 {
-	char *str_dup_without_spaces;
-	
+	char	*str_dup_without_spaces;
+
 	str_dup_without_spaces = malloc(ft_strlen(str) - i + 1);
 	if (!str_dup_without_spaces)
 		exit (1);
@@ -259,14 +259,14 @@ char	*remove_back_spaces_p2(char *str, int i, int how_many_char)
 	Return a string with all the characters at the back that is a space.
 	It frees the origial STR variable
 */
-char *remove_back_spaces(char *str)
+char	*remove_back_spaces(char *str)
 {
-	char *str_dup_without_spaces;
-	int	i;
-	int how_many_char;
+	char	*str_dup_without_spaces;
+	int		i;
+	int		how_many_char;
 
 	if (str == NULL)
-		return NULL;
+		return (NULL);
 	i = 0;
 	while (ft_isspace(str[ft_strlen(str) - i - 1]) && ft_strlen(str) - i > 0)
 		i++;
@@ -291,9 +291,10 @@ char *remove_back_spaces(char *str)
 /*
 	Initiates values to zero or null and malloc the new lexer i.
 	
-	LEXER is a pointer to the address of current one of double array of t_lexer (&lexer[i])
+	LEXER is a pointer to the address of current one
+	of double array of t_lexer (&lexer[i])
 */
-void	initiate_values_to_zero_NULL(t_lexer **lexer, int i)
+void	initiate_values_to_zero_null(t_lexer **lexer, int i)
 {
 	(*lexer) = (t_lexer *)malloc(sizeof(t_lexer));
 	if (!(*lexer))
@@ -308,10 +309,12 @@ void	initiate_values_to_zero_NULL(t_lexer **lexer, int i)
 }
 
 /*
-	Removes the spaces that are at the front and back of all parts of LEXER
+	Removes the spaces that are at the front and back of
+	all parts of LEXER
 	by using remove_front_spaces() and remove_back_spaces()
 	
-	LEXER is a pointer to the address of current one of double array of t_lexer (&lexer[i])
+	LEXER is a pointer to the address of current one
+	of double array of t_lexer (&lexer[i])
 */
 void	removes_front_and_back_redondant_spaces(t_lexer **lexer)
 {
@@ -330,16 +333,23 @@ void	removes_front_and_back_redondant_spaces(t_lexer **lexer)
 	Place the first word of the user input (cmd) to the right place.
 	Either in file or args.
 
-	PREVIUS_LEXER is a pointer to the address of previus one of double array of t_lexer (&lexer[i - 1])
-	CURRENT_LEXER is a pointer to the address of current one of double array of t_lexer (&lexer[i])
+	PREVIUS_LEXER is a pointer to the address of previus
+	one of double array of t_lexer (&lexer[i - 1])
+	
+	CURRENT_LEXER is a pointer to the address of current
+	one of double array of t_lexer (&lexer[i])
 */
-void	move_cmd_to_right_place_if_speacific_tokenid(t_lexer **previus_lexer, t_lexer **current_lexer, int i)
+void	move_cmd_to_right_place_if_speacific_tokenid(
+		t_lexer **previus_lexer, t_lexer **current_lexer, int i)
 {
 	if (i > 0)
 	{
-		if ((*previus_lexer)->tokenid[0] == '<' && (*previus_lexer)->tokenid[1] == '\0')
-			move_file_name_to_file_and_comand_back((*previus_lexer), (*current_lexer));
-		if ((*previus_lexer)->tokenid[0] == '<' && (*previus_lexer)->tokenid[1] == '<')
+		if ((*previus_lexer)->tokenid[0]
+			== '<' && (*previus_lexer)->tokenid[1] == '\0')
+			move_file_name_to_file_and_comand_back(
+				(*previus_lexer), (*current_lexer));
+		if ((*previus_lexer)->tokenid[0]
+			== '<' && (*previus_lexer)->tokenid[1] == '<')
 		{
 			(*previus_lexer)->args = (*current_lexer)->cmd;
 			(*current_lexer)->cmd = NULL;
@@ -360,10 +370,10 @@ void	move_cmd_to_right_place_if_speacific_tokenid(t_lexer **previus_lexer, t_lex
 */
 t_lexer	**main_parser(char *str)
 {
-	int	token_num;
-	int curser;
-	int	i;
-	t_lexer **lexer;
+	int		token_num;
+	int		curser;
+	int		i;
+	t_lexer	**lexer;
 
 	token_num = count_token(str);
 	lexer = (t_lexer **)malloc(sizeof(t_lexer *) * (token_num + 2));
@@ -373,11 +383,12 @@ t_lexer	**main_parser(char *str)
 	curser = 0;
 	while (i <= token_num)
 	{
-		initiate_values_to_zero_NULL(&lexer[i], i);
+		initiate_values_to_zero_null(&lexer[i], i);
 		curser = parse_until_token_id(str, i, lexer, curser);
 		if (ft_char_find(lexer[i]->args, "-") != -1)
 			move_flags_from_args_to_flags(lexer[i]);
-		move_cmd_to_right_place_if_speacific_tokenid(&lexer[i - 1], &lexer[i], i);
+		move_cmd_to_right_place_if_speacific_tokenid(
+			&lexer[i - 1], &lexer[i], i);
 		removes_front_and_back_redondant_spaces(&lexer[i]);
 		i++;
 	}
@@ -387,9 +398,10 @@ t_lexer	**main_parser(char *str)
 }
 
 // count num of dash and flags char len
-void	count_num_dash_and_flags_char_len(char **str, int i, int *num_of_dash, int *flags_char_len)
+void	count_num_dash_and_flags_char_len(char **str,
+		int i, int *num_of_dash, int *flags_char_len)
 {
-	int j;
+	int	j;
 
 	while ((*str)[i] != '\0')
 	{
@@ -403,10 +415,9 @@ void	count_num_dash_and_flags_char_len(char **str, int i, int *num_of_dash, int 
 			{
 				(*num_of_dash)++;
 				j = 0;
-				while ((*str)[i + j] != '\0' && ft_isspace((*str)[i + j]) == false)
-				{
+				while ((*str)[i + j] != '\0' &&
+					ft_isspace((*str)[i + j]) == false)
 					j++;
-				}
 				i = i + j;
 				(*flags_char_len) = (*flags_char_len) + j;
 				continue ;
@@ -417,13 +428,15 @@ void	count_num_dash_and_flags_char_len(char **str, int i, int *num_of_dash, int 
 }
 
 //initiate the values in cosponding with num of dash and flags char len
-char *init_new_flag_str(int flags_char_len, char **str, int num_of_dash)
+char	*init_new_flag_str(int flags_char_len, char **str, int num_of_dash)
 {
 	char	*new_str;
 
-	if (ft_strlen((*str)) - (sizeof(char) * (flags_char_len + num_of_dash)) != 0)
+	if (ft_strlen((*str)) - (sizeof(char) * (
+				flags_char_len + num_of_dash)) != 0)
 	{
-		new_str = malloc(ft_strlen((*str)) - (sizeof(char) * (flags_char_len + num_of_dash)) + 1);
+		new_str = malloc(ft_strlen((*str)) - (sizeof(char)
+					* (flags_char_len + num_of_dash)) + 1);
 		if (!new_str)
 			exit(1);
 	}
@@ -437,16 +450,31 @@ void	set_value_of_flag_str_p2(char **new_str, char **str, int *k, int *i)
 	(*new_str)[(*k)] = (*str)[(*i)];
 	if ((*str)[(*i) + 1] != '\0')
 		if (((*str)[(*i) + 1]))
-	(*k)++;
+			(*k)++;
 	(*i)++;
 }
 
-// set the values of string, but doesn't add the '-'
-int	set_value_of_flag_str(int *flags_char_len, char **str, char	**flags, char **new_str)
+void	place_flag(int *i, char **str, char **flags, int *flags_char_len)
 {
-	int i;
-	int j;
-	int k;
+	int	j;
+
+	j = 0;
+	(*i)++;
+	while ((*str)[(*i) + j] != '\0' && ft_isspace((*str)[(*i) + j]) == false)
+	{
+		(*flags)[(*flags_char_len)] = (*str)[(*i) + j];
+		j++;
+		(*flags_char_len)++;
+	}
+	(*i) = (*i) + j;
+}
+
+// set the values of string, but doesn't add the '-'
+int	set_value_of_flag_str(int *flags_char_len,
+		char **str, char	**flags, char **new_str)
+{
+	int	i;
+	int	k;
 
 	i = 0;
 	(*flags_char_len) = 0;
@@ -459,15 +487,7 @@ int	set_value_of_flag_str(int *flags_char_len, char **str, char	**flags, char **
 				i++;
 			if ((*str)[i] == '-')
 			{
-				j = 0;
-				i++;
-				while ((*str)[i + j] != '\0' && ft_isspace((*str)[i + j]) == false)
-				{
-					(*flags)[(*flags_char_len)] = (*str)[i + j];
-					j++;
-					(*flags_char_len)++;
-				}
-				i = i + j;
+				place_flag(&i, str, flags, flags_char_len);
 				continue ;
 			}
 			if ((*str)[i] == '\0')
@@ -479,8 +499,12 @@ int	set_value_of_flag_str(int *flags_char_len, char **str, char	**flags, char **
 }
 
 // null terminate all right string or make them null if they are.
-void	null_terminate_flags_str(int k, int flags_char_len, char **new_str, char **str, char **flags)
+void	null_terminate_flags_str(int flags_char_len,
+		char **new_str, char **str, char **flags)
 {
+	int	k;
+
+	k = set_value_of_flag_str(&flags_char_len, str, flags, new_str);
 	if (k == 0)
 	{
 		free((*new_str));
@@ -493,13 +517,12 @@ void	null_terminate_flags_str(int k, int flags_char_len, char **new_str, char **
 	(*flags)[flags_char_len] = '\0';
 }
 
-char *get_flags_str(char **str)
+char	*get_flags_str(char **str)
 {
 	char	*flags;
 	char	*new_str;
 	int		flags_char_len;
 	int		i;
-	int		k;
 	int		num_of_dash;
 
 	if (str == NULL)
@@ -515,54 +538,68 @@ char *get_flags_str(char **str)
 	if (!flags)
 		exit (1);
 	new_str = init_new_flag_str(flags_char_len, str, num_of_dash);
-	k = set_value_of_flag_str(&flags_char_len, str, &flags, &new_str);
-	null_terminate_flags_str(k, flags_char_len, &new_str, str, &flags);
+	null_terminate_flags_str(flags_char_len, &new_str, str, &flags);
 	return (flags);
 }
 // ! this is for lexer_quotes
 
-char	*ft_strjoin_with_frees(char const *s1, char const *s2);
+char	*sjoin_fr(char const *s1, char const *s2);
 char	*handle_expand_doll(char *str);
 
 bool	is_a_token_id(char *input);
 int		copy_until_tokenid(int i, char *input_after_curser, char **destination);
 int		copy_until_space(int i, char *input_after_curser, char **destination);
-int		write_the_right_token(int i, char *input_after_curser,char tokenid[3]);
+int		write_the_right_token(int i, char *input_after_curser, char tokenid[3]);
 
-// depending on the current situation place the content of the quotes in the right place
-void	parse_with_quotes_quotes_assigning(t_post_quotes **content, bool *function_done, t_lexer ***lexer, int *i_content, int i)
+void	parse_quote_cmd(t_post_quotes **content,
+		t_lexer ***lexer, bool *function_done, int i)
+{
+	if ((*content)->have_to_expand)
+		(*lexer)[i]->cmd = handle_expand_doll((*content)->content);
+	else
+		(*lexer)[i]->cmd = ft_strdup((*content)->content);
+	(*function_done) = true;
+}
+
+/*
+depending on the current situation place
+the content of the quotes in the right place
+*/
+void	parse_with_quotes_quotes_assigning(t_post_quotes **content,
+		bool *function_done, t_lexer ***lexer, int i)
 {
 	if ((*function_done) == false)
-	{
-		if (content[(*i_content)]->have_to_expand)
-			(*lexer)[i]->cmd = handle_expand_doll(content[(*i_content)]->content);
-		else
-			(*lexer)[i]->cmd = ft_strdup(content[(*i_content)]->content);
-		(*function_done) = true;
-	}
+		parse_quote_cmd(content, lexer, function_done, i);
 	else
 	{
-		if (content[(*i_content)]->content[0] == '-')
-			if (content[(*i_content)]->have_to_expand)
-				(*lexer)[i]->flags = ft_strjoin_with_frees((*lexer)[i]->flags, handle_expand_doll(&content[(*i_content)]->content[1]));
-			// ! need to protect this malloc with strdup, when puting in a function
+		if ((*content)->content[0] == '-')
+		{
+			if ((*content)->have_to_expand)
+				(*lexer)[i]->flags = sjoin_fr((*lexer)[i]->flags,
+						handle_expand_doll(&(*content)->content[1]));
 			else
-				(*lexer)[i]->flags = ft_strjoin_with_frees((*lexer)[i]->flags, ft_strdup(&content[(*i_content)]->content[1]));
+				(*lexer)[i]->flags = sjoin_fr((*lexer)[i]->flags,
+						ft_strdup(&(*content)->content[1]));
+		}
 		else
-			if (content[(*i_content)]->have_to_expand)
-				(*lexer)[i]->args = ft_strjoin_with_frees((*lexer)[i]->args, ft_strjoin_with_frees(handle_expand_doll(content[(*i_content)]->content), ft_strdup(" ")));
-			// ! need to protect this malloc with strdup, when puting in a function
+		{
+			if ((*content)->have_to_expand)
+				(*lexer)[i]->args = sjoin_fr((*lexer)[i]->args,
+						sjoin_fr(handle_expand_doll((*content)->content),
+							ft_strdup(" ")));
 			else
-				(*lexer)[i]->args = ft_strjoin_with_frees((*lexer)[i]->args, ft_strjoin_with_frees(ft_strdup(content[(*i_content)]->content), ft_strdup(" ")));
+				(*lexer)[i]->args = sjoin_fr((*lexer)[i]->args, sjoin_fr(
+							ft_strdup((*content)->content), ft_strdup(" ")));
+		}
 	}
-	(*i_content)++;
 }
 
 // not sure if done right
-void	move_flags_for_quotes(char **curent_content, int *j, int i, t_lexer ***lexer)
+void	move_flags_for_quotes(char **curent_content,
+		int *j, int i, t_lexer ***lexer)
 {
-	char *temp;
-	char *temp2;
+	char	*temp;
+	char	*temp2;
 
 	temp = NULL;
 	(*j) = copy_until_tokenid(*j, (*curent_content), &temp);
@@ -570,13 +607,14 @@ void	move_flags_for_quotes(char **curent_content, int *j, int i, t_lexer ***lexe
 	{
 		printf("temp == (%s)\n", temp);
 		temp2 = get_flags_str(&temp);
-		// ! need to protect this malloc with strdup, when puting in a function
-		(*lexer)[i]->args = ft_strjoin_with_frees((*lexer)[i]->args, ft_strjoin_with_frees(temp, ft_strdup(" ")));
-		(*lexer)[i]->flags = ft_strjoin_with_frees((*lexer)[i]->flags, temp2);
+		(*lexer)[i]->args = sjoin_fr((*lexer)[i]->args,
+				sjoin_fr(temp, ft_strdup(" ")));
+		(*lexer)[i]->flags = sjoin_fr((*lexer)[i]->flags, temp2);
 	}
 }
 
-void	parse_with_quotes_none_quotes_assigning_if_token(char **curent_content, int *j, t_lexer ***lexer, int *i)
+void	parse_with_quotes_none_quotes_assigning_if_token(char
+		**curent_content, int *j, t_lexer ***lexer, int *i)
 {
 	write_the_right_token((*j), (*curent_content), ((*lexer)[(*i)]->tokenid));
 	(*j) = (*j) + ft_strlen((*lexer)[(*i)]->tokenid);
@@ -595,28 +633,31 @@ void	parse_with_quotes_none_quotes_assigning_if_token(char **curent_content, int
 	(*i)++;
 	if ((*curent_content)[(*j)] != '\0')
 	{
-		initiate_values_to_zero_NULL(&(*lexer)[(*i)], (*i));
+		initiate_values_to_zero_null(&(*lexer)[(*i)], (*i));
 		(*lexer)[(*i)]->flags = ft_strdup("-");
 		if (!(*lexer)[(*i)]->flags)
 			exit(1);
 	}
 }
 
-void	parse_with_quotes_none_quotes_assigning(char **curent_content, bool *function_done, t_lexer ***lexer, int *i)
+void	parse_with_quotes_none_quotes_assigning(char
+		**curent_content, bool *function_done, t_lexer ***lexer, int *i)
 {
-	int j;
+	int	j;
 
 	j = 0;
 	while ((*curent_content)[j] != '\0')
 	{
-		if ((*function_done) == false && ft_isspace((*curent_content)[j]) == false)
+		if ((*function_done) == false
+			&& ft_isspace((*curent_content)[j]) == false)
 		{
 			j = copy_until_space(j, (*curent_content), &(*lexer)[(*i)]->cmd);
 			(*function_done) = true;
 		}
 		if (is_a_token_id(&(*curent_content)[j]) == true)
 		{
-			parse_with_quotes_none_quotes_assigning_if_token(curent_content, &j, lexer, i);
+			parse_with_quotes_none_quotes_assigning_if_token(
+				curent_content, &j, lexer, i);
 			(*function_done) = false;
 		}
 		if ((*function_done) && ft_isspace((*curent_content)[j]) == false)
@@ -629,9 +670,10 @@ void	parse_with_quotes_none_quotes_assigning(char **curent_content, bool *functi
 }
 
 // malloc the content
-void	parse_with_quotes_init(t_post_quotes **content, int	*token_num, t_lexer ***lexer)
+void	parse_with_quotes_init(t_post_quotes **content,
+		int	*token_num, t_lexer ***lexer)
 {
-	int i;
+	int	i;
 
 	i = 0;
 	(*token_num) = 0;
@@ -644,23 +686,22 @@ void	parse_with_quotes_init(t_post_quotes **content, int	*token_num, t_lexer ***
 	(*lexer) = (t_lexer **)malloc(sizeof(t_lexer *) * ((*token_num) + 2));
 	if (!(*lexer))
 		exit(1);
-
 }
 
-void	parser_with_quotes_p2(t_post_quotes **content, bool *function_done, t_lexer ***lexer, int *i)
+void	parser_with_quotes_p2(t_post_quotes **content,
+		bool *function_done, t_lexer ***lexer, int *i)
 {
-	int i_content;
-	
+	int	i_content;
+
 	i_content = 0;
 	while (content[i_content] != NULL)
 	{
 		if (content[i_content]->is_quotes)
-			parse_with_quotes_quotes_assigning(content, function_done, lexer, &i_content, *i);
+			parse_with_quotes_quotes_assigning(
+				&content[i_content++], function_done, lexer, (*i));
 		else
-		{	
-			parse_with_quotes_none_quotes_assigning(&content[i_content]->content, function_done, lexer, i);
-			i_content++;
-		}
+			parse_with_quotes_none_quotes_assigning(
+				&content[i_content++]->content, function_done, lexer, i);
 	}
 	if ((*lexer)[(*i)]->args != NULL)
 	{
@@ -683,17 +724,17 @@ void	parser_with_quotes_p2(t_post_quotes **content, bool *function_done, t_lexer
 */
 t_lexer	**parser_with_quotes(t_post_quotes **content)
 {
-	t_lexer **lexer;
-	int	token_num;
-	int i;
-	bool function_done;
+	t_lexer	**lexer;
+	int		token_num;
+	int		i;
+	bool	function_done;
 
 	parse_with_quotes_init(content, &token_num, &lexer);
 	i = 0;
 	function_done = false;
 	if (function_done == false)
 	{
-		initiate_values_to_zero_NULL(&lexer[i], i);
+		initiate_values_to_zero_null(&lexer[i], i);
 		lexer[i]->flags = ft_strdup("-");
 		if (!lexer[i]->flags)
 			exit(1);
@@ -704,7 +745,7 @@ t_lexer	**parser_with_quotes(t_post_quotes **content)
 	return (lexer);
 }
 
-int	count_char_until_next_token(char *input);
+int		count_char_until_next_token(char *input);
 
 /*
 	Return true if INPUT is of these:
@@ -737,9 +778,11 @@ bool	is_a_token_id(char *input)
 }
 
 /*
-	Copies from index I from INPUT_AFTER_CURSER into pointer to the string DESTINATION
-	But only copies until the end of the string or until a space or until a tokenid.
-	And return the index at whitch it stoped.
+Copies from index I from INPUT_AFTER_CURSE
+into pointer to the string DESTINATION
+But only copies until the end of the string or
+until a space or until a tokenid.
+And return the index at whitch it stoped.
 */
 int	copy_until_space(int i, char *input_after_curser, char **destination)
 {
@@ -747,8 +790,8 @@ int	copy_until_space(int i, char *input_after_curser, char **destination)
 
 	j = 0;
 	while (input_after_curser[i + j] != '\0'
-			&& (!ft_isspace(input_after_curser[i + j])
-				&& !is_a_token_id(&input_after_curser[i + j])))
+		&& (!ft_isspace(input_after_curser[i + j])
+			&& !is_a_token_id(&input_after_curser[i + j])))
 	{
 		j++;
 	}
@@ -771,8 +814,10 @@ int	copy_until_space(int i, char *input_after_curser, char **destination)
 }
 
 /*
-	Copies from index I from INPUT_AFTER_CURSER into pointer to the string DESTINATION
-	But only copies until the end of the string or until a tokenid.
+	Copies from index I from INPUT_AFTER_CURSER
+	into pointer to the string DESTINATION
+	But only copies until the end of the string
+	or until a tokenid.
 	And return the index at whitch it stoped.
 */
 int	copy_until_tokenid(int i, char *input_after_curser, char **destination)
@@ -807,7 +852,7 @@ int	copy_until_tokenid(int i, char *input_after_curser, char **destination)
 	write in TOKENID, the token id curently at INPUT_AFTER_CURSER[I]
 	tokenid: ||, |, <<, <, >>, >
 */
-int	write_the_right_token(int i, char *input_after_curser,char tokenid[3])
+int	write_the_right_token(int i, char *input_after_curser, char tokenid[3])
 {
 	int	j;
 
@@ -828,7 +873,7 @@ int	write_the_right_token(int i, char *input_after_curser,char tokenid[3])
 	And continue reading the INPUT starting at the curser.
 	and return the new Curser (index at whitch it is done reading)
 */
-int parse_until_token_id(
+int	parse_until_token_id(
 		char *input, int current_lex, t_lexer **lexer, int curser)
 {
 	int		i;
@@ -844,12 +889,12 @@ int parse_until_token_id(
 			function_done = true;
 		}
 		if (function_done && ft_isspace(input[i + curser]) == false)
-		{
-			i = copy_until_tokenid(i, &input[curser], &(lexer[current_lex]->args));
-		}
+			i = copy_until_tokenid(i,
+					&input[curser], &(lexer[current_lex]->args));
 		if (is_a_token_id(&input[i + curser]) == true)
 		{
-			i = write_the_right_token(i, &input[curser], (lexer[current_lex]->tokenid));
+			i = write_the_right_token(i,
+					&input[curser], (lexer[current_lex]->tokenid));
 			break ;
 		}
 		if (ft_isspace(input[i + curser]))
@@ -857,7 +902,6 @@ int parse_until_token_id(
 	}
 	return (curser + i);
 }
-
 
 int	count_char_until_next_token(char *input)
 {
@@ -888,7 +932,7 @@ int	count_char_until_next_token(char *input)
 	return (free_double_array(list_of_tokenid), i);
 }
 
-int set_k_for_count_token(char *input, int i, char	**list_of_tokenid, int j)
+int	set_k_for_count_token(char *input, int i, char	**list_of_tokenid, int j)
 {
 	int		k;
 

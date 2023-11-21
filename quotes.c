@@ -6,21 +6,30 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/12 11:53:41 by omathot           #+#    #+#             */
-/*   Updated: 2023/10/17 15:28:22 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/11/20 22:09:41 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
 /*
-Handle ’ (single quote) which should prevent the shell from interpreting the metacharacters in the quoted sequence.
-Handle " (double quote) which should prevent the shell from interpreting the metacharacters in the quoted sequence except for $ (dollar sign).
+Handle ’ (single quote) which should prevent
+the shell from interpreting the metacharacters in
+the quoted sequence.
+Handle " (double quote) which should prevent
+the shell from interpreting the metacharacters in
+the quoted sequence except for $ (dollar sign).
 */
 
-int		*get_doll_position(char *str);
-char	*handle_expand_doll(char *str);
+int					*get_doll_position(char *str);
+char				*handle_expand_doll(char *str);
+t_list_of_quotes	*count_and_locate_quotes(char *str);
+void				find_fake_quotes(t_list_of_quotes **list_of_quotes,
+						char **str, int	**fake_double_quotes);
+char				*sjoin_fr(char const *s1, char const *s2);
 
-int	get_number_of_real_double_quotes(int **position_double_quotes,  int	*fake_double_quotes)
+int	get_number_of_real_double_quotes(int
+		**position_double_quotes, int *fake_double_quotes)
 {
 	int	i;
 	int	j;
@@ -44,10 +53,12 @@ int	get_number_of_real_double_quotes(int **position_double_quotes,  int	*fake_do
 	return (num_of_real_quotes);
 }
 
-void	remove_fake_double_quotes_p2(int **position_double_quotes, int	*fake_double_quotes, int *num_of_real_quotes, int	**real_quotes)
+void	remove_fake_double_quotes_p2(int
+		**position_double_quotes, int *fake_double_quotes,
+		int *num_of_real_quotes, int **real_quotes)
 {
-	int j;
-	int i;
+	int	j;
+	int	i;
 
 	i = 0;
 	while ((*position_double_quotes)[i] != -1)
@@ -61,7 +72,8 @@ void	remove_fake_double_quotes_p2(int **position_double_quotes, int	*fake_double
 		}
 		if ((*position_double_quotes)[i] != fake_double_quotes[j])
 		{
-			(*real_quotes)[(*num_of_real_quotes)] = (*position_double_quotes)[i];
+			(*real_quotes)[(*num_of_real_quotes)]
+				= (*position_double_quotes)[i];
 			(*num_of_real_quotes)++;
 		}
 		i++;
@@ -69,40 +81,38 @@ void	remove_fake_double_quotes_p2(int **position_double_quotes, int	*fake_double
 	(*real_quotes)[(*num_of_real_quotes)] = -1;
 }
 
-void	remove_fake_double_quotes(int **position_double_quotes, int	*fake_double_quotes)
+void	remove_fake_double_quotes(int
+		**position_double_quotes, int *fake_double_quotes)
 {
-	// int	i;
-	// int	j;
 	int	num_of_real_quotes;
 	int	*real_quotes;
 
-	num_of_real_quotes = get_number_of_real_double_quotes(position_double_quotes, fake_double_quotes);
-	real_quotes = (int *)malloc(sizeof(int) * (num_of_real_quotes + 1));
+	num_of_real_quotes = get_number_of_real_double_quotes(
+			position_double_quotes, fake_double_quotes);
+	printf("num_of_real_quotes == %i\n", num_of_real_quotes);
+	real_quotes = (int *)malloc(sizeof(int) * (num_of_real_quotes + 5));
 	if (!real_quotes)
 		exit(1);
-	remove_fake_double_quotes_p2(position_double_quotes, fake_double_quotes, &num_of_real_quotes, &real_quotes);
+	remove_fake_double_quotes_p2(position_double_quotes,
+		fake_double_quotes, &num_of_real_quotes, &real_quotes);
 	free((*position_double_quotes));
 	(*position_double_quotes) = real_quotes;
 }
-
-t_list_of_quotes *count_and_locate_quotes(char *str);
-void	find_fake_quotes(t_list_of_quotes **list_of_quotes, char **str, int	**fake_double_quotes);
-char	*ft_strjoin_with_frees(char const *s1, char const *s2);
-
 
 /*
 	get more user input and adds it to the str (userinput)
 	then refind the quotes and relocate the fakequotes (recursive loop)
 */
-void	relocate_quotes(t_list_of_quotes **list_of_quotes, char **str, int	**fake_double_quotes)
+void	relocate_quotes(t_list_of_quotes **list_of_quotes,
+		char **str, int **fake_double_quotes)
 {
-	char *str_temp;
+	char	*str_temp;
 
 	if (fake_double_quotes != NULL)
 		str_temp = readline("\n double quotes > ");
 	else
 		str_temp = readline("\n single quotes > ");
-	*str = ft_strjoin_with_frees(*str, ft_strjoin("\n", str_temp));
+	*str = sjoin_fr(*str, ft_strjoin("\n", str_temp));
 	free((*list_of_quotes)->double_quotes);
 	free((*list_of_quotes)->single_quotes);
 	free(*list_of_quotes);
@@ -111,11 +121,28 @@ void	relocate_quotes(t_list_of_quotes **list_of_quotes, char **str, int	**fake_d
 	{
 		find_fake_quotes(list_of_quotes, str, fake_double_quotes);
 		if ((*fake_double_quotes)[0] != -1)
-			remove_fake_double_quotes(&(*list_of_quotes)->double_quotes, (*fake_double_quotes));
+			remove_fake_double_quotes(
+				&(*list_of_quotes)->double_quotes, (*fake_double_quotes));
 	}
 }
 
-void	find_fake_quotes(t_list_of_quotes **list_of_quotes, char **str, int	**fake_double_quotes)
+// void	assign_fake_quotes(t_list_of_quotes **list_of_quotes, int *val_of_curent_double_quote, int *fake_double_quotes_val, int *i)
+// {
+// 	puts("in bs function");
+// 	if ((*list_of_quotes)->double_quotes[(*i)] != -1)
+// 	{
+// 		puts("double quotes found in if");
+// 		printf("curent (*val_of_curent_double_quote) = %i\n",(*val_of_curent_double_quote));
+// 		(*fake_double_quotes_val) = (*val_of_curent_double_quote);
+// 	}
+// 	//(*index_fake_double_quotes) = (*index_fake_double_quotes) + 1;
+// 	(*i) = (*i) + 1;
+// 	(*val_of_curent_double_quote) = (*list_of_quotes)->double_quotes[(*i)];
+// }
+
+
+void	find_fake_quotes(t_list_of_quotes **list_of_quotes,
+		char **str, int	**fake_double_quotes)
 {
 	int	i;
 	int	j;
@@ -128,27 +155,31 @@ void	find_fake_quotes(t_list_of_quotes **list_of_quotes, char **str, int	**fake_
 	while ((*list_of_quotes)->single_quotes[j] != -1)
 	{
 		val_of_curent_double_quote = (*list_of_quotes)->double_quotes[i];
-		if ((*list_of_quotes)->single_quotes[j + 1] == -1)
+		if ((*list_of_quotes)->single_quotes[j + 1] != -1)
 		{
-			relocate_quotes(list_of_quotes, str, NULL);
-			continue ;
-		}
-		while (val_of_curent_double_quote != -1 && (*list_of_quotes)->single_quotes[j] > val_of_curent_double_quote)
-		{
-			i++;
-			val_of_curent_double_quote = (*list_of_quotes)->double_quotes[i];
-		}
-		while (val_of_curent_double_quote != -1 && (*list_of_quotes)->single_quotes[j + 1] > val_of_curent_double_quote)
-		{
-			if ((*list_of_quotes)->double_quotes[i] != -1)
-				(*fake_double_quotes)[index_fake_double_quotes] = val_of_curent_double_quote;
-			index_fake_double_quotes++;
-			i++;
-			val_of_curent_double_quote = (*list_of_quotes)->double_quotes[i];
-			if ((*list_of_quotes)->double_quotes[i] == -1)
-				break ;
+			while (val_of_curent_double_quote != -1 && (*list_of_quotes)->single_quotes[j] > val_of_curent_double_quote)
+				val_of_curent_double_quote = (*list_of_quotes)->double_quotes[++i];
+			while (val_of_curent_double_quote != -1 && (*list_of_quotes)->single_quotes[j + 1] > val_of_curent_double_quote)
+			{
+				// puts("assigning fake quotes");
+				// printf("curent (*val_of_curent_double_quote) = %i\n", (val_of_curent_double_quote));
+				// assign_fake_quotes(list_of_quotes, &val_of_curent_double_quote,&(*fake_double_quotes)[index_fake_double_quotes++], &i);
+				// i++;
+				if ((*list_of_quotes)->double_quotes[i] != -1)
+					(*fake_double_quotes)[index_fake_double_quotes] = val_of_curent_double_quote;
+				index_fake_double_quotes++;
+				i++;
+				val_of_curent_double_quote = (*list_of_quotes)->double_quotes[i];
+				if ((*list_of_quotes)->double_quotes[i] == -1)
+					break ;
 		}
 		j = j + 2;
+		}
+		else
+		{
+			puts("in else");
+			relocate_quotes(list_of_quotes, str, NULL);
+		}
 	}
 	(*fake_double_quotes)[index_fake_double_quotes] = -1;
 }
@@ -156,8 +187,6 @@ void	find_fake_quotes(t_list_of_quotes **list_of_quotes, char **str, int	**fake_
 /*
 	Find double quotes are surounded by single quotes and remove them from consideration.
 	So if they find it they will change the values of list of quotes.
-
-	
 */
 void	chekc_quotes_and_remove_fake_quotes(t_list_of_quotes **list_of_quotes, char **str)
 {
@@ -302,7 +331,7 @@ void	remove_quotes_and_expand_dollars(char **str, t_list_of_quotes *list_of_quot
 			str_temp = str_dup_until_index(&(*str)[i + 1], list_of_quotes->double_quotes[current_double_quotes_index + 1] - i - 1);
 			// puts(str_temp);
 			str_temp = handle_expand_doll(str_temp);
-			final_str  = ft_strjoin_with_frees(final_str, str_temp);
+			final_str  = sjoin_fr(final_str, str_temp);
 			i = list_of_quotes->double_quotes[current_double_quotes_index + 1] + 1;
 			current_double_quotes_index++;
 			current_double_quotes_index++;
@@ -312,7 +341,7 @@ void	remove_quotes_and_expand_dollars(char **str, t_list_of_quotes *list_of_quot
 			// copy single quotes
 			str_temp = str_dup_until_index(&(*str)[i + 1], list_of_quotes->single_quotes[current_single_quotes_index + 1] - i - 1);
 			// str_temp = handle_expand_doll(str_temp);
-			final_str  = ft_strjoin_with_frees(final_str, str_temp);
+			final_str  = sjoin_fr(final_str, str_temp);
 			i = list_of_quotes->single_quotes[current_single_quotes_index + 1] + 1;
 			current_single_quotes_index++;
 			current_single_quotes_index++;
@@ -323,7 +352,7 @@ void	remove_quotes_and_expand_dollars(char **str, t_list_of_quotes *list_of_quot
 			// printf("i = %d, until %d, \n", i, list_of_quotes->double_quotes[current_double_quotes_index]);
 			str_temp = str_dup_until_index(&(*str)[i], list_of_quotes->double_quotes[current_double_quotes_index] - i);
 			str_temp = handle_expand_doll(str_temp);
-			final_str  = ft_strjoin_with_frees(final_str, str_temp);
+			final_str  = sjoin_fr(final_str, str_temp);
 			i = list_of_quotes->double_quotes[current_double_quotes_index];
 		}
 		else if (list_of_quotes->single_quotes[current_single_quotes_index] != -1 && (list_of_quotes->double_quotes[current_double_quotes_index] > list_of_quotes->single_quotes[current_single_quotes_index] || list_of_quotes->double_quotes[current_double_quotes_index] == -1))
@@ -331,14 +360,14 @@ void	remove_quotes_and_expand_dollars(char **str, t_list_of_quotes *list_of_quot
 			// copy until single quotes
 			str_temp = str_dup_until_index(&(*str)[i], list_of_quotes->single_quotes[current_single_quotes_index] - i);
 			str_temp = handle_expand_doll(str_temp);
-			final_str  = ft_strjoin_with_frees(final_str, str_temp);
+			final_str  = sjoin_fr(final_str, str_temp);
 			i = list_of_quotes->single_quotes[current_single_quotes_index];
 		}
 		else if (list_of_quotes->double_quotes[current_double_quotes_index] == -1 && list_of_quotes->single_quotes[current_single_quotes_index] == -1)
 		{
 			//only regular text left
 			str_temp = ft_strdup(&(*str)[i]);
-			final_str  = ft_strjoin_with_frees(final_str, str_temp);
+			final_str  = sjoin_fr(final_str, str_temp);
 			free(*str);
 			(*str) = final_str;
 			// puts(final_str);

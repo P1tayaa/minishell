@@ -6,7 +6,7 @@
 #    By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/03/09 01:41:47 by oscarmathot       #+#    #+#              #
-#    Updated: 2023/10/29 13:06:29 by oscarmathot      ###   ########.fr        #
+#    Updated: 2023/11/20 00:48:15 by oscarmathot      ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -20,6 +20,10 @@ LIBFT_A	:= lib/libft/libft.a
 CMP		:= gcc
 # FLAGS 	:= -Werror -Wall -Wextra -g -I lib
 FLAGS 	:= -Werror -Wall -Wextra -fsanitize=address -g -I lib # 
+
+ifeq ($(wildcard $(/opt/homebrew/opt/readline/include)),)
+	FLAGS = -Werror -Wall -Wextra -fsanitize=address -g -I lib -I/opt/homebrew/opt/readline/include
+endif
 
 #---------------------------------
 #FORMATTING AND FUN
@@ -44,11 +48,12 @@ RESET	:= \033[0m
 #RULES
 
 all	: $(NAME)
+		@echo "a\\n"
 		@echo "$(GREEN)Project built successfully !$(RESET)"
 
 $(NAME) : $(OBJ) $(LIBFT_A) minishell.h
 		@echo "$(CYAN)Creating the executable...$(RESET)"
-		@$(CC) $(FLAGS) $(OBJ) $(LIBFT_A) -lreadline -o $(NAME)
+		@$(CC) $(FLAGS) $(OBJ) $(LIBFT_A) -L/opt/homebrew/opt/readline/lib -lreadline -o $(NAME)
 
 %.o : %.c minishell.h
 		@echo "$(CYAN)Compiling...$(RESET) $<"
