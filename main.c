@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:29:45 by omathot           #+#    #+#             */
-/*   Updated: 2023/11/21 22:23:18 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/11/22 02:05:34 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -156,7 +156,7 @@ void	restore_default_sigint_handling(void)
 	sigaction(SIGINT, &sa, NULL);
 }
 
-void	handle_weird_cat_output(t_lexer **lexer)
+void	finish_output(t_lexer **lexer)
 {
 	if (ft_strlen(lexer[0]->cmd) == 3)
 		if ((ft_memcmp(lexer[0]->cmd, "cat", 3) == 0)
@@ -227,7 +227,7 @@ int	main(void)
 		free(str);
 		if (noquotes_into_pipes(&lexer) == 1)
 			continue ;
-		handle_weird_cat_output(lexer);
+		finish_output(lexer);
 		lexer_free(lexer);
 	}
 	return (0);

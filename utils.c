@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/14 17:01:53 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/11/21 14:58:08 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/11/22 02:01:08 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -256,22 +256,23 @@ int	return_biggest_int(int a, int b)
 	return (b);
 }
 
-char *here_doc_starter(char *wordlocking_for)
+char	*here_doc_starter(char *wordlocking_for)
 {
-    char *str_return;
-    char *read_line_str;
-    
-    str_return = NULL;
-    read_line_str = readline(" > ");
-    while (ft_strncmp(wordlocking_for, read_line_str, return_biggest_int(ft_strlen(wordlocking_for), ft_strlen(read_line_str)))!= 0)
-    {
-        str_return = sjoin_fr(str_return, ft_strjoin("\n", read_line_str));
-        read_line_str = readline(" > ");
-    }
+	char	*str_return;
+	char	*read_line_str;
+
+	str_return = NULL;
+	read_line_str = readline(" > ");
+	while (ft_strncmp(wordlocking_for, read_line_str,
+			return_biggest_int(ft_strlen(wordlocking_for),
+				ft_strlen(read_line_str))) != 0)
+	{
+		str_return = sjoin_fr(str_return, ft_strjoin("\n", read_line_str));
+		read_line_str = readline(" > ");
+	}
 	str_return = sjoin_fr(str_return, ft_strdup("\n"));
 	return (str_return);
 }
-
 
 bool	is_str_export(char *str)
 {
@@ -566,7 +567,8 @@ bool	mv_temp_to_real_export(int *i_export_content,
 	return (free(temp_var_from_no_quotes), false);
 }
 
-void	go_through_content_get_export(int *i, t_post_quotes ***content, char ***export_content)
+void	go_through_content_get_export(int *i,
+		t_post_quotes ***content, char ***export_content)
 {
 	int			i_export_content;
 
@@ -593,7 +595,8 @@ void	go_through_content_get_export(int *i, t_post_quotes ***content, char ***exp
 	(*export_content)[i_export_content] = NULL;
 }
 
-void	set_env_for_quotes(t_post_quotes ***content, t_lexer ***lexer, char ***export_content)
+void	set_env_for_quotes(t_post_quotes ***content,
+		t_lexer ***lexer, char ***export_content)
 {
 	int	i;
 
@@ -644,7 +647,6 @@ bool	check_export_for_quotes(
 		i = 0;
 	}
 	go_through_content_get_export(&i, content, &export_content);
-
 	set_env_for_quotes(content, lexer, &export_content);
 	return (true);
 }
@@ -663,7 +665,7 @@ int	count_char_unti_space(char *str)
 	return (i);
 }
 
-int count_len_split_world(char *str)
+int	count_len_split_world(char *str)
 {
 	int		i;
 	int		word_count;
@@ -683,8 +685,8 @@ int count_len_split_world(char *str)
 	return (word_count);
 }
 
-int	count_len_split_world(char *str);
-int	count_char_unti_space(char *str);
+int		count_len_split_world(char *str);
+int		count_char_unti_space(char *str);
 
 // char	**initialize_str_split(char *str)
 // {
@@ -705,36 +707,7 @@ void	finish_writing(int *j, int *word_count, char **str_split, bool *writing)
 	*writing = false;
 }
 
-// void	split_logic(char *str, char **str_split, int *word_count, bool *writing)
-// {
-// 	int	i;
-// 	int	j;
-
-// 	i = -1;
-// 	j = 0;
-// 	while (str[++i] != '\0')
-// 	{
-// 		if (ft_isspace(str[i]))
-// 		{
-// 			if (*writing)
-// 				finish_writing(&j, word_count, str_split, writing);
-// 			if (str[i + 1] != '\0' && !ft_isspace(str[i + 1]))
-// 				str_split[*word_count] = (char *)malloc
-// 					(sizeof(char) * (count_char_unti_space(&str[i + 1]) + 3));
-// 		}
-// 		else
-// 		{
-// 			if (i == 0)
-// 				str_split[*word_count] = malloc(count_char_unti_space(&str[i]) + 3);
-// 			*writing = true;
-// 			str_split[*word_count][j++] = str[i];
-// 		}
-// 	}
-// 	if (ft_isspace(str[i - 1]))
-// 		(*word_count)--;
-// }
-
-char *remove_front_spaces(char *str);
+char	*remove_front_spaces(char *str);
 
 // char	**finalize_str_split(char **str, char **str_split, int word_count)
 // {
@@ -750,56 +723,74 @@ char *remove_front_spaces(char *str);
 // 	return (str_split);
 // }
 
+bool	writing_process(bool *writing,
+		char ***str_split, int *word_count, int *j)
+{
+	if ((*writing))
+	{
+		(*str_split)[(*word_count)][(*j)] = '\0';
+		(*word_count)++;
+		(*j) = 0;
+		(*writing) = false;
+	}
+	return (1);
+}
+
+int	cc_u_s(char *str)
+{
+	return (count_char_unti_space(str));
+}
+
+int	finish_or_malloc_word(char *str,
+		char ***s_p, int *wc)
+{
+	bool	writing;
+	int		j;
+	int		i;
+
+	writing = false;
+	j = 0;
+	i = -1;
+	while (str[++i] != '\0')
+	{
+		if (ft_isspace(str[i]))
+		{
+			if (str[1] != '\0' && writing_process(
+					&writing, s_p, wc, &j))
+				if (!ft_isspace(str[i + 1]))
+					(*s_p)[(*wc)] = malloc((cc_u_s(&str[i + 1]) + 1));
+		}
+		else
+		{
+			if (i == 0)
+				(*s_p)[(*wc)] = malloc((cc_u_s(&str[i]) + 1));
+			writing = true;
+			(*s_p)[(*wc)][j++] = str[i];
+		}
+	}
+	return (j);
+}
+
 char	**split_spaces(char *str)
 {
-	int        i;
-    int        j;
-    int        word_count;
-    bool    writing;
-    char    **str_split;
+	int		j;
+	int		word_count;
+	char	**str_split;
 
-    str_split = (char **)malloc(sizeof(char *)
-            * (count_len_split_world(str) + 1));
-    if (!(str_split))
-        exit(-1);
-    i = 0;
-    writing = false;
-    word_count = 0;
-    j = 0;
-    while (str[i] != '\0')
-    {
-        if (ft_isspace(str[i]))
-        {
-            if (writing)
-            {
-                str_split[word_count][j] = '\0';
-                word_count++;
-                j = 0;
-                writing = false;
-            }
-            if (str[i + 1] != '\0')
-                if (!ft_isspace(str[i + 1]))
-                {
-                    str_split[word_count] = malloc(sizeof(char) * (count_char_unti_space(&str[i + 1]) + 1));
-                }
-        }
-        else
-        {
-            if (i == 0)
-                str_split[word_count] = malloc(sizeof(char) * (count_char_unti_space(&str[i]) + 1));
-            writing = true;
-            str_split[word_count][j] = str[i];
-            j++;
-        }
-        i++;
-    }
-    if (ft_isspace(str[i - 1]) == 0)
-    {
-        str_split[word_count][j] = '\0';
-        word_count++;
-    }
-    str_split[word_count] = NULL;
-    return (str_split);
+	str_split = (char **)malloc(sizeof(char *)
+			* (count_len_split_world(str) + 1));
+	if (!(str_split))
+		exit(-1);
+	word_count = 0;
+	j = 0;
+	j = finish_or_malloc_word(str, &str_split, &word_count);
+	if (ft_isspace(str[ft_strlen(str) - 1]) == 0)
+	{
+		str_split[word_count][j] = '\0';
+		word_count++;
+	}
+	str_split[word_count] = NULL;
+	return (str_split);
 }
 
 char	**remalloc_and_dup(char **all_var_rm, int all_var_rm_total)
@@ -849,38 +840,73 @@ bool	check_unset_noquotes(t_lexer ***lexer)
 	return (false);
 }
 
-bool	check_unset_for_quotes(t_post_quotes	***content, t_lexer ***lexer)
+void	unset_and_free(t_lexer ***lexer, char ***all_var_rm,
+		int all_var_rm_num, t_post_quotes ***content)
 {
-	char	**all_var_rm;
-	int		all_var_rm_num;
-	int		all_var_rm_total;
-	int		i;
-	
-	if (is_str_unset((*lexer)[0]->cmd) == false)
-		return (false);
+	int	i;
+
+	i = 0;
+	(*all_var_rm)[all_var_rm_num] = NULL;
+	while ((*all_var_rm)[i] != NULL)
+	{
+		unset_env((*all_var_rm)[i], get_env());
+		i++;
+	}
+	i = 0;
+	while ((*all_var_rm)[i] != NULL)
+	{
+		free((*all_var_rm)[i]);
+		i++;
+	}
+	free((*all_var_rm));
+	free_content(*content);
+	lexer_free((*lexer));
+}
+
+int	initial_unset_checks(t_lexer ***lexer, t_post_quotes ***content)
+{
 	if ((*lexer)[1] != NULL)
 	{
 		printf("Can't pipe unset\n");
 		lexer_free((*lexer));
 		free_content((*content));
-		return (true);
+		return (1);
 	}
 	if ((*lexer)[0]->args == NULL)
 	{
 		lexer_free((*lexer));
 		free_content((*content));
-		return (true);
+		return (1);
 	}
+	return (0);
+}
+
+void	write_content(char **temp, t_post_quotes ***content, int *i)
+{
+	(*temp) = ft_strdup(&((*content)[0]->content[5]));
+	free((*content)[0]->content);
+	(*content)[0]->content = (*temp);
+	(*i) = 0;
+}
+
+bool	check_unset_for_quotes(t_post_quotes ***content, t_lexer ***lexer)
+{
+	char	**all_var_rm;
+	char	*temp;
+	char	**all_var_rm_temp;
+	int		all_var_rm_num;
+	int		all_var_rm_total;
+	int		i;
+	int		j;
+
+	if (is_str_unset((*lexer)[0]->cmd) == false)
+		return (false);
+	if (initial_unset_checks(lexer, content) == 1)
+		return (true);
 	if (is_str_unset((*content)[0]->content))
 		i = 1;
 	else
-	{
-		char *temp;
-		temp = ft_strdup(&((*content)[0]->content[5]));
-		free((*content)[0]->content);
-		(*content)[0]->content = temp;
-		i = 0;
-	}
+		write_content(&temp, content, &i);
 	while ((*content)[i] != NULL)
 		i++;
 	all_var_rm_total = i * 2 + 1;
@@ -899,9 +925,6 @@ bool	check_unset_for_quotes(t_post_quotes	***content, t_lexer ***lexer)
 		}
 		else
 		{
-			char **all_var_rm_temp;
-			int j;
-
 			if (is_all_space((*content)[i]->content))
 			{
 				i++;
@@ -935,23 +958,6 @@ bool	check_unset_for_quotes(t_post_quotes	***content, t_lexer ***lexer)
 		}
 		all_var_rm_num++;
 	}
-	all_var_rm[all_var_rm_num] = NULL;
-	i = 0;
-	while (all_var_rm[i] != NULL)
-	{
-		unset_env(all_var_rm[i], get_env());
-		// free(all_var_rm[i]);
-		i++;
-	}
-	i = 0;
-	while (all_var_rm[i] != NULL)
-	{
-		free(all_var_rm[i]);
-		i++;
-	}
-	free(all_var_rm);
-	free_content(*content);
-	lexer_free((*lexer));
+	unset_and_free(lexer, &all_var_rm, all_var_rm_num, content);
 	return (true);
 }
-
