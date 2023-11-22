@@ -448,28 +448,30 @@ void	print_coordines_of_all_quotes(t_list_of_quotes *list_of_quotes)
 }
 
 // set bools of return_index_until_new
-void	set_bools_riun(bool *expandable, bool *in_quotes)
+void	set_bools_riun(bool *expandable,
+		bool *in_quotes, bool to_expandable, bool to_quotes)
 {
 	if (expandable != NULL)
 	{
-		(*expandable) = false;
-		(*in_quotes) = true;
+		(*expandable) = to_expandable;
+		(*in_quotes) = to_quotes;
 	}
 }
 
-void	set_low_sup_s(bool *have_a_low_sup, int *lowers_superier_inportant_index, t_list_of_quotes *list_of_quotes, int *i)
+void	set_low_sup_s(bool *have_a_low_sup, int *lowers_superier_index,
+		t_list_of_quotes *list_of_quotes, int *i)
 {
-	if (have_a_low_sup == false)
+	if ((*have_a_low_sup) == false)
 		(*have_a_low_sup) = true;
-	(*lowers_superier_inportant_index) = list_of_quotes->single_quotes[(*i)];
+	(*lowers_superier_index) = list_of_quotes->single_quotes[(*i)];
 }
 
 void	set_low_sup_d(bool *have_a_low_sup,
-	int *lowers_superier_inportant_index, t_list_of_quotes *list_of_quotes, int *i)
+	int *lowers_superier_index, t_list_of_quotes *list_of_quotes, int *i)
 {
-	if (have_a_low_sup == false)
+	if ((*have_a_low_sup) == false)
 		(*have_a_low_sup) = true;
-	(*lowers_superier_inportant_index) = list_of_quotes->double_quotes[(*i)];
+	(*lowers_superier_index) = list_of_quotes->double_quotes[(*i)];
 }
 
 /*
@@ -482,64 +484,55 @@ void	set_low_sup_d(bool *have_a_low_sup,
 	and if EXPANDABLE is not NULL, it changes the
 		 values of EXPANDABLE and IN_QUOTES
 		 	depending on the return
+t_list_of_quotes *list_of_quotes, int index_curent_char,
+bool *expandable, bool *in_quotes
+bool	have_a_low_sup;
+int		lowers_superier_inportant_index;
 */
-int return_index_until_new(t_list_of_quotes *list_of_quotes, int index_curent_char, bool *expandable, bool *in_quotes)
+int	return_index_until_new(t_list_of_quotes *l_q,
+		int i_cc, bool *exp, bool *i_q)
 {
 	int		i;
-	bool	have_a_low_sup;
-	int     lowers_superier_inportant_index;
+	bool	low;
+	int		l_s_i;
 
-	i = 0;
-	have_a_low_sup = false;
-	lowers_superier_inportant_index = -1;
-	while (list_of_quotes->single_quotes[i] != -1)
+	i = -1;
+	low = false;
+	l_s_i = -1;
+	while (l_q->single_quotes[++i] != -1)
 	{
-		if (i % 2 == 0 && (have_a_low_sup == false || list_of_quotes->single_quotes[i] < lowers_superier_inportant_index))
-        {
-			if (list_of_quotes->single_quotes[i] > index_curent_char)
-			{
-				if (have_a_low_sup == false)
-					have_a_low_sup = true;
-				lowers_superier_inportant_index = list_of_quotes->single_quotes[i];
-			}
-		}
-		if (i % 2 == 0 && index_curent_char == list_of_quotes->single_quotes[i])
-		{
-			return (set_bools_riun(expandable, in_quotes), list_of_quotes->single_quotes[i + 1]);
-		}
-		i++;
+		if (i % 2 == 0 && (low == false || l_q->single_quotes[i] < l_s_i))
+			if (l_q->single_quotes[i] > i_cc)
+				set_low_sup_s(&low, &l_s_i, l_q, &i);
+		if (i % 2 == 0 && i_cc == l_q->single_quotes[i])
+			return (set_bools_riun(exp, i_q, 0, 1), l_q->single_quotes[i + 1]);
 	}
-	i = 0;
-	while (list_of_quotes->double_quotes[i] != -1)
+	i = -1;
+	while (l_q->double_quotes[++i] != -1)
 	{
-		if (i % 2 == 0 && (have_a_low_sup == false || list_of_quotes->double_quotes[i] < lowers_superier_inportant_index))
-		{
-			if (list_of_quotes->double_quotes[i] > index_curent_char)
-			{
-				if (have_a_low_sup == false)
-					have_a_low_sup = true;
-				lowers_superier_inportant_index = list_of_quotes->double_quotes[i];
-			}
-		}
-		if (i % 2 == 0 && index_curent_char == list_of_quotes->double_quotes[i])
-		{
-			return (set_bools_riun(expandable, in_quotes), list_of_quotes->double_quotes[i + 1]);
-		}
-		i++;
+		if (i % 2 == 0 && (low == false || l_q->double_quotes[i] < l_s_i))
+			if (l_q->double_quotes[i] > i_cc)
+				set_low_sup_d(&low, &l_s_i, l_q, &i);
+		if (i % 2 == 0 && i_cc == l_q->double_quotes[i])
+			return (set_bools_riun(exp, i_q, 1, 1), l_q->double_quotes[i + 1]);
 	}
-	return (set_bools_riun(expandable, in_quotes), lowers_superier_inportant_index);
+	return (set_bools_riun(exp, i_q, 1, 0), l_s_i);
 }
 
 /*
-	check if double quotes and single quotes are next to each other or there is text in between.
+	check if double quotes and single quotes are next
+	to each other or there is text in between.
 	ex: 'test'"test" false
 	ex: 'test'la"test" true
 	
-	END_QUOTES_SURCH is list of quotes where we are looking at the end
-	START_QUOTES_SURCH is the list of quotes where we look at the start
+	END_QUOTES_SURCH is list of quotes where we are
+	looking at the end
+	START_QUOTES_SURCH is the list of quotes where we
+	look at the start
 	I is the current END_QUOTES_SURCH we are looking at
 */
-bool check_for_quotes_none_quotes(int *end_quotes_surch, int *start_quotes_surch, int i)
+bool	check_for_quotes_none_quotes(int *end_quotes_surch,
+		int *start_quotes_surch, int i)
 {
 	int		j;
 	bool	have_none_quotes;
@@ -548,7 +541,6 @@ bool check_for_quotes_none_quotes(int *end_quotes_surch, int *start_quotes_surch
 	j = 0;
 	while (start_quotes_surch[j] != -1)
 	{
-		// printf("end is %d, start is %d\n", end_quotes_surch[i], start_quotes_surch[j]);
 		if (end_quotes_surch[i] + 1 == start_quotes_surch[j])
 			have_none_quotes = false;
 		j++;
@@ -557,47 +549,48 @@ bool check_for_quotes_none_quotes(int *end_quotes_surch, int *start_quotes_surch
 }
 
 /*
-	Count how many quotes string are separated with ' and " and if there is in between.
+	Count how many quotes string are separated with '
+	and " and if there is in between.
 
-	Always assume there is something at the end, it does check, but check for front.
+	Always assume there is something at the end,
+	it does check, but check for front.
 */
-int	count_how_many_quotes_content_separated(t_list_of_quotes *list_of_quotes, char *str)
+int	count_how_many_quotes_content_separated(
+	t_list_of_quotes *list_of_quotes, char *str)
 {
 	int		i;
 	int		num_of_content_parts;
-	
-	i = 0;
+
+	i = -1;
 	num_of_content_parts = 0;
 	if (str[0] != '\'' && str[0] != '\"')
 		num_of_content_parts++;
-	while (list_of_quotes->double_quotes[i] != -1)
+	while (list_of_quotes->double_quotes[++i] != -1)
 	{
 		if (list_of_quotes->double_quotes[i] % 2 == 1)
-			if (check_for_quotes_none_quotes(list_of_quotes->double_quotes, list_of_quotes->single_quotes, i))
+			if (check_for_quotes_none_quotes(list_of_quotes->double_quotes,
+					list_of_quotes->single_quotes, i))
 				num_of_content_parts++;
-		i++;
 	}
 	num_of_content_parts = num_of_content_parts + i / 2;
-	i = 0;
-	while (list_of_quotes->single_quotes[i] != -1)
+	i = -1;
+	while (list_of_quotes->single_quotes[++i] != -1)
 	{
 		if (list_of_quotes->single_quotes[i] % 2 == 1)
-			if (check_for_quotes_none_quotes(list_of_quotes->single_quotes, list_of_quotes->double_quotes, i))
+			if (check_for_quotes_none_quotes(list_of_quotes->single_quotes,
+					list_of_quotes->double_quotes, i))
 				num_of_content_parts++;
-		i++;
 	}
 	num_of_content_parts = num_of_content_parts + i / 2;
 	return (num_of_content_parts);
 }
 
-t_post_quotes	**make_post_quotes_content(char *str, t_list_of_quotes *list_of_quotes)
+t_post_quotes	**make_post_quotes_content(char *str,
+		t_list_of_quotes *list_of_quotes)
 {
 	t_post_quotes	**content;
 	int				index_current_char;
 	int				content_i;
-	// bool 			expandable;
-	// bool 			in_quotes;
-
 
 	index_current_char = 0;
 	content = (t_post_quotes **)malloc(sizeof(t_post_quotes) * (count_how_many_quotes_content_separated(list_of_quotes, str) + 1));
@@ -652,22 +645,25 @@ t_post_quotes	**make_post_quotes_content(char *str, t_list_of_quotes *list_of_qu
 /*
 	This the main of the quotes.
 	So if there is not quotes in STR_OG:
-	It expand_doll and and doesn't do anything to content, leaving it NULL;
+	It expand_doll and and doesn't do anything
+		to content, leaving it NULL;
 	If there is a quotes:
-	It will find them than seperate the content insinde and out side of quotes and puts it into content.
+	It will find them than seperate the content
+		insinde and out side of quotes and puts it into content.
 
 	STR_OF is a pointer to the string, the userinput
-	CONTENT is a pointer to the array of pointer of T_POST_QUOTES, (fake return)
+	CONTENT is a pointer to the array of pointer
+		of T_POST_QUOTES, (fake return)
 */
 void	check_quotes(char **str_og, t_post_quotes ***content)
 {
-	t_list_of_quotes *list_of_quotes;
-	char *str;
-	
-	str = (*str_og);
+	t_list_of_quotes	*list_of_quotes;
+	char				*str;
 
+	str = (*str_og);
 	list_of_quotes = count_and_locate_quotes(str);
-	if (list_of_quotes->single_quotes[0] == -1 && list_of_quotes->double_quotes[0] == -1)
+	if (list_of_quotes->single_quotes[0] == -1
+		&& list_of_quotes->double_quotes[0] == -1)
 	{
 		add_history(str);
 		str = handle_expand_doll((*str_og));
@@ -686,36 +682,34 @@ void	check_quotes(char **str_og, t_post_quotes ***content)
 	free(list_of_quotes);
 }
 
-char	**spit_text_args(char *str, int	*doll_pos);
-char	*ft_strjoin_double_str(char **spit_text);
-void	split_test_freeur(char **spit_text);
-char *get_env_of_valus_str(char *str);
+char				**spit_text_args(char *str, int	*doll_pos);
+char				*ft_strjoin_double_str(char **spit_text);
+void				split_test_freeur(char **spit_text);
+char				*get_env_of_valus_str(char *str);
 
 char	*handle_expand_doll(char *str)
 {
-	int	*doll_pos;
-	char **spit_text;
-	char *final_str;
+	int		*doll_pos;
+	char	**spit_text;
+	char	*final_str;
 
-	// printf("{%s}\n",str);
 	doll_pos = get_doll_position(str);
 	if (doll_pos[0] == -1)
-		{
-			free(doll_pos);
-			return (ft_strdup(str));
-		}
+	{
+		free(doll_pos);
+		return (ft_strdup(str));
+	}
 	spit_text = spit_text_args(str, doll_pos);
 	final_str = ft_strjoin_double_str(spit_text);
 	split_test_freeur(spit_text);
 	free(doll_pos);
-	// puts(final_str);
 	return (final_str);
 }
 
 void	ft_strjoin_double_str_copy_to(char **spit_text, char **str)
 {
-	int i;
-	int j;
+	int	i;
+	int	j;
 	int	size_str;
 
 	i = 0;
@@ -735,17 +729,16 @@ void	ft_strjoin_double_str_copy_to(char **spit_text, char **str)
 
 char	*ft_strjoin_double_str(char **spit_text)
 {
-	int	i;
-	int	j;
-	int	size_str;
-	char *str;
+	int		i;
+	int		j;
+	int		size_str;
+	char	*str;
 
 	size_str = 0;
 	i = 0;
 	while (spit_text[i] != NULL)
 	{
-		size_str = size_str + ft_strlen(spit_text[i]);
-		i++;
+		size_str = size_str + ft_strlen(spit_text[i++]);
 	}
 	str = malloc(sizeof(char) * (size_str + 1));
 	if (!str)
@@ -756,11 +749,7 @@ char	*ft_strjoin_double_str(char **spit_text)
 	{
 		j = 0;
 		while (spit_text[i][j] != '\0')
-		{
-			str[size_str] = spit_text[i][j];
-			size_str++;
-			j++;
-		}
+			str[size_str++] = spit_text[i][j++];
 		i++;
 	}
 	str[size_str] = '\0';
@@ -779,10 +768,9 @@ void	split_test_freeur(char **spit_text)
 	}
 	free(spit_text);
 	spit_text = NULL;
-	
 }
 
-char *ft_strdup_intil_index_n(char *s1, int n)
+char	*ft_strdup_intil_index_n(char *s1, int n)
 {
 	int		i;
 	char	*c;
@@ -800,7 +788,7 @@ char *ft_strdup_intil_index_n(char *s1, int n)
 	return (c);
 }
 
-bool	ft_isspace(unsigned char c);
+bool				ft_isspace(unsigned char c);
 
 int	find_next_space(char *str)
 {
@@ -830,7 +818,8 @@ int	find_next_quote(char *str)
 	return (i);
 }
 
-void	spit_text_args_even(char *str, int	*doll_pos, int i, int num_doll, char **string_split)
+void	spit_text_args_even(char *str, int	*doll_pos,
+		int i, int num_doll, char **string_split)
 {
 	if (i == 0)
 		string_split[i] = ft_strdup_intil_index_n(str, doll_pos[num_doll] - 1);
@@ -840,10 +829,7 @@ void	spit_text_args_even(char *str, int	*doll_pos, int i, int num_doll, char **s
 			if (find_next_space(&str[doll_pos[num_doll - 1]] + 1) == -1 || find_next_space(&str[doll_pos[num_doll - 1]] + 1) > doll_pos[num_doll] - (doll_pos[num_doll - 1] + 1))
 				string_split[i] = ft_strdup("\0");
 			else
-				string_split[i] = ft_strdup_intil_index_n(&str
-					[doll_pos[num_doll - 1] + find_next_space(&str[doll_pos[num_doll - 1]])],
-					doll_pos[num_doll]
-					- (doll_pos[num_doll - 1] + find_next_space(&str[doll_pos[num_doll - 1]])) - 1);
+				string_split[i] = ft_strdup_intil_index_n(&str[doll_pos[num_doll - 1] + find_next_space(&str[doll_pos[num_doll - 1]])], doll_pos[num_doll] - (doll_pos[num_doll - 1] + find_next_space(&str[doll_pos[num_doll - 1]])) - 1);
 		else
 			if (find_next_space(&str[doll_pos[num_doll - 1]]) == -1)
 				if (find_next_quote(&str[doll_pos[num_doll - 1]]) == -1)
@@ -851,14 +837,12 @@ void	spit_text_args_even(char *str, int	*doll_pos, int i, int num_doll, char **s
 				else
 					string_split[i] = ft_strdup("\"");
 			else
-				string_split[i] = ft_strdup_intil_index_n(&str
-					[doll_pos[num_doll - 1] + find_next_space(&str[doll_pos[num_doll - 1]])],
-					ft_strlen(&str
-					[doll_pos[num_doll - 1] + find_next_space(&str[doll_pos[num_doll - 1]])]));
+				string_split[i] = ft_strdup_intil_index_n(&str[doll_pos[num_doll - 1] + find_next_space(&str[doll_pos[num_doll - 1]])], ft_strlen(&str[doll_pos[num_doll - 1] + find_next_space(&str[doll_pos[num_doll - 1]])]));
 	}
 }
 
-void	spit_text_args_odd(char *str, int	*doll_pos, int num_doll, char	**temp_str)
+void	spit_text_args_odd(char *str, int *doll_pos,
+		int num_doll, char	**temp_str)
 {
 	if (find_next_space(&str[doll_pos[num_doll]]) == -1)
 	{
@@ -870,14 +854,12 @@ void	spit_text_args_odd(char *str, int	*doll_pos, int num_doll, char	**temp_str)
 				(*temp_str) = ft_strdup_intil_index_n(&str[doll_pos[num_doll] + 1], find_next_quote(&str[doll_pos[num_doll] + 1]) - 1);
 			else
 			{
-				// printf("%d\n", doll_pos[num_doll] + 1);
 				(*temp_str) = ft_strdup(&str[doll_pos[num_doll] + 1]);
 			}
 		}
 	}
 	else if (doll_pos[num_doll + 1] != -1 && find_next_space(&str[doll_pos[num_doll]] + 1) > doll_pos[num_doll + 1] - (doll_pos[num_doll] + 1))
 	{
-		// printf("\n %d, %d\n", doll_pos[num_doll + 1],  doll_pos[num_doll]);
 		(*temp_str) = ft_strdup_intil_index_n(&str[doll_pos[num_doll] + 1], doll_pos[num_doll + 1] - (doll_pos[num_doll] + 2));
 	}
 	else
@@ -886,7 +868,7 @@ void	spit_text_args_odd(char *str, int	*doll_pos, int num_doll, char	**temp_str)
 
 void	spit_text_args_odd_p2(char	**string_split, char **temp_str, int i)
 {
-	char *temp;
+	char	*temp;
 
 	temp = get_env_of_valus_str((*temp_str));
 	if (temp != NULL)
@@ -902,7 +884,8 @@ void	spit_text_args_odd_p2(char	**string_split, char **temp_str, int i)
 	free((*temp_str));
 }
 
-void	spit_text_args_init(int *num_doll, int	*doll_pos, int *total_parts, char	***string_split)
+void	spit_text_args_init(int *num_doll, int *doll_pos,
+		int *total_parts, char ***string_split)
 {
 	(*num_doll) = 0;
 	while (doll_pos[(*num_doll)] != -1)
@@ -967,27 +950,9 @@ int	*get_doll_position(char *str)
 	{
 		if (str[i] == '$')
 			if (str[i + 1] != '=')
-			{
-				doll_pos[num_doll] = i;
-				num_doll++;
-			}
+				doll_pos[num_doll++] = i;
 		i++;
 	}
 	doll_pos[num_doll] = -1;
 	return (doll_pos);
 }
-
-// char **all;
-// malloc (sizeof(char *) * parts);
-// all[0] = strconais;
-// all[1] = getenv(str);
-
-// char *finish;
-// finish(len2char())
-
-// 1. look at first open - pattern matching     'asudgadagg"ausydgasdas"adhad';
-// 2. getenv 
-
-
-
-// we need a function to call when reading user input. spit_text_args doesnt do the job. 
