@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
+/*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:30:26 by omathot           #+#    #+#             */
-/*   Updated: 2023/11/21 21:30:28 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/11/22 14:29:48 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,7 @@ typedef struct s_list_of_quotes
 {
 	int	*single_quotes;
 	int	*double_quotes;
+	int *i_temp;
 }	t_list_of_quotes;
 
 typedef struct s_pipedata

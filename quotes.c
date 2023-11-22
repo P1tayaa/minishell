@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   quotes.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
+/*   By: sboulain <sboulain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/12 11:53:41 by omathot           #+#    #+#             */
-/*   Updated: 2023/11/20 22:09:41 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/11/22 15:35:57 by sboulain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -585,58 +585,110 @@ int	count_how_many_quotes_content_separated(
 	return (num_of_content_parts);
 }
 
+void	add_the_end_content(char *str,
+	t_post_quotes ***content, int index_current_char, int *content_i)
+{
+	if (str[index_current_char + 1] == '\0')
+	{
+		free(content[(*content_i)]);
+		return ;
+	}
+	(*content)[(*content_i)]->content = malloc(
+			sizeof(char) * (ft_strlen(str) - index_current_char));
+	if (!(*content)[(*content_i)]->content)
+		exit(1);
+	ft_strlcpy((*content)[(*content_i)]->content,
+		&str[index_current_char + 1], ft_strlen(str) - index_current_char);
+	(*content)[(*content_i)]->have_to_expand = true;
+	(*content)[(*content_i)]->is_quotes = false;
+	(*content_i)++;
+}
+
+void	fill_content_nq(char *str,
+		t_list_of_quotes *list_of_quotes,
+		int index_current_char, t_post_quotes ***content)
+{
+	int	*content_i;
+
+	content_i = list_of_quotes->i_temp;
+	(*content)[(*content_i)]->content = malloc(sizeof(char)
+			* (return_index_until_new(list_of_quotes,
+					index_current_char, NULL, NULL) - index_current_char + 1));
+	if (!(*content)[(*content_i)]->content)
+		exit(1);
+	ft_strlcpy((*content)[(*content_i)]->content, &str[index_current_char],
+		return_index_until_new(list_of_quotes, index_current_char,
+			&(*content)[(*content_i)]->have_to_expand, &(*content)[
+			(*content_i)]->is_quotes) - index_current_char + 1);
+}
+
+void	fill_content_q(char *str,
+		t_list_of_quotes *list_of_quotes,
+			int index_current_char, t_post_quotes ***content)
+{
+	int	*content_i;
+
+	content_i = list_of_quotes->i_temp;
+	(*content)[(*content_i)]->content = malloc(sizeof(char)
+			* (return_index_until_new(list_of_quotes,
+					index_current_char, NULL, NULL) - index_current_char));
+	if (!(*content)[(*content_i)]->content)
+		exit(1);
+	ft_strlcpy((*content)[(*content_i)]->content, &str[index_current_char + 1],
+		return_index_until_new(list_of_quotes, index_current_char, &(*content)[
+			(*content_i)]->have_to_expand, &(*content)[(*content_i)]
+			->is_quotes) - index_current_char);
+}
+
+t_post_quotes	**malloc_big_content(char *str,
+		t_list_of_quotes **list_of_quotes)
+{
+	t_post_quotes	**content;
+
+	content = (t_post_quotes **)malloc(sizeof(t_post_quotes)
+			* (count_how_many_quotes_content_separated((*list_of_quotes),
+					str) + 1));
+	if (!content)
+		exit(1);
+	return (content);
+	(*(*list_of_quotes)->i_temp) = -1;
+}
+
+t_post_quotes	*malloc_small_content(void)
+{
+	t_post_quotes	*single_content;
+
+	single_content = (t_post_quotes *)malloc(sizeof(t_post_quotes));
+	if (!single_content)
+		exit(1);
+	return (single_content);
+}
+
 t_post_quotes	**make_post_quotes_content(char *str,
 		t_list_of_quotes *list_of_quotes)
 {
+	static int		content_i = -1;
 	t_post_quotes	**content;
-	int				index_current_char;
-	int				content_i;
+	int				j;
 
-	index_current_char = 0;
-	content = (t_post_quotes **)malloc(sizeof(t_post_quotes) * (count_how_many_quotes_content_separated(list_of_quotes, str) + 1));
-	if (!content)
-		exit(1);
-	content_i = 0;
-	while (str[index_current_char] != '\0')
+	list_of_quotes->i_temp = &content_i;
+	j = 0;
+	content = malloc_big_content(str, &list_of_quotes);
+	while (str[j] != '\0' && ++content_i > -1)
 	{
-		if (return_index_until_new(list_of_quotes, index_current_char, NULL, NULL) == index_current_char + 1)
-			index_current_char++;
-		content[content_i] = (t_post_quotes *)malloc(sizeof(t_post_quotes));
-		if (!content[content_i])
-			exit(1);
-		if (return_index_until_new(list_of_quotes, index_current_char, NULL, NULL) == -1)
+		if (return_index_until_new(list_of_quotes, j, NULL, NULL) == j + 1)
+			j++;
+		content[content_i] = malloc_small_content();
+		if (return_index_until_new(list_of_quotes, j, NULL, NULL) == -1)
 		{
-			if (str[index_current_char + 1] == '\0')
-			{
-				free(content[content_i]);
-				break ;
-			}
-			content[content_i]->content = malloc(sizeof(char) * (ft_strlen(str) - index_current_char));
-			if (!content[content_i]->content)
-				exit(1);
-			ft_strlcpy(content[content_i]->content, &str[index_current_char + 1], ft_strlen(str) - index_current_char);
-			content[content_i]->have_to_expand = true;
-			content[content_i]->is_quotes = false;
-			content_i++;
+			add_the_end_content(str, &content, j, &content_i);
 			break ;
 		}
-		if (str[0] != '\'' && str[0] != '\"' && index_current_char == 0)
-		{
-
-			content[content_i]->content = malloc(sizeof(char) * (return_index_until_new(list_of_quotes, index_current_char, NULL, NULL) - index_current_char + 1));
-			if (!content[content_i]->content)
-				exit(1);
-			ft_strlcpy(content[content_i]->content, &str[index_current_char], return_index_until_new(list_of_quotes, index_current_char, &content[content_i]->have_to_expand, &content[content_i]->is_quotes) - index_current_char + 1);
-		}
+		if (str[0] != '\'' && str[0] != '\"' && j == 0)
+			fill_content_nq(str, list_of_quotes, j, &content);
 		else
-		{
-			content[content_i]->content = malloc(sizeof(char) * (return_index_until_new(list_of_quotes, index_current_char, NULL, NULL) - index_current_char));
-			if (!content[content_i]->content)
-				exit(1);
-			ft_strlcpy(content[content_i]->content, &str[index_current_char + 1], return_index_until_new(list_of_quotes, index_current_char, &content[content_i]->have_to_expand, &content[content_i]->is_quotes) - index_current_char);
-		}
-		index_current_char = return_index_until_new(list_of_quotes, index_current_char, NULL, NULL);
-		content_i++;
+			fill_content_q(str, list_of_quotes, j, &content);
+		j = return_index_until_new(list_of_quotes, j, NULL, NULL);
 	}
 	content[content_i] = NULL;
 	return (content);
@@ -818,27 +870,39 @@ int	find_next_quote(char *str)
 	return (i);
 }
 
-void	spit_text_args_even(char *str, int	*doll_pos,
-		int i, int num_doll, char **string_split)
+/*
+char	*spit_text_args_even(char *str, int	*doll_pos,
+		int num_doll, char *string_split)
+
+*/
+char	*spit_text_args_even(char *str, int	*d_p,
+		int n_d, char *s_s)
 {
-	if (i == 0)
-		string_split[i] = ft_strdup_intil_index_n(str, doll_pos[num_doll] - 1);
+	if (d_p[n_d] != -1)
+	{
+		if (find_next_space(&str[d_p[n_d - 1]] + 1) == -1 || find_next_space(
+				&str[d_p[n_d - 1]] + 1) > d_p[n_d] - (d_p[n_d - 1] + 1))
+			s_s = ft_strdup("\0");
+		else
+			s_s = ft_strdup_intil_index_n(&str[d_p[n_d - 1] + find_next_space(
+						&str[d_p[n_d - 1]])], d_p[n_d] - (d_p[n_d - 1]
+						+ find_next_space(&str[d_p[n_d - 1]])) - 1);
+	}
 	else
 	{
-		if (doll_pos[num_doll] != -1)
-			if (find_next_space(&str[doll_pos[num_doll - 1]] + 1) == -1 || find_next_space(&str[doll_pos[num_doll - 1]] + 1) > doll_pos[num_doll] - (doll_pos[num_doll - 1] + 1))
-				string_split[i] = ft_strdup("\0");
+		if (find_next_space(&str[d_p[n_d - 1]]) == -1)
+		{
+			if (find_next_quote(&str[d_p[n_d - 1]]) == -1)
+				s_s = ft_strdup("\0");
 			else
-				string_split[i] = ft_strdup_intil_index_n(&str[doll_pos[num_doll - 1] + find_next_space(&str[doll_pos[num_doll - 1]])], doll_pos[num_doll] - (doll_pos[num_doll - 1] + find_next_space(&str[doll_pos[num_doll - 1]])) - 1);
+				s_s = ft_strdup("\"");
+		}
 		else
-			if (find_next_space(&str[doll_pos[num_doll - 1]]) == -1)
-				if (find_next_quote(&str[doll_pos[num_doll - 1]]) == -1)
-					string_split[i] = ft_strdup("\0");
-				else
-					string_split[i] = ft_strdup("\"");
-			else
-				string_split[i] = ft_strdup_intil_index_n(&str[doll_pos[num_doll - 1] + find_next_space(&str[doll_pos[num_doll - 1]])], ft_strlen(&str[doll_pos[num_doll - 1] + find_next_space(&str[doll_pos[num_doll - 1]])]));
+			s_s = ft_strdup_intil_index_n(&str[d_p[n_d - 1] + find_next_space(
+						&str[d_p[n_d - 1]])], ft_strlen(&str[d_p[n_d - 1]
+						+ find_next_space(&str[d_p[n_d - 1]])]));
 	}
+	return (s_s);
 }
 
 void	spit_text_args_odd(char *str, int *doll_pos,
@@ -847,23 +911,27 @@ void	spit_text_args_odd(char *str, int *doll_pos,
 	if (find_next_space(&str[doll_pos[num_doll]]) == -1)
 	{
 		if (doll_pos[num_doll + 1] != -1)
-			(*temp_str) = ft_strdup_intil_index_n(&str[doll_pos[num_doll] + 1], doll_pos[num_doll + 1] - (doll_pos[num_doll] + 2));
+			(*temp_str) = ft_strdup_intil_index_n(&str[doll_pos[
+					num_doll] + 1], doll_pos[num_doll + 1]
+					- (doll_pos[num_doll] + 2));
 		else
 		{
 			if (find_next_quote(&str[doll_pos[num_doll] + 1]) - 1 != -2)
-				(*temp_str) = ft_strdup_intil_index_n(&str[doll_pos[num_doll] + 1], find_next_quote(&str[doll_pos[num_doll] + 1]) - 1);
+				(*temp_str) = ft_strdup_intil_index_n(&str[doll_pos
+					[num_doll] + 1], find_next_quote(
+							&str[doll_pos[num_doll] + 1]) - 1);
 			else
-			{
 				(*temp_str) = ft_strdup(&str[doll_pos[num_doll] + 1]);
-			}
 		}
 	}
-	else if (doll_pos[num_doll + 1] != -1 && find_next_space(&str[doll_pos[num_doll]] + 1) > doll_pos[num_doll + 1] - (doll_pos[num_doll] + 1))
-	{
-		(*temp_str) = ft_strdup_intil_index_n(&str[doll_pos[num_doll] + 1], doll_pos[num_doll + 1] - (doll_pos[num_doll] + 2));
-	}
+	else if (doll_pos[num_doll + 1] != -1 && find_next_space(&str[
+				doll_pos[num_doll]] + 1) > doll_pos[
+			num_doll + 1] - (doll_pos[num_doll] + 1))
+		(*temp_str) = ft_strdup_intil_index_n(&str[doll_pos
+			[num_doll] + 1], doll_pos[num_doll + 1] - (doll_pos[num_doll] + 2));
 	else
-		(*temp_str) = ft_strdup_intil_index_n(&str[doll_pos[num_doll] + 1], find_next_space(&str[doll_pos[num_doll]] + 1) - 1);
+		(*temp_str) = ft_strdup_intil_index_n(&str[doll_pos
+			[num_doll] + 1], find_next_space(&str[doll_pos[num_doll]] + 1) - 1);
 }
 
 void	spit_text_args_odd_p2(char	**string_split, char **temp_str, int i)
@@ -891,43 +959,53 @@ void	spit_text_args_init(int *num_doll, int *doll_pos,
 	while (doll_pos[(*num_doll)] != -1)
 		(*num_doll)++;
 	(*total_parts) = ((*num_doll) * 2) + 1;
-	(*string_split) = malloc(sizeof(char *) * ((*total_parts) + 2));
+	(*string_split) = malloc(sizeof(char *)
+			* ((*total_parts) + 2));
 	if (!(*string_split))
 		exit(1);
 }
 
+void	terminate_string_split(char	***s_s, int i)
+{
+	(*s_s)[i] = NULL;
+}
+
 /*
-	splite the STR into str and the dollars, and also replace the dollar with their value.
+	splite the STR into str and the dollars,
+		and also replace the dollar with their value.
 	Or for $? make it $! to be catch later. 
 	And return the array of str.
+	
+	string_split = s_s
 */
 char	**spit_text_args(char *str, int	*doll_pos)
 {
 	int		i;
-	char	**string_split;
+	char	**s_s;
 	int		num_doll;
 	char	*temp_str;
 	int		total_parts;
 
-	spit_text_args_init(&num_doll, doll_pos, &total_parts, &string_split);
-	i = 0;
+	spit_text_args_init(&num_doll, doll_pos, &total_parts, &s_s);
+	i = -1;
 	num_doll = 0;
-	while (i < (total_parts))
+	while (++i < (total_parts))
 	{
 		if (i % 2 == 0)
-			spit_text_args_even(str, doll_pos, i, num_doll, string_split);
+		{
+			if (i == 0)
+				s_s[i] = ft_strdup_intil_index_n(str, doll_pos[num_doll] - 1);
+			else
+				spit_text_args_even(str, doll_pos, num_doll, s_s[i]);
+		}
 		else
 		{
-			spit_text_args_odd(str, doll_pos, num_doll, &temp_str);
-			spit_text_args_odd_p2(string_split, &temp_str, i);
-			num_doll++;
+			spit_text_args_odd(str, doll_pos, num_doll++, &temp_str);
+			spit_text_args_odd_p2(s_s, &temp_str, i);
 		}
-		i++;
 	}
-	string_split[i] = NULL;
-	return (string_split);
+	return (terminate_string_split(&s_s, i), s_s);
 }
-
 
 int	*get_doll_position(char *str)
 {
