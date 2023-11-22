@@ -207,7 +207,7 @@ char	*mk_doll_ques_into_num(char **str_og,
 void	handle_signal_return(int *number_replace)
 {
 	if (g_exit_status != 0)
-		(*number_replace) = g_exit_status;
+		(*number_replace) = ((t_global *)(g_exit_status))->status;
 	g_exit_status = 0;
 }
 
@@ -256,23 +256,68 @@ int	return_biggest_int(int a, int b)
 	return (b);
 }
 
-char	*here_doc_starter(char *wordlocking_for)
+void signals_heredoc()
 {
-	char	*str_return;
-	char	*read_line_str;
-
-	str_return = NULL;
-	read_line_str = readline(" > ");
-	while (ft_strncmp(wordlocking_for, read_line_str,
-			return_biggest_int(ft_strlen(wordlocking_for),
-				ft_strlen(read_line_str))) != 0)
-	{
-		str_return = sjoin_fr(str_return, ft_strjoin("\n", read_line_str));
-		read_line_str = readline(" > ");
-	}
-	str_return = sjoin_fr(str_return, ft_strdup("\n"));
-	return (str_return);
+    rl_replace_line("", 0);
+    rl_redisplay();
+    if (((t_global *)(g_exit_status))->heredoc)
+        ((t_global *)(g_exit_status))->status = 130; // Set status to indicate SIGINT received
 }
+
+
+void	send_heredoc_signal()
+{
+	struct sigaction	sa;
+
+	sa.sa_handler = &signals_heredoc;
+	sa.sa_flags = 0;
+	sigemptyset(&sa.sa_mask);
+	sigaction(SIGINT, &sa, NULL);
+}
+
+char *here_doc_starter(char *wordlooking_for)
+{
+    char	*str_return;
+    char	*read_line_str;
+	static t_global glob; // Declare the struct
+
+	t_global *g_exit_status = &glob;
+	str_return = NULL;
+    ((t_global *)(g_exit_status))->heredoc = 1;
+	((t_global *)(g_exit_status))->status = 0;
+    rl_catch_signals = 0;
+    send_heredoc_signal();
+    while ( ((t_global *)(g_exit_status))->status == 0)
+	{
+        read_line_str = readline(" > ");
+        if (read_line_str == NULL ||  ((t_global *)(g_exit_status))->status != 0)
+		{
+            free(str_return); // Free any allocated memory
+            str_return = NULL; // Set return value to NULL as heredoc is not completed
+            break;
+        }
+        if (str_return == NULL)
+            str_return = strdup(read_line_str);
+        else
+		{
+            char *temp = str_return;
+            str_return = malloc(strlen(temp) + strlen(read_line_str) + 2);
+            if (str_return == NULL)
+			{
+                free(temp);
+                break ;
+            }
+            sprintf(str_return, "%s\n%s", temp, read_line_str);
+            free(temp);
+        }
+        if (ft_strncmp(wordlooking_for, read_line_str, ft_strlen(wordlooking_for)) == 0)
+            break; // Exit the loop if the word matches
+        free(read_line_str); // Free the readline string after using it
+    }
+     ((t_global *)(g_exit_status))->heredoc = 0; // Reset heredoc flag when exiting
+    return (str_return);
+}
+
 
 bool	is_str_export(char *str)
 {
@@ -840,73 +885,38 @@ bool	check_unset_noquotes(t_lexer ***lexer)
 	return (false);
 }
 
-void	unset_and_free(t_lexer ***lexer, char ***all_var_rm,
-		int all_var_rm_num, t_post_quotes ***content)
+bool	check_unset_for_quotes(t_post_quotes	***content, t_lexer ***lexer)
 {
-	int	i;
-
-	i = 0;
-	(*all_var_rm)[all_var_rm_num] = NULL;
-	while ((*all_var_rm)[i] != NULL)
-	{
-		unset_env((*all_var_rm)[i], get_env());
-		i++;
-	}
-	i = 0;
-	while ((*all_var_rm)[i] != NULL)
-	{
-		free((*all_var_rm)[i]);
-		i++;
-	}
-	free((*all_var_rm));
-	free_content(*content);
-	lexer_free((*lexer));
-}
-
-int	initial_unset_checks(t_lexer ***lexer, t_post_quotes ***content)
-{
+	char	**all_var_rm;
+	int		all_var_rm_num;
+	int		all_var_rm_total;
+	int		i;
+	
+	if (is_str_unset((*lexer)[0]->cmd) == false)
+		return (false);
 	if ((*lexer)[1] != NULL)
 	{
 		printf("Can't pipe unset\n");
 		lexer_free((*lexer));
 		free_content((*content));
-		return (1);
+		return (true);
 	}
 	if ((*lexer)[0]->args == NULL)
 	{
 		lexer_free((*lexer));
 		free_content((*content));
-		return (1);
-	}
-	return (0);
-}
-
-void	write_content(char **temp, t_post_quotes ***content, int *i)
-{
-	(*temp) = ft_strdup(&((*content)[0]->content[5]));
-	free((*content)[0]->content);
-	(*content)[0]->content = (*temp);
-	(*i) = 0;
-}
-
-bool	check_unset_for_quotes(t_post_quotes ***content, t_lexer ***lexer)
-{
-	char	**all_var_rm;
-	char	*temp;
-	char	**all_var_rm_temp;
-	int		all_var_rm_num;
-	int		all_var_rm_total;
-	int		i;
-	int		j;
-
-	if (is_str_unset((*lexer)[0]->cmd) == false)
-		return (false);
-	if (initial_unset_checks(lexer, content) == 1)
 		return (true);
+	}
 	if (is_str_unset((*content)[0]->content))
 		i = 1;
 	else
-		write_content(&temp, content, &i);
+	{
+		char *temp;
+		temp = ft_strdup(&((*content)[0]->content[5]));
+		free((*content)[0]->content);
+		(*content)[0]->content = temp;
+		i = 0;
+	}
 	while ((*content)[i] != NULL)
 		i++;
 	all_var_rm_total = i * 2 + 1;
@@ -925,6 +935,9 @@ bool	check_unset_for_quotes(t_post_quotes ***content, t_lexer ***lexer)
 		}
 		else
 		{
+			char **all_var_rm_temp;
+			int j;
+
 			if (is_all_space((*content)[i]->content))
 			{
 				i++;
@@ -958,6 +971,22 @@ bool	check_unset_for_quotes(t_post_quotes ***content, t_lexer ***lexer)
 		}
 		all_var_rm_num++;
 	}
-	unset_and_free(lexer, &all_var_rm, all_var_rm_num, content);
+	all_var_rm[all_var_rm_num] = NULL;
+	i = 0;
+	while (all_var_rm[i] != NULL)
+	{
+		unset_env(all_var_rm[i], get_env());
+		// free(all_var_rm[i]);
+		i++;
+	}
+	i = 0;
+	while (all_var_rm[i] != NULL)
+	{
+		free(all_var_rm[i]);
+		i++;
+	}
+	free(all_var_rm);
+	free_content(*content);
+	lexer_free((*lexer));
 	return (true);
 }
