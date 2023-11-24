@@ -51,7 +51,11 @@ int	executer_p2(t_lexer **lexer, t_pipedata *data)
 	if (ft_memcmp(lexer[(*data).lex_count]->cmd, "pwd", 3) == 0)
 	{
 		if (getcwd(str2, 4096) == NULL)
+		{
 			write(2, "invalid directory\n", 18);
+			g_exit_status = 126;
+			return (126);
+		}
 		else
 			printf("%s\n", str2);
 	}
@@ -60,10 +64,7 @@ int	executer_p2(t_lexer **lexer, t_pipedata *data)
 		if (lexer[(*data).lex_count]->flags != NULL)
 		{
 			if (ft_memcmp(lexer[(*data).lex_count]->flags, "-n", 2) == 0)
-			{
-				echo_handle(lexer[(*data).lex_count]->args, true);
-				return (0);
-			}
+				return (echo_handle(lexer[(*data).lex_count]->args, true), 0);
 		}
 		echo_handle(lexer[(*data).lex_count]->args, false);
 	}

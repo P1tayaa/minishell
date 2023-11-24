@@ -338,8 +338,9 @@ void	removes_front_and_back_redondant_spaces(t_lexer **lexer)
 	
 	CURRENT_LEXER is a pointer to the address of current
 	one of double array of t_lexer (&lexer[i])
+	move_cmd_to_right_place_if_speacific_tokenid
 */
-void	move_cmd_to_right_place_if_speacific_tokenid(
+void	move_cmd_if_speacific_tokenid(
 		t_lexer **previus_lexer, t_lexer **current_lexer, int i)
 {
 	if (i > 0)
@@ -387,7 +388,7 @@ t_lexer	**main_parser(char *str)
 		curser = parse_until_token_id(str, i, lexer, curser);
 		if (ft_char_find(lexer[i]->args, "-") != -1)
 			move_flags_from_args_to_flags(lexer[i]);
-		move_cmd_to_right_place_if_speacific_tokenid(
+		move_cmd_if_speacific_tokenid(
 			&lexer[i - 1], &lexer[i], i);
 		removes_front_and_back_redondant_spaces(&lexer[i]);
 		i++;
@@ -630,7 +631,8 @@ void	parse_with_quotes_none_quotes_assigning_if_token(char
 	}
 	if ((*lexer)[(*i)]->cmd != NULL)
 		(*lexer)[(*i)]->cmd = remove_back_spaces((*lexer)[(*i)]->cmd);
-	move_cmd_to_right_place_if_speacific_tokenid(&(*lexer)[(*i - 1)], &(*lexer)[(*i)], (*i));
+	move_cmd_if_speacific_tokenid(
+		&(*lexer)[(*i - 1)], &(*lexer)[(*i)], (*i));
 	(*i)++;
 	if ((*curent_content)[(*j)] != '\0')
 	{
@@ -704,7 +706,7 @@ void	parser_with_quotes_p2(t_post_quotes **content,
 			parse_with_quotes_none_quotes_assigning(
 				&content[i_content++]->content, function_done, lexer, i);
 	}
-	move_cmd_to_right_place_if_speacific_tokenid(&(*lexer)[(*i - 1)], &(*lexer)[(*i)], (*i));
+	move_cmd_if_speacific_tokenid(&(*lexer)[(*i - 1)], &(*lexer)[(*i)], (*i));
 	if ((*lexer)[(*i)]->args != NULL)
 	{
 		(*lexer)[(*i)]->args = remove_front_spaces((*lexer)[(*i)]->args);
@@ -717,7 +719,6 @@ void	parser_with_quotes_p2(t_post_quotes **content,
 		free((*lexer)[(*i)]->flags);
 		(*lexer)[(*i)]->flags = NULL;
 	}
-	// move_cmd_to_right_place_if_speacific_tokenid(&(*lexer)[(*i - 1)], &(*lexer)[(*i)], (*i));
 }
 
 /*

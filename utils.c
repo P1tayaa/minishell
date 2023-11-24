@@ -258,27 +258,27 @@ int	return_biggest_int(int a, int b)
 
 char	*here_doc_starter(char *wordlocking_for)
 {
-    char	*str_return;
-    char	*read_line_str;
+	char	*str_return;
+	char	*read_line_str;
+
 	rl_catch_signals = 0;
-    
-    str_return = NULL;
-    read_line_str = readline(" > ");
-    while (read_line_str != NULL && ft_strncmp(wordlocking_for, read_line_str, return_biggest_int(ft_strlen(wordlocking_for), ft_strlen(read_line_str)))!= 0 && g_exit_status == 0)
-    {
-        str_return = sjoin_fr(str_return, ft_strjoin("\n", read_line_str));
-        read_line_str = readline(" > ");
-    }
+	str_return = NULL;
+	read_line_str = readline(" > ");
+	while (read_line_str != NULL && ft_strncmp(wordlocking_for,
+			read_line_str, return_biggest_int(ft_strlen(wordlocking_for),
+				ft_strlen(read_line_str))) != 0 && g_exit_status == 0)
+	{
+		str_return = sjoin_fr(str_return, ft_strjoin("\n", read_line_str));
+		read_line_str = readline(" > ");
+	}
 	if (g_exit_status != 0)
 	{
 		g_exit_status = 0;
-		// manage_signals(0);
 		exit(130);
 	}
 	str_return = sjoin_fr(str_return, ft_strdup("\n"));
 	return (str_return);
 }
-
 
 bool	is_str_export(char *str)
 {
@@ -763,7 +763,7 @@ int	finish_or_malloc_word(char *str,
 		{
 			if (str[1] != '\0' && writing_process(
 					&writing, s_p, wc, &j))
-				if (!ft_isspace(str[i + 1]))
+				if (!ft_isspace(str[i + 1]) && str[i + 1] != '\0')
 					(*s_p)[(*wc)] = malloc((cc_u_s(&str[i + 1]) + 1));
 		}
 		else
@@ -846,108 +846,125 @@ bool	check_unset_noquotes(t_lexer ***lexer)
 	return (false);
 }
 
-bool	check_unset_for_quotes(t_post_quotes	***content, t_lexer ***lexer)
+void	checks_andset_else(t_post_quotes ***content, int *i)
 {
-	char	**all_var_rm;
-	int		all_var_rm_num;
-	int		all_var_rm_total;
-	int		i;
-	
-	if (is_str_unset((*lexer)[0]->cmd) == false)
-		return (false);
+	char	*temp;
+
+	temp = ft_strdup(&((*content)[0]->content[5]));
+	free((*content)[0]->content);
+	(*content)[0]->content = temp;
+	(*i) = 0;
+}
+
+int	checks_andset_i(t_lexer ***lexer, t_post_quotes ***content, int *i)
+{
 	if ((*lexer)[1] != NULL)
 	{
 		printf("Can't pipe unset\n");
 		lexer_free((*lexer));
 		free_content((*content));
-		return (true);
+		return (1);
 	}
 	if ((*lexer)[0]->args == NULL)
 	{
 		lexer_free((*lexer));
 		free_content((*content));
-		return (true);
+		return (1);
 	}
 	if (is_str_unset((*content)[0]->content))
-		i = 1;
+		(*i) = 1;
 	else
+		checks_andset_else(content, i);
+	while ((*content)[(*i)] != NULL)
+		(*i)++;
+	return (0);
+}
+
+void	prep_all_var(t_post_quotes ***content,
+		int *all_var_rm_total, char ***all_var_rm, int *i)
+{
+	(*all_var_rm_total) = (*i) * 2 + 1;
+	(*all_var_rm) = malloc(sizeof(char *) * ((*all_var_rm_total)));
+	if (is_str_unset((*content)[0]->content))
+		(*i) = 1;
+	else
+		(*i) = 0;
+}
+
+int	unset_quotes_nq_else(t_post_quotes **content, char ***all_var_rm,
+		int *all_var_rm_total, int *all_var_rm_num)
+{
+	char	**all_var_rm_temp;
+	int		j;
+
+	if (is_all_space((*content)->content))
+		return (0);
+	all_var_rm_temp = split_spaces((*content)->content);
+	j = 0;
+	while (all_var_rm_temp[j] != NULL)
+		j++;
+	if (j == 1)
 	{
-		char *temp;
-		temp = ft_strdup(&((*content)[0]->content[5]));
-		free((*content)[0]->content);
-		(*content)[0]->content = temp;
-		i = 0;
+		(*all_var_rm)[(*all_var_rm_num)++] = ft_strdup(all_var_rm_temp[0]);
+		free(all_var_rm_temp[0]);
+		return (free(all_var_rm_temp), 0);
 	}
-	while ((*content)[i] != NULL)
+	(*all_var_rm)[(*all_var_rm_num)] = NULL;
+	(*all_var_rm_total) = (*all_var_rm_total) + j;
+	(*all_var_rm) = remalloc_and_dup((*all_var_rm), (*all_var_rm_total));
+	j = 0;
+	while (all_var_rm_temp[j] != NULL)
+		(*all_var_rm)[(*all_var_rm_num)++] = all_var_rm_temp[j++];
+	return (free(all_var_rm_temp), 0);
+}
+
+void	finish_check_unset(char ***all_var_rm,
+		t_post_quotes ***content, t_lexer ***lexer)
+{
+	int	i;
+
+	i = 0;
+	while ((*all_var_rm)[i] != NULL)
+	{
+		unset_env((*all_var_rm)[i], get_env());
 		i++;
-	all_var_rm_total = i * 2 + 1;
-	all_var_rm = malloc(sizeof(char *) * (all_var_rm_total));
+	}
+	i = 0;
+	while ((*all_var_rm)[i] != NULL)
+	{
+		free((*all_var_rm)[i]);
+		i++;
+	}
+	free((*all_var_rm));
+	free_content(*content);
+	lexer_free((*lexer));
+}
+
+bool	check_unset_for_quotes(t_post_quotes ***content, t_lexer ***lexer)
+{
+	char	**all_var_rm;
+	int		all_var_rm_num;
+	int		all_var_rm_total;
+	int		i;
+
+	if (is_str_unset((*lexer)[0]->cmd) == false)
+		return (false);
+	if (checks_andset_i(lexer, content, &i) == 1)
+		return (true);
+	prep_all_var(content, &all_var_rm_total, &all_var_rm, &i);
 	all_var_rm_num = 0;
-	if (is_str_unset((*content)[0]->content))
-		i = 1;
-	else
-		i = 0;
 	while ((*content)[i])
 	{
 		if ((*content)[i]->is_quotes == true)
-		{
-			all_var_rm[all_var_rm_num] = ft_strdup((*content)[i]->content);
-			i++;
-		}
+			all_var_rm[all_var_rm_num] = ft_strdup((*content)[i++]->content);
 		else
 		{
-			char **all_var_rm_temp;
-			int j;
-
-			if (is_all_space((*content)[i]->content))
-			{
-				i++;
-				continue ;
-			}
-			all_var_rm_temp = split_spaces((*content)[i]->content);
-			j = 0;
-			while (all_var_rm_temp[j] != NULL)
-				j++;
-			if (j == 1)
-			{
-				all_var_rm[all_var_rm_num] = all_var_rm_temp[0];
-				free(all_var_rm_temp);
-				all_var_rm_num++;
-				i++;
-				continue ;
-			}
-			all_var_rm[all_var_rm_num] = NULL;
-			all_var_rm_total = all_var_rm_total + j;
-			all_var_rm = remalloc_and_dup(all_var_rm, all_var_rm_total);
-			j = 0;
-			while (all_var_rm_temp[j] != NULL)
-			{
-				all_var_rm[all_var_rm_num] = all_var_rm_temp[j];
-				all_var_rm_num++;
-				j++;
-			}
-			free(all_var_rm_temp);
-			i++;
+			unset_quotes_nq_else(&((*content)[i++]),
+				&all_var_rm, &all_var_rm_total, &all_var_rm_num);
 			continue ;
 		}
 		all_var_rm_num++;
 	}
 	all_var_rm[all_var_rm_num] = NULL;
-	i = 0;
-	while (all_var_rm[i] != NULL)
-	{
-		unset_env(all_var_rm[i], get_env());
-		// free(all_var_rm[i]);
-		i++;
-	}
-	i = 0;
-	while (all_var_rm[i] != NULL)
-	{
-		free(all_var_rm[i]);
-		i++;
-	}
-	free(all_var_rm);
-	free_content(*content);
-	lexer_free((*lexer));
-	return (true);
+	return (finish_check_unset(&all_var_rm, content, lexer), true);
 }

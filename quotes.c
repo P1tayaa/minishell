@@ -753,6 +753,9 @@ char	*handle_expand_doll(char *str)
 		return (ft_strdup(str));
 	}
 	spit_text = spit_text_args(str, doll_pos);
+	printf("spit_text[0] in handle = (%s)\n", spit_text[0]);
+	printf("spit_text[1] in handle = (%s)\n", spit_text[1]);
+	printf("spit_text[2] in handle = (%s)\n", spit_text[2]);
 	final_str = ft_strjoin_double_str(spit_text);
 	split_test_freeur(spit_text);
 	free(doll_pos);
@@ -790,9 +793,7 @@ char	*ft_strjoin_double_str(char **spit_text)
 	size_str = 0;
 	i = 0;
 	while (spit_text[i] != NULL)
-	{
 		size_str = size_str + ft_strlen(spit_text[i++]);
-	}
 	str = malloc(sizeof(char) * (size_str + 1));
 	if (!str)
 		exit(EXIT_FAILURE);
@@ -877,33 +878,33 @@ char	*spit_text_args_even(char *str, int	*doll_pos,
 
 */
 char	*spit_text_args_even(char *str, int	*d_p,
-		int n_d, char *s_s)
+		int n_d, char **s_s)
 {
 	if (d_p[n_d] != -1)
 	{
 		if (find_next_space(&str[d_p[n_d - 1]] + 1) == -1 || find_next_space(
 				&str[d_p[n_d - 1]] + 1) > d_p[n_d] - (d_p[n_d - 1] + 1))
-			s_s = ft_strdup("\0");
+			(*s_s) = ft_strdup("\0");
 		else
-			s_s = ft_strdup_intil_index_n(&str[d_p[n_d - 1] + find_next_space(
-						&str[d_p[n_d - 1]])], d_p[n_d] - (d_p[n_d - 1]
-						+ find_next_space(&str[d_p[n_d - 1]])) - 1);
+			(*s_s) = ft_strdup_intil_index_n(&str[d_p[n_d - 1]
+					+ find_next_space(&str[d_p[n_d - 1]])], d_p[n_d]
+					- (d_p[n_d - 1] + find_next_space(&str[d_p[n_d - 1]])) - 1);
 	}
 	else
 	{
 		if (find_next_space(&str[d_p[n_d - 1]]) == -1)
 		{
 			if (find_next_quote(&str[d_p[n_d - 1]]) == -1)
-				s_s = ft_strdup("\0");
+				(*s_s) = ft_strdup("\0");
 			else
-				s_s = ft_strdup("\"");
+				(*s_s) = ft_strdup("\"");
 		}
 		else
-			s_s = ft_strdup_intil_index_n(&str[d_p[n_d - 1] + find_next_space(
-						&str[d_p[n_d - 1]])], ft_strlen(&str[d_p[n_d - 1]
-						+ find_next_space(&str[d_p[n_d - 1]])]));
+			(*s_s) = ft_strdup_intil_index_n(&str[d_p[n_d - 1]
+					+ find_next_space(&str[d_p[n_d - 1]])], ft_strlen(&str[
+						d_p[n_d - 1] + find_next_space(&str[d_p[n_d - 1]])]));
 	}
-	return (s_s);
+	return ((*s_s));
 }
 
 void	spit_text_args_odd(char *str, int *doll_pos,
@@ -958,7 +959,10 @@ void	spit_text_args_init(int *num_doll, int *doll_pos,
 {
 	(*num_doll) = 0;
 	while (doll_pos[(*num_doll)] != -1)
+	{
+		printf("doll poss is (%d)\n", doll_pos[(*num_doll)]);
 		(*num_doll)++;
+	}
 	(*total_parts) = ((*num_doll) * 2) + 1;
 	(*string_split) = malloc(sizeof(char *)
 			* ((*total_parts) + 2));
@@ -997,7 +1001,7 @@ char	**spit_text_args(char *str, int	*doll_pos)
 			if (i == 0)
 				s_s[i] = ft_strdup_intil_index_n(str, doll_pos[num_doll] - 1);
 			else
-				spit_text_args_even(str, doll_pos, num_doll, s_s[i]);
+				spit_text_args_even(str, doll_pos, num_doll, &(s_s[i]));
 		}
 		else
 		{
@@ -1024,15 +1028,14 @@ int	*get_doll_position(char *str)
 	doll_pos = malloc(sizeof(int) * (num_doll + 1));
 	if (!doll_pos)
 		exit(EXIT_FAILURE);
-	i = 0;
+	i = -1;
 	num_doll = 0;
-	while (str[i] != '\0')
+	while (str[++i] != '\0')
 	{
 		if (str[i] == '$')
 			if (str[i + 1] != '\0')
 				if (str[i + 1] != '=')
 					doll_pos[num_doll++] = i;
-		i++;
 	}
 	doll_pos[num_doll] = -1;
 	return (doll_pos);

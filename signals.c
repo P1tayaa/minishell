@@ -104,9 +104,7 @@ void	f_sigmain2(int sig)
 		g_exit_status = 130;
 		rl_replace_line("", 0);
 		rl_on_new_line();
-		// rl_redisplay();
-		rl_done = 1;		// GOATED LINE
-		// write(2, "Minishell_OS_1.5", 16);
+		rl_done = 1;
 	}
 	else
 		g_exit_status = 131;

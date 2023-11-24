@@ -14,7 +14,6 @@
 # define MINISHELL_H
 
 # include <stdio.h>
-# include <string.h>	// REMOOOOOOOOVE BEFORE PUUUUSH! 
 # include <stdlib.h>
 # include <unistd.h>
 # include <limits.h>
@@ -25,12 +24,6 @@
 # include "./lib/libft/libft.h"
 # include <fcntl.h>
 # include <sys/wait.h>
-
-// typedef struct s_global
-// {
-// 	volatile sig_atomic_t	status;
-// 	volatile sig_atomic_t	heredoc;
-// }	t_global;
 
 extern int	g_exit_status;
 
@@ -55,10 +48,10 @@ typedef struct s_lexer
 
 typedef struct s_list_of_quotes
 {
-    int    *single_quotes;
-    int    *double_quotes;
-    int *i_temp;
-}    t_list_of_quotes;
+	int	*single_quotes;
+	int	*double_quotes;
+	int	*i_temp;
+}	t_list_of_quotes;
 
 typedef struct s_pipedata
 {
