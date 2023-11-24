@@ -375,19 +375,15 @@ int	manage_reads_writes(t_pipedata *data, t_lexer **lexer)
 	if (lexer[(*data).lex_count]->tokenid[0] == '<')
 	{
 		if (lexer[(*data).lex_count]->tokenid[1] == '<')
+			manage_heredoc(data, lexer);
+		else
 		{
-			if (manage_heredoc(data, lexer) == 0)
-			{
-				close((*data).input_fd);
-				close((*data).fd[0]);
-				close((*data).fd[1]);
-				return (i);
-			}
+			manage_redirection(data, lexer, i);
+			if (lexer[(*data).lex_count]->cmd == NULL
+				&& lexer[(*data).lex_count + 1]->tokenid[0] != '<')
+				(*data).lex_count++;
+
 		}
-		manage_redirection(data, lexer, i);
-		if (lexer[(*data).lex_count]->cmd == NULL
-			&& lexer[(*data).lex_count + 1]->tokenid[0] != '<')
-			(*data).lex_count++;
 	}
 	else if (lexer[(*data).lex_count]->tokenid[0] == '>')
 	{
@@ -604,14 +600,21 @@ void	create_and_run_child(t_pipedata *data,
 	}
 	if ((*pid) == 0)
 	{
+		puts("correct");
 		manage_signals(3);
 		if (manage_reads_writes(&(*data), lexer) == -1)
 			return ;
 		if (lexer[(*data).lex_count]->cmd)
+		{
+			puts("fire the children");
 			execute_child_process(&(*data));
+		}
 	}
 	else
+	{
+		puts("parenting");
 		(*doll) = parent_management(&(*data), lexer, (*pid));
+	}
 	manage_signals(0);
 }
 void    pipes(t_lexer **lexer, t_pipedata *data, int *pid, int *doll)
@@ -649,6 +652,7 @@ void	piping(t_lexer **lexer)
 	t_pipedata			data;
 	int					pid;
 	static int			doll;
+	char				*temp;
 
 	initialize_pipedata(&data);
 	if (lexer[0] == NULL)
@@ -662,7 +666,9 @@ void	piping(t_lexer **lexer)
 	{
 		if (lexer[0]->tokenid[1] == '<')
 		{
-			unlink(sjoin_fr(ft_strdup(lexer[0]->args), ft_strdup("heredoc.txt")));
+			temp = sjoin_fr(ft_strdup(lexer[0]->args), ft_strdup("heredoc.txt"));
+			unlink(temp);
+			free(temp);
 		}
 	}
 	dup2(data.og_out, STDOUT_FILENO);
