@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/13 13:30:47 by sboulain          #+#    #+#             */
-/*   Updated: 2023/11/20 16:29:16 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/11/23 17:41:14 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -630,6 +630,7 @@ void	parse_with_quotes_none_quotes_assigning_if_token(char
 	}
 	if ((*lexer)[(*i)]->cmd != NULL)
 		(*lexer)[(*i)]->cmd = remove_back_spaces((*lexer)[(*i)]->cmd);
+	move_cmd_to_right_place_if_speacific_tokenid(&(*lexer)[(*i - 1)], &(*lexer)[(*i)], (*i));
 	(*i)++;
 	if ((*curent_content)[(*j)] != '\0')
 	{
@@ -703,6 +704,7 @@ void	parser_with_quotes_p2(t_post_quotes **content,
 			parse_with_quotes_none_quotes_assigning(
 				&content[i_content++]->content, function_done, lexer, i);
 	}
+	move_cmd_to_right_place_if_speacific_tokenid(&(*lexer)[(*i - 1)], &(*lexer)[(*i)], (*i));
 	if ((*lexer)[(*i)]->args != NULL)
 	{
 		(*lexer)[(*i)]->args = remove_front_spaces((*lexer)[(*i)]->args);
@@ -715,6 +717,7 @@ void	parser_with_quotes_p2(t_post_quotes **content,
 		free((*lexer)[(*i)]->flags);
 		(*lexer)[(*i)]->flags = NULL;
 	}
+	// move_cmd_to_right_place_if_speacific_tokenid(&(*lexer)[(*i - 1)], &(*lexer)[(*i)], (*i));
 }
 
 /*

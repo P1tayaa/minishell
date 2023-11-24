@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:30:26 by omathot           #+#    #+#             */
-/*   Updated: 2023/11/21 21:30:28 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/11/23 17:41:17 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,13 @@
 # include <fcntl.h>
 # include <sys/wait.h>
 
-extern volatile sig_atomic_t	g_exit_status;
+// typedef struct s_global
+// {
+// 	volatile sig_atomic_t	status;
+// 	volatile sig_atomic_t	heredoc;
+// }	t_global;
+
+extern int	g_exit_status;
 
 typedef struct s_post_quotes
 {
@@ -49,9 +55,10 @@ typedef struct s_lexer
 
 typedef struct s_list_of_quotes
 {
-	int	*single_quotes;
-	int	*double_quotes;
-}	t_list_of_quotes;
+    int    *single_quotes;
+    int    *double_quotes;
+    int *i_temp;
+}    t_list_of_quotes;
 
 typedef struct s_pipedata
 {
@@ -64,7 +71,7 @@ typedef struct s_pipedata
 	t_lexer	**lexer;
 }	t_pipedata;
 
-void	manage_signals(void);
+void	manage_signals(int mode);
 void	exec(t_lexer *lexer);
 void	piping(t_lexer **lexer);
 char	*ft_strtok(char *str, const char *delim);

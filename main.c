@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:29:45 by omathot           #+#    #+#             */
-/*   Updated: 2023/11/22 02:05:34 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/11/23 17:37:11 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ bool	check_unset_for_quotes(t_post_quotes	***content, t_lexer ***lexer);
 void	free_double_array(char **list_of_tokenid);
 void	pipe_export(t_lexer ***lexer);
 
-volatile sig_atomic_t	g_exit_status = 0;
+int	g_exit_status;
 
 void	lexer_free(t_lexer **lexer)
 {
@@ -195,10 +195,10 @@ int	lexer_with_quotes(t_lexer ***lexer, t_post_quotes ***content, char **str)
 int	initialize_and_checks(t_post_quotes ***content,
 		bool quotes_test, char **str)
 {
-	manage_signals();
+	manage_signals(0);
 	(*content) = NULL;
 	(*str) = read_user_input(quotes_test);
-	if (str == NULL)
+	if ((*str) == NULL)
 		return (1);
 	if (quotes_test)
 		check_quotes(str, content);
@@ -211,7 +211,9 @@ int	main(void)
 	t_lexer			**lexer;
 	bool			quotes_test;
 	t_post_quotes	**content;
+	// int				i;
 
+	// i = 0;
 	quotes_test = true;
 	while (1)
 	{
@@ -224,6 +226,16 @@ int	main(void)
 			if (lexer_with_quotes(&lexer, &content, &str) == 1)
 				continue ;
 		}
+		// while (lexer[i] != NULL)
+		// {
+		// 	printf("cmd = (%s)\n", lexer[i]->cmd);
+		// 	printf("args = (%s)\n", lexer[i]->args);
+		// 	printf("flags = (%s)\n", lexer[i]->flags);
+		// 	printf("tokenid = (%s)\n", lexer[i]->tokenid);
+		// 	printf("file = (%s)\n", lexer[i]->file);
+		// 	printf("i = (%i)\n\n", i);
+		// 	i++;
+		// }
 		free(str);
 		if (noquotes_into_pipes(&lexer) == 1)
 			continue ;
@@ -251,6 +263,8 @@ char	*read_user_input(bool quotes_test)
 			add_history(str);
 		break ;
 	}
+	if (str == NULL)
+		return (NULL);
 	str_return = ft_strdup(str);
 	if (str)
 		free(str);

@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/17 11:31:43 by omathot           #+#    #+#             */
-/*   Updated: 2023/11/20 14:35:21 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/11/22 23:10:27 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,42 +41,97 @@ Works everywhere else, more portable and should be used instead.
 	rl_redisplay();
 */
 
-void	signal_catcher(int sig)
+// void	signal_catcher(int sig)
+// {
+// 	printf("g_exit og sigcatch = %p\n", g_exit_status);
+// 	if (sig == SIGINT)
+// 	{
+// 		write(STDERR_FILENO, "\n", 1);
+// 		rl_on_new_line();
+// 		rl_replace_line("", 0);
+// 		rl_redisplay();
+// 		g_exit_status = 130;
+// 	}
+// 	(void) sig;
+// }
+
+// void	slash_catch(int sig)
+// {
+// 	if (sig == SIGQUIT)
+// 	{
+// 		rl_redisplay();
+// 		g_exit_status = 131;
+// 	}
+// }
+
+// void	manage_signals(void)
+// {
+// 	struct sigaction	s1;
+// 	struct sigaction	s2;
+
+// 	s1.sa_handler = &signal_catcher;
+// 	sigemptyset(&(s1.sa_mask));
+// 	sigaddset(&s1.sa_mask, SIGINT);
+// 	s1.sa_flags = 0;
+// 	sigaction(SIGINT, &s1, NULL);
+// 	s2.sa_handler = &slash_catch;
+// 	sigemptyset(&(s2.sa_mask));
+// 	sigaddset(&s2.sa_mask, SIGINT);
+// 	s2.sa_flags = 0;
+// 	sigaction(SIGQUIT, &s2, NULL);
+// 	return ;
+// }
+
+void	f_sigmain(int sig)
 {
 	if (sig == SIGINT)
 	{
-		write(STDERR_FILENO, "\n", 1);
-		rl_on_new_line();
-		rl_replace_line("", 0);
-		rl_redisplay();
+		printf("\n");
 		g_exit_status = 130;
-	}
-	(void) sig;
-}
-
-void	slash_catch(int sig)
-{
-	if (sig == SIGQUIT)
-	{
+		rl_replace_line("", 0);
+		rl_on_new_line();
 		rl_redisplay();
-		g_exit_status = 131;
 	}
+	else
+		g_exit_status = 131;
 }
 
-void	manage_signals(void)
+void	f_sigmain2(int sig)
 {
-	struct sigaction	s1;
-	struct sigaction	s2;
+	if (sig == SIGINT)
+	{
+		printf("\n");
+		g_exit_status = 130;
+		rl_replace_line("", 0);
+		rl_on_new_line();
+		// rl_redisplay();
+		rl_done = 1;		// GOATED LINE
+		// write(2, "Minishell_OS_1.5", 16);
+	}
+	else
+		g_exit_status = 131;
+}
 
-	s1.sa_handler = &signal_catcher;
-	sigemptyset(&(s1.sa_mask));
-	sigaddset(&s1.sa_mask, SIGINT);
-	s1.sa_flags = 0;
-	sigaction(SIGINT, &s1, NULL);
-	s2.sa_handler = &slash_catch;
-	sigemptyset(&(s2.sa_mask));
-	sigaddset(&s2.sa_mask, SIGINT);
-	s2.sa_flags = 0;
-	sigaction(SIGQUIT, &s2, NULL);
-	return ;
+void	manage_signals(int mode)
+{
+	if (mode == 0)
+	{
+		signal(SIGINT, f_sigmain);
+		signal(SIGQUIT, SIG_IGN);
+	}
+	if (mode == 1)
+	{
+		signal(SIGINT, SIG_IGN);
+		signal(SIGQUIT, SIG_IGN);
+	}
+	if (mode == 2)
+	{
+		signal(SIGINT, f_sigmain2);
+		signal(SIGQUIT, SIG_IGN);
+	}
+	if (mode == 3)
+	{
+		signal(SIGINT, f_sigmain);
+		signal(SIGQUIT, SIG_DFL);
+	}
 }

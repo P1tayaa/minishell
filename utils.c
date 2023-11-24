@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/14 17:01:53 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/11/22 02:01:08 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/11/22 23:56:58 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -207,7 +207,7 @@ char	*mk_doll_ques_into_num(char **str_og,
 void	handle_signal_return(int *number_replace)
 {
 	if (g_exit_status != 0)
-		(*number_replace) = ((t_global *)(g_exit_status))->status;
+		(*number_replace) = g_exit_status;
 	g_exit_status = 0;
 }
 
@@ -256,66 +256,27 @@ int	return_biggest_int(int a, int b)
 	return (b);
 }
 
-void signals_heredoc()
-{
-    rl_replace_line("", 0);
-    rl_redisplay();
-    if (((t_global *)(g_exit_status))->heredoc)
-        ((t_global *)(g_exit_status))->status = 130; // Set status to indicate SIGINT received
-}
-
-
-void	send_heredoc_signal()
-{
-	struct sigaction	sa;
-
-	sa.sa_handler = &signals_heredoc;
-	sa.sa_flags = 0;
-	sigemptyset(&sa.sa_mask);
-	sigaction(SIGINT, &sa, NULL);
-}
-
-char *here_doc_starter(char *wordlooking_for)
+char	*here_doc_starter(char *wordlocking_for)
 {
     char	*str_return;
     char	*read_line_str;
-	static t_global glob; // Declare the struct
-
-	t_global *g_exit_status = &glob;
-	str_return = NULL;
-    ((t_global *)(g_exit_status))->heredoc = 1;
-	((t_global *)(g_exit_status))->status = 0;
-    rl_catch_signals = 0;
-    send_heredoc_signal();
-    while ( ((t_global *)(g_exit_status))->status == 0)
-	{
+	rl_catch_signals = 0;
+    
+    str_return = NULL;
+    read_line_str = readline(" > ");
+    while (read_line_str != NULL && ft_strncmp(wordlocking_for, read_line_str, return_biggest_int(ft_strlen(wordlocking_for), ft_strlen(read_line_str)))!= 0 && g_exit_status == 0)
+    {
+        str_return = sjoin_fr(str_return, ft_strjoin("\n", read_line_str));
         read_line_str = readline(" > ");
-        if (read_line_str == NULL ||  ((t_global *)(g_exit_status))->status != 0)
-		{
-            free(str_return); // Free any allocated memory
-            str_return = NULL; // Set return value to NULL as heredoc is not completed
-            break;
-        }
-        if (str_return == NULL)
-            str_return = strdup(read_line_str);
-        else
-		{
-            char *temp = str_return;
-            str_return = malloc(strlen(temp) + strlen(read_line_str) + 2);
-            if (str_return == NULL)
-			{
-                free(temp);
-                break ;
-            }
-            sprintf(str_return, "%s\n%s", temp, read_line_str);
-            free(temp);
-        }
-        if (ft_strncmp(wordlooking_for, read_line_str, ft_strlen(wordlooking_for)) == 0)
-            break; // Exit the loop if the word matches
-        free(read_line_str); // Free the readline string after using it
     }
-     ((t_global *)(g_exit_status))->heredoc = 0; // Reset heredoc flag when exiting
-    return (str_return);
+	if (g_exit_status != 0)
+	{
+		g_exit_status = 0;
+		// manage_signals(0);
+		exit(130);
+	}
+	str_return = sjoin_fr(str_return, ft_strdup("\n"));
+	return (str_return);
 }
 
 
