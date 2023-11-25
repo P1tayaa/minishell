@@ -6,11 +6,11 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/13 13:56:36 by sboulain          #+#    #+#             */
-/*   Updated: 2023/11/23 17:38:04 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/11/25 22:33:35 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#include "../minishell.h"
 
 void	echo_handle(char *str, bool has_n);
 void	rtrim(char *str);
@@ -118,12 +118,4 @@ void	rtrim(char *str)
 		return ;
 	while (len > 0 && ft_isspace(str[len - 1]))
 		str[--len] = '\0';
-}
-
-bool	ft_isspace(unsigned char c)
-{
-	if (c == '\t' || c == '\n' || c == '\v' || c == '\f' || c == '\r'
-		|| c == ' ')
-		return (true);
-	return (false);
 }

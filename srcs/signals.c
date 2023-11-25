@@ -6,11 +6,11 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/17 11:31:43 by omathot           #+#    #+#             */
-/*   Updated: 2023/11/22 23:10:27 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/11/25 21:47:54 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#include "../minishell.h"
 
 /*
 need exectuable to run to have a behaviour. 
