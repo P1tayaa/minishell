@@ -6,11 +6,11 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/25 12:36:35 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/11/21 21:11:16 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/11/25 21:48:05 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#include "../minishell.h"
 
 /*
 	makes (malloced) a array of strings

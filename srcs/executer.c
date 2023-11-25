@@ -6,11 +6,11 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/13 13:56:36 by sboulain          #+#    #+#             */
-/*   Updated: 2023/11/21 21:28:17 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/11/25 22:33:35 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#include "../minishell.h"
 
 void	echo_handle(char *str, bool has_n);
 void	rtrim(char *str);
@@ -51,7 +51,11 @@ int	executer_p2(t_lexer **lexer, t_pipedata *data)
 	if (ft_memcmp(lexer[(*data).lex_count]->cmd, "pwd", 3) == 0)
 	{
 		if (getcwd(str2, 4096) == NULL)
+		{
 			write(2, "invalid directory\n", 18);
+			g_exit_status = 126;
+			return (126);
+		}
 		else
 			printf("%s\n", str2);
 	}
@@ -60,10 +64,7 @@ int	executer_p2(t_lexer **lexer, t_pipedata *data)
 		if (lexer[(*data).lex_count]->flags != NULL)
 		{
 			if (ft_memcmp(lexer[(*data).lex_count]->flags, "-n", 2) == 0)
-			{
-				echo_handle(lexer[(*data).lex_count]->args, true);
-				return (0);
-			}
+				return (echo_handle(lexer[(*data).lex_count]->args, true), 0);
 		}
 		echo_handle(lexer[(*data).lex_count]->args, false);
 	}
@@ -117,12 +118,4 @@ void	rtrim(char *str)
 		return ;
 	while (len > 0 && ft_isspace(str[len - 1]))
 		str[--len] = '\0';
-}
-
-bool	ft_isspace(unsigned char c)
-{
-	if (c == '\t' || c == '\n' || c == '\v' || c == '\f' || c == '\r'
-		|| c == ' ')
-		return (true);
-	return (false);
 }
