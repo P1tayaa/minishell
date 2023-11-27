@@ -6,7 +6,7 @@
 #    By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/03/09 01:41:47 by oscarmathot       #+#    #+#              #
-#    Updated: 2023/11/25 23:19:13 by oscarmathot      ###   ########.fr        #
+#    Updated: 2023/11/27 03:15:57 by oscarmathot      ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -26,10 +26,10 @@ OBJ 	:= $(SRCS:.c=.o)
 LIBFT_A	:= lib/libft/libft.a
 CMP		:= gcc
 # FLAGS 	:= -Werror -Wall -Wextra -g -I lib
-FLAGS 	:= -Werror -Wall -Wextra -fsanitize=address -g -I lib # 
+FLAGS 	:= -Werror -Wall -Wextra -I lib # 
 
 ifeq ($(wildcard $(/opt/homebrew/opt/readline/include)),)
-	FLAGS = -Werror -Wall -Wextra -fsanitize=address -g -I lib -I/opt/homebrew/opt/readline/include
+	FLAGS = -Werror -Wall -Wextra -I lib -I/opt/homebrew/opt/readline/include
 endif
 
 #---------------------------------
