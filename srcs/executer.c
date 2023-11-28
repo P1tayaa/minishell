@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/13 13:56:36 by sboulain          #+#    #+#             */
-/*   Updated: 2023/11/28 20:09:28 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/11/28 21:24:25 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,20 @@ void	print_env(char ***environment);
 void	print_export(char ***environment);
 void	ascii_sort(char **environment);
 void	free_double_array(char **list_of_tokenid);
-char	***get_env(void);
+
+int	is_there_space(char *str)
+{
+	int	i;
+
+	i = 0;
+	while (str[i])
+	{
+		if (str[i] == 32 || (str[i] >= 9 && str[i] <= 13))
+			return (1);
+		i++;
+	}
+	return (0);
+}
 
 int	executer_p3(t_lexer **lexer, t_pipedata *data)
 {
@@ -73,6 +86,20 @@ int	executer_p2(t_lexer **lexer, t_pipedata *data)
 	return (0);
 }
 
+int	is_there_letter(char *str)
+{
+	int	i;
+
+	i = 0;
+	while (str[i])
+	{
+		if ((str[i] >= 65 && str[i] <= 90) || (str[i] >=97 && str[i] <= 122))
+			return (1);
+		i++;
+	}
+	return (0);
+}
+
 int	executer(t_lexer **lexer, t_pipedata *data)
 {
 	int			return_val;
@@ -89,7 +116,12 @@ int	executer(t_lexer **lexer, t_pipedata *data)
 	{
 		if (lexer[(*data).lex_count]->args != NULL)
 		{
-			if (lexer[(*data).lex_count]->args[0] < 49 || lexer[(*data).lex_count]->args[0] > 57)
+			if (is_there_space(lexer[(*data).lex_count]->args))
+			{
+				write(2, "exit\nminishell: exit: too many arguments\n", 41);
+				return (1);
+			}
+			else if (is_there_letter(lexer[(*data).lex_count]->args))
 			{
 				ft_putstr_fd("minishell: exit: ", STDERR_FILENO);
 				ft_putstr_fd(lexer[(*data).lex_count]->args, STDERR_FILENO);
