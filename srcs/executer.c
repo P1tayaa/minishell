@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/13 13:56:36 by sboulain          #+#    #+#             */
-/*   Updated: 2023/11/25 22:33:35 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/11/28 20:09:28 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,13 +89,17 @@ int	executer(t_lexer **lexer, t_pipedata *data)
 	{
 		if (lexer[(*data).lex_count]->args != NULL)
 		{
-			ft_putstr_fd("minishell: exit: ", STDERR_FILENO);
-			ft_putstr_fd(lexer[(*data).lex_count]->args, STDERR_FILENO);
-			ft_putstr_fd(": numeric argument required\n", STDERR_FILENO);
-			free_double_array(*(get_env)());
-			exit(2);
+			if (lexer[(*data).lex_count]->args[0] < 49 || lexer[(*data).lex_count]->args[0] > 57)
+			{
+				ft_putstr_fd("minishell: exit: ", STDERR_FILENO);
+				ft_putstr_fd(lexer[(*data).lex_count]->args, STDERR_FILENO);
+				ft_putstr_fd(": numeric argument required\n", STDERR_FILENO);
+				free_double_array(*(get_env)());
+				exit(2);
+			}
+			exit(ft_atoi(lexer[(*data).lex_count]->args));
 		}
-		exit(EXIT_SUCCESS);
+		exit (EXIT_SUCCESS);
 	}
 	else
 		return_val = executer_p2(lexer, data);

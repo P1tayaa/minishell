@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/25 23:18:02 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/11/25 23:26:20 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/11/28 20:38:19 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,6 +71,8 @@ bool	execute_child_process(t_pipedata *data)
 			cmd_path = data->lexer[data->lex_count]->cmd;
 			exit_statement(data);
 		}
+		else
+			cmd_path = data->lexer[data->lex_count]->cmd;
 	}
 	args = mk_args_for_proc(data);
 	if (execve(cmd_path, args, (*(*data).environ)) == -1)

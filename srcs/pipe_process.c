@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/25 23:14:44 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/11/25 23:24:36 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/11/28 20:37:40 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,9 +84,10 @@ void	pipes(t_lexer **lexer, t_pipedata *data, int *pid, int *doll)
 				{
 					if (lexer[(*data).lex_count]->args == NULL)
 					{
-						if (lexer[((*data).lex_count++) + 1] != NULL)
+						if (lexer[((*data).lex_count) + 1] != NULL)
 						{
 							readline("\n");
+							(*data).lex_count++;
 							continue ;
 						}
 					}
