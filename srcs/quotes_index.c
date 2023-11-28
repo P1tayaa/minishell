@@ -141,7 +141,6 @@ void	add_the_end_content(char *str,
 {
 	if (str[index_current_char + 1] == '\0')
 	{
-		printf("content_i = %i\n", (*content_i));
 		free((*content)[(*content_i)]);
 		return ;
 	}

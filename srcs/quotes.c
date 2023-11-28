@@ -89,7 +89,6 @@ void	remove_fake_double_quotes(int
 
 	num_of_real_quotes = get_number_of_real_double_quotes(
 			position_double_quotes, fake_double_quotes);
-	printf("num_of_real_quotes == %i\n", num_of_real_quotes);
 	real_quotes = (int *)malloc(sizeof(int) * (num_of_real_quotes + 5));
 	if (!real_quotes)
 		exit(1);

@@ -23,16 +23,6 @@ void	handle_export_var_noquotes(t_lexer ***lexer)
 
 	var_prept = get_export_var((*lexer)[0]->args);
 	i = 0;
-	while (var_prept[i] != NULL)
-	{
-		if (i % 2 == 0)
-			printf("(%s)", var_prept[i]);
-		else
-			printf(" = (%s)\n", var_prept[i]);
-		i++;
-	}
-	printf("\n");
-	i = 0;
 	handle_export_digit_err(lexer, &var_prept, &i);
 	lexer_free((*lexer));
 	free(var_prept);

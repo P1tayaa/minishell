@@ -25,6 +25,12 @@ void	finish_output(t_lexer **lexer)
 		if ((ft_memcmp(lexer[0]->cmd, "cat", 3) == 0)
 			&& lexer[1] == NULL && lexer[0]->args == NULL)
 			write(2, "\033[18D\033[K", 8);
+	if (ft_strlen(lexer[0]->cmd) == 4)
+		if (ft_memcmp(lexer[0]->cmd, "grep", 4) == 0 && lexer[1] == NULL)
+			write(2, "\033[18D\033[K", 8);
+	if (ft_strlen(lexer[0]->cmd) == 2)
+		if (ft_memcmp(lexer[0]->cmd, "wc", 2) == 0 && lexer[1] == NULL && lexer[0]->args == NULL)
+			write(2, "\033[18D\033[K", 8);
 }
 
 int	noquotes_into_pipes(t_lexer ***lexer)

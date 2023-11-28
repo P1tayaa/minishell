@@ -57,7 +57,6 @@ int	manage_heredoc(t_pipedata *data, t_lexer **lexer)
 		str = here_doc_starter(lexer[(*data).lex_count]->args);
 		lexer[(*data).lex_count]->args = sjoin_fr(
 				lexer[(*data).lex_count]->args, ft_strdup("heredoc.txt"));
-		printf("args = %s\n", lexer[(*data).lex_count]->args);
 		(*data).fd[1] = open(lexer[(*data).lex_count]->args,
 				O_WRONLY | O_CREAT | O_TRUNC, 0644);
 		write((*data).fd[1], str, ft_strlen(str));

@@ -95,7 +95,6 @@ void	move_flags_for_quotes(char **curent_content,
 	(*j) = copy_until_tokenid(*j, (*curent_content), &temp);
 	if (temp != NULL)
 	{
-		printf("temp == (%s)\n", temp);
 		temp2 = get_flags_str(&temp);
 		(*lexer)[i]->args = sjoin_fr((*lexer)[i]->args,
 				sjoin_fr(temp, ft_strdup(" ")));
