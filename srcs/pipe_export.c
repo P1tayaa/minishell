@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/25 23:13:48 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/11/25 23:20:09 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/11/28 22:45:23 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 void	export_middle_commands(t_lexer ***lexer,
 		t_pipedata *data, char **cmd_path, char **args)
 {
-	(*cmd_path) = get_cmd_path((*lexer)[(*data).lex_count]->cmd, &(*data));
+	(*cmd_path) = get_cmd_path((*lexer)[(*data).lex_count]->cmd);
 	dup2((*data).input_fd, STDIN_FILENO);
 	dup2((*data).fd[1], STDOUT_FILENO);
 	close((*data).input_fd);
@@ -38,7 +38,7 @@ void	read_writes_export(t_lexer ***lexer,
 	else if (((*data).lex_count == count - 1)
 		&& (*lexer)[(*data).lex_count]->tokenid[0] != '>')
 	{
-		(*cmd_path) = get_cmd_path((*lexer)[(*data).lex_count]->cmd, &(*data));
+		(*cmd_path) = get_cmd_path((*lexer)[(*data).lex_count]->cmd);
 		dup2((*data).input_fd, STDIN_FILENO);
 		close((*data).input_fd);
 		close((*data).fd[0]);
@@ -50,7 +50,7 @@ void	read_writes_export(t_lexer ***lexer,
 void	out_file_export(t_lexer ***lexer,
 		t_pipedata *data, char **cmd_path, char **args)
 {
-	(*cmd_path) = get_cmd_path((*lexer)[(*data).lex_count]->cmd, &(*data));
+	(*cmd_path) = get_cmd_path((*lexer)[(*data).lex_count]->cmd);
 	(*data).fd[1] = redirection_handler((*lexer)[(*data).lex_count]);
 	dup2((*data).fd[1], STDOUT_FILENO);
 	dup2((*data).input_fd, STDIN_FILENO);

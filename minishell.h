@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/10 13:30:26 by omathot           #+#    #+#             */
-/*   Updated: 2023/11/27 19:40:20 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/11/28 22:43:56 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -151,7 +151,7 @@ int					get_num_export_con(char *arg);
 char				*ft_strdup_until_space(char *str);
 int					ft_strtok_line_help(char **str_reminder,
 						int *index_unter_delim, int *curser);
-char				*get_cmd_path(const char *cmd, t_pipedata *data);
+char				*get_cmd_path(const char *cmd);
 int					print_if_correct(t_lexer ***lexer);
 char				**mk_args_for_proc(t_pipedata *data);
 int					are_there_more_cmds(t_lexer **lexer, int current);

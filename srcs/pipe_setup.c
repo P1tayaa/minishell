@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/25 23:18:02 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/11/28 21:09:33 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/11/28 23:07:41 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,8 +62,12 @@ bool	execute_child_process(t_pipedata *data)
 	char	**args;
 
 	cmd_path = NULL;
-	if (data->lexer[data->lex_count]->cmd[0] != '.')
-		cmd_path = get_cmd_path(data->lexer[data->lex_count]->cmd, data);
+	if (access(data->lexer[data->lex_count]->cmd, X_OK) == 0)
+	{
+		cmd_path = ft_strdup(data->lexer[data->lex_count]->cmd);
+	}
+	else if (data->lexer[data->lex_count]->cmd[0] != '.')
+		cmd_path = get_cmd_path(data->lexer[data->lex_count]->cmd);
 	if (cmd_path == NULL)
 	{
 		if (access(data->lexer[data->lex_count]->cmd, X_OK) != 0)

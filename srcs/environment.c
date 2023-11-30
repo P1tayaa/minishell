@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/29 12:56:41 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/11/25 21:48:08 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/11/28 22:49:19 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,7 +84,7 @@ char	***get_env(void)
 	int			count;
 	extern char	**environ;
 	static char	**environment;
-	char		***copy;
+	char	***copy;
 
 	count = 0;
 	i = 0;

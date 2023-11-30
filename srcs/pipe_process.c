@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/25 23:14:44 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/11/28 20:37:40 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/11/28 23:16:59 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,33 @@
 void	wait_process_signals(int *doll, int *pid);
 int		manage_reads_writes(t_pipedata *data, t_lexer **lexer);
 void	manage_collapse(t_lexer **lexer, t_pipedata *data, int *pid, int doll);
+
+
+ /*
+ 		if (lexer[(*data).lex_count]->cmd[0] = '.')
+		{
+			char	***copy;
+			int	i;
+
+			i = 0;
+			copy = get_env();
+			while (copy[i])
+			{
+				if (ft_strlen(copy[i] > ft_strlen("SHLVL")))
+				{
+					if (ft_memcmp(copy[i], "SHLVL", 5) == 0)
+					{
+
+					}
+				}
+				else
+				{
+					if (ft_memcmp(copy[i], "SHLVL", ft_strlen(copy[i])))
+				}
+				
+			}
+		}
+ */
 
 void	manage_single_execs(t_lexer **lexer,
 		t_pipedata *data, int *pid, int *doll)

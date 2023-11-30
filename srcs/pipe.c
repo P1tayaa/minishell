@@ -6,7 +6,7 @@
 /*   By: oscarmathot <oscarmathot@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/20 15:16:04 by oscarmathot       #+#    #+#             */
-/*   Updated: 2023/11/28 20:08:16 by oscarmathot      ###   ########.fr       */
+/*   Updated: 2023/11/28 22:46:22 by oscarmathot      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,18 +40,20 @@ int	open_file(char *filename, int mode)
 	}
 }
 
-char	*check_path(t_pipedata *data)
+char	*check_path(void)
 {
 	char	*path;
 	int		i;
+	char	***copy;
 
 	path = NULL;
 	i = 0;
-	while ((*data->environ)[i] != NULL)
+	copy = get_env();
+	while ((*copy)[i] != NULL)
 	{
-		if (ft_memcmp((*data->environ)[i], "PATH=", 5) == 0)
+		if (ft_memcmp((*copy)[i], "PATH=", 5) == 0)
 		{
-			path = (*data->environ)[i] + 5;
+			path = (*copy)[i] + 5;
 			break ;
 		}
 		i++;
@@ -64,14 +66,14 @@ char	*check_path(t_pipedata *data)
 	return (ft_strdup(path));
 }
 
-char	*get_cmd_path(const char *cmd, t_pipedata *data)
+char	*get_cmd_path(const char *cmd)
 {
 	char	*path;
 	char	*tmp_path;
 	char	*token;
 	char	full_path[1024];
 
-	path = check_path(data);
+	path = check_path();
 	tmp_path = strdup(path);
 	token = ft_strtok(tmp_path, ":");
 	while (token)
